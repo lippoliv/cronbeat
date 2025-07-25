@@ -1,9 +1,6 @@
-version: '3.8'
-
 services:
   php:
     image: php:8.4-apache
-    container_name: cronbeat-php
     ports:
       - "8080:80"
     volumes:
