@@ -1,0 +1,27 @@
+{
+    "name": "cronbeat/cronbeat",
+    "description": "The ultimate open-source tool for monitoring your cron jobs",
+    "type": "project",
+    "require": {
+        "php": "^8.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "CronBeat\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CronBeat\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
