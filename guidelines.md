@@ -67,6 +67,14 @@ This document outlines the development guidelines for the CronBeat project. All 
 - Use a consistent naming convention for test methods
 - Group related tests in appropriately named test classes
 
+## Version Control Practices
+
+### Commit Messages
+- Do not use conventional commits during development
+- Conventional commit format will only be applied when merging to main branch
+- During development, use clear and descriptive commit messages that explain the changes
+- Keep commits focused on a single logical change when possible
+
 ## Quality Assurance
 
 ### Code Reviews
