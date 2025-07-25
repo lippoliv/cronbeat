@@ -1,14 +1,31 @@
-# cronbeat
+# CronBeat
 
-The ultimate open-source tool for monitoring your cron jobs. Ensure your automated tasks run smoothly on schedule with minimal effort.
+Introducing **CronBeat**, the ultimate open-source tool for monitoring your cron jobs. Ensure your automated tasks run smoothly and on schedule with minimal effort.
 
-## Project Overview
+> **Note:** CronBeat is currently in early development.
 
-Cronbeat helps you monitor and manage your cron jobs by providing:
-- Real-time status monitoring
-- Failure notifications
-- Execution history
-- Performance metrics
+## Why CronBeat?
+- **Simple Integration:** Just add HTTP requests to your scripts.
+- **Customizable Check-ins:** Set intervals and grace periods to avoid false alarms.
+- **Real-time Alerts:** Get email notifications if a job fails to check in.
+- **Comprehensive Dashboard:** Monitor all your cron jobs in one place. Track health, historical data, and missed deadlines.
+
+## Key Features:
+- **PHP Only:** No frameworks, just pure PHP.
+- **Easy Updates:** Keep your tool up-to-date effortlessly.
+- **Runs on Shared Hosting:** Perfect for any environment.
+- **Free and Open Source:** Use it, modify it, share it.
+
+With CronBeat, you can:
+- Quickly identify trends and diagnose problems.
+- Take corrective actions to maintain reliability.
+- Enjoy peace of mind knowing your automated processes are monitored.
+
+Are you ready to elevate your cron job management? Try CronBeat today and experience the difference.
+
+---
+
+**Disclaimer:** This repository is a test project fully developed by "JetBrains Junie on GitHub". All code will be reviewed by a senior PHP developer before release.
 
 ## Project Setup
 
@@ -67,13 +84,3 @@ The development environment is configured using Docker Compose with the followin
 
 The PHP source code is located in the `src` directory. Any changes made to files in this directory will be immediately reflected in the running application due to the volume mapping in Docker Compose.
 
-### Docker Configuration
-
-The `docker-compose.yml` file defines the service configuration:
-- No version attribute (as it's deprecated in recent Docker Compose versions)
-- No static container name (allowing for multiple instances)
-- Automatic restart unless explicitly stopped
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
