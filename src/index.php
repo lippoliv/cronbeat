@@ -3,7 +3,13 @@
 // Define application root directory
 define('APP_DIR', dirname(__DIR__));
 
-require_once APP_DIR . '/vendor/autoload.php';
+// Include class files
+require_once __DIR__ . '/classes/database.php';
+require_once __DIR__ . '/classes/ui.php';
+require_once __DIR__ . '/views/base.view.php';
+require_once __DIR__ . '/views/setup.view.php';
+require_once __DIR__ . '/views/login.view.php';
+require_once __DIR__ . '/views/dashboard.view.php';
 
 use Cronbeat\Database;
 use Cronbeat\UI;

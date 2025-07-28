@@ -12,8 +12,6 @@ class Database {
             $this->dbPath = $dbPath;
         } else if (defined('APP_DIR')) {
             $this->dbPath = APP_DIR . '/db/db.sqlite';
-        } else {
-            $this->dbPath = __DIR__ . '/../../db/db.sqlite';
         }
         $this->dbDir = dirname($this->dbPath);
     }
