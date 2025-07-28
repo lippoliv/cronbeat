@@ -2,6 +2,7 @@
     "name": "lippoliv/cronbeat",
     "description": "A PHP 8.4 application for monitoring cron jobs",
     "type": "project",
+    "license": "GPL-3.0-or-later",
     "require": {
         "php": ">=8.4"
     },
