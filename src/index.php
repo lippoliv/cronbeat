@@ -1,6 +1,9 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
+// Define application root directory
+define('APP_DIR', dirname(__DIR__));
+
+require_once APP_DIR . '/vendor/autoload.php';
 
 use Cronbeat\Database;
 use Cronbeat\UI;
