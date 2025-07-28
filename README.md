@@ -42,10 +42,27 @@ This project is set up with PHP 8.4 and Docker Compose for easy local developmen
 cronbeat/
 ├── docker-compose.yml    # Docker configuration
 ├── src/                  # PHP source code
-│   └── index.php         # Main entry point
+│   ├── index.php         # Main entry point
+│   └── Classes/          # PHP classes
+│       ├── database.php  # Database operations
+│       └── ui.php        # UI rendering
+├── db/                   # Database directory (created on first run)
+│   └── db.sqlite         # SQLite database file
+├── tests/                # Unit tests
 ├── LICENSE
 └── README.md
 ```
+
+### Database Schema
+
+CronBeat uses SQLite for data storage. The database is automatically created on first run when you set up your admin account.
+
+**Tables:**
+- `users`: Stores user credentials
+  - `id`: Primary key
+  - `username`: Unique username
+  - `password`: Hashed password
+  - `created_at`: Timestamp of account creation
 
 ## Getting Started
 
@@ -65,7 +82,12 @@ cronbeat/
    http://localhost:8080
    ```
 
-4. To stop the containers:
+4. Set up your account:
+   - On first run, you'll see a setup form to create an admin account
+   - Enter your username and password
+   - After setup, you'll be redirected to the login page
+
+5. To stop the containers:
    ```bash
    docker-compose down
    ```
@@ -80,7 +102,27 @@ The development environment is configured using Docker Compose with the followin
 - Source code mounted from ./src to /var/www/html
 - Error reporting enabled for development
 
+### Security Features
+
+CronBeat implements several security features:
+
+- **Password Hashing**: Passwords are hashed using SHA-256 in the browser before being sent to the server
+- **Secure Storage**: User credentials are stored securely in the SQLite database
+- **Input Validation**: All user input is validated before processing
+- **Error Handling**: Detailed error messages are shown only when appropriate
+
 ### Making Changes
 
 The PHP source code is located in the `src` directory. Any changes made to files in this directory will be immediately reflected in the running application due to the volume mapping in Docker Compose.
+
+### Testing
+
+The project includes unit tests for all logic. To run the tests:
+
+```bash
+composer install  # Install dependencies if not already done
+composer test     # Run all tests
+```
+
+Tests follow the Given-When-Then pattern and are located in the `tests` directory.
 
