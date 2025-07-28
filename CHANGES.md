@@ -1,5 +1,11 @@
 # Changes Made
 
+## Fixed Composer Validation
+
+Added the license field to `composer.json`:
+- Specified "GPL-3.0-or-later" as the license based on the existing LICENSE file
+- Resolved the composer validation error related to missing license information
+
 ## Added Testing Infrastructure
 
 1. Created `composer.json` with:
