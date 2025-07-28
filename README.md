@@ -43,17 +43,17 @@ cronbeat/
 ├── docker-compose.yml    # Docker configuration
 ├── src/                  # PHP source code
 │   ├── index.php         # Main entry point
-│   └── Classes/          # PHP classes
-│       ├── database.php  # Database operations
-│       └── ui.php        # UI rendering
+│   └── classes/          # PHP classes
+│       ├── ...
 ├── db/                   # Database directory (created on first run)
-│   └── db.sqlite         # SQLite database file
+│   └── ...
 ├── tests/                # Unit tests
+│   ├── ...
 ├── LICENSE
 └── README.md
 ```
 
-### Database Schema
+### Database
 
 CronBeat uses SQLite for data storage. The database is automatically created on first run when you set up your admin account.
 
