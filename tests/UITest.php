@@ -82,7 +82,7 @@ class UITest extends TestCase
         $this->assertStringContainsString('<p>Welcome to CronBeat! This is a placeholder for the dashboard.</p>', $html);
     }
     
-    public function testRenderPage()
+    public function testRenderPageIncludesContentAndTitle()
     {
         // Given a UI instance and content
         $content = '<p>Test content</p>';
@@ -94,8 +94,18 @@ class UITest extends TestCase
         // Then it should contain the content and title
         $this->assertStringContainsString("<title>{$title}</title>", $html);
         $this->assertStringContainsString($content, $html);
+    }
+    
+    public function testRenderPageIncludesPasswordHashingJavaScript()
+    {
+        // Given a UI instance and content
+        $content = '<p>Test content</p>';
+        $title = 'Test Title';
         
-        // And it should include the JavaScript for password hashing
+        // When rendering a page
+        $html = $this->ui->renderPage($content, $title);
+        
+        // Then it should include the JavaScript for password hashing
         $this->assertStringContainsString('function sha256(str)', $html);
         $this->assertStringContainsString('document.querySelectorAll(\'form.hash-password\')', $html);
     }

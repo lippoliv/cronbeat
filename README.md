@@ -42,13 +42,8 @@ This project is set up with PHP 8.4 and Docker Compose for easy local developmen
 cronbeat/
 ├── docker-compose.yml    # Docker configuration
 ├── src/                  # PHP source code
-│   ├── index.php         # Main entry point
-│   └── classes/          # PHP classes
-│       ├── ...
 ├── db/                   # Database directory (created on first run)
-│   └── ...
 ├── tests/                # Unit tests
-│   ├── ...
 ├── LICENSE
 └── README.md
 ```
