@@ -31,146 +31,146 @@ class DatabaseTest extends TestCase
     
     public function testDatabaseDoesNotExistInitially()
     {
-        // Given a database path that doesn't exist
+        // Given
         $database = new Database($this->testDbPath);
         
-        // When checking if the database exists
+        // When
         $exists = $database->databaseExists();
         
-        // Then it should return false
+        // Then
         $this->assertFalse($exists);
     }
     
     public function testDatabaseExistsAfterCreation()
     {
-        // Given a database path and we create the file
+        // Given
         $database = new Database($this->testDbPath);
         touch($this->testDbPath);
         
-        // When checking if the database exists
+        // When
         $exists = $database->databaseExists();
         
-        // Then it should return true
+        // Then
         $this->assertTrue($exists);
     }
     
     public function testCreateDatabaseReturnsTrue()
     {
-        // Given a database path in a directory that doesn't exist
+        // Given
         $testDbDir = sys_get_temp_dir() . '/cronbeat_test_dir';
         $testDbPath = $testDbDir . '/test.sqlite';
         $database = new Database($testDbPath);
         
-        // When creating the database
+        // When
         $result = $database->createDatabase();
         
-        // Then it should return true
+        // Then
         $this->assertTrue($result);
     }
     
     public function testCreateDatabaseCreatesFile()
     {
-        // Given a database path in a directory that doesn't exist
+        // Given
         $testDbDir = sys_get_temp_dir() . '/cronbeat_test_dir';
         $testDbPath = $testDbDir . '/test.sqlite';
         $database = new Database($testDbPath);
         
-        // When creating the database
+        // When
         $database->createDatabase();
         
-        // Then it should create the database file
+        // Then
         $this->assertTrue(file_exists($testDbPath));
     }
     
     public function testCreateDatabaseCreatesDirectory()
     {
-        // Given a database path in a directory that doesn't exist
+        // Given
         $testDbDir = sys_get_temp_dir() . '/cronbeat_test_dir';
         $testDbPath = $testDbDir . '/test.sqlite';
         $database = new Database($testDbPath);
         
-        // When creating the database
+        // When
         $database->createDatabase();
         
-        // Then it should create the directory
+        // Then
         $this->assertTrue(is_dir($testDbDir));
     }
     
     public function testCreateUserReturnsTrue()
     {
-        // Given a new database
+        // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
         
-        // When creating a user
+        // When
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $result = $database->createUser($username, $passwordHash);
         
-        // Then it should return true
+        // Then
         $this->assertTrue($result);
     }
     
     public function testCreatedUserExists()
     {
-        // Given a new database
+        // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
         
-        // When creating a user
+        // When
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $database->createUser($username, $passwordHash);
         
-        // Then the user should exist
+        // Then
         $this->assertTrue($database->userExists($username));
     }
     
     public function testValidateUserWithCorrectCredentials()
     {
-        // Given a database with a user
+        // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $database->createUser($username, $passwordHash);
         
-        // When validating with correct credentials
+        // When
         $validResult = $database->validateUser($username, $passwordHash);
         
-        // Then it should return true
+        // Then
         $this->assertTrue($validResult);
     }
     
     public function testValidateUserWithIncorrectPassword()
     {
-        // Given a database with a user
+        // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $database->createUser($username, $passwordHash);
         
-        // When validating with incorrect password
+        // When
         $invalidResult = $database->validateUser($username, 'wronghash');
         
-        // Then it should return false
+        // Then
         $this->assertFalse($invalidResult);
     }
     
     public function testValidateUserWithNonExistentUser()
     {
-        // Given a database with a user
+        // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $database->createUser($username, $passwordHash);
         
-        // When validating with non-existent user
+        // When
         $nonExistentResult = $database->validateUser('nonexistent', $passwordHash);
         
-        // Then it should return false
+        // Then
         $this->assertFalse($nonExistentResult);
     }
 }

@@ -52,13 +52,6 @@ cronbeat/
 
 CronBeat uses SQLite for data storage. The database is automatically created on first run when you set up your admin account.
 
-**Tables:**
-- `users`: Stores user credentials
-  - `id`: Primary key
-  - `username`: Unique username
-  - `password`: Hashed password
-  - `created_at`: Timestamp of account creation
-
 ## Getting Started
 
 1. Clone this repository:
