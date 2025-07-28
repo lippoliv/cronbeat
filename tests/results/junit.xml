@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="/workspaces/cronbeat/phpunit.xml" tests="2" assertions="2" errors="0" failures="0" skipped="0" time="0.002253">
+    <testsuite name="Cronbeat Test Suite" tests="2" assertions="2" errors="0" failures="0" skipped="0" time="0.002253">
+      <testsuite name="Cronbeat\Tests\DummyTest" file="/workspaces/cronbeat/tests/DummyTest.php" tests="2" assertions="2" errors="0" failures="0" skipped="0" time="0.002253">
+        <testcase name="testStringConcatenation" file="/workspaces/cronbeat/tests/DummyTest.php" line="22" class="Cronbeat\Tests\DummyTest" classname="Cronbeat.Tests.DummyTest" assertions="1" time="0.002056"/>
+        <testcase name="testSimpleAddition" file="/workspaces/cronbeat/tests/DummyTest.php" line="9" class="Cronbeat\Tests\DummyTest" classname="Cronbeat.Tests.DummyTest" assertions="1" time="0.000197"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>
