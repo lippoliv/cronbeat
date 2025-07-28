@@ -65,7 +65,17 @@ cronbeat/
    http://localhost:8080
    ```
 
-4. To stop the containers:
+4. First-time Setup:
+   - When accessing the application for the first time, you'll be presented with a setup form
+   - Create an admin user by entering a username and password
+   - The password is securely hashed before being stored in the database
+   - After setup, you'll be redirected to the login page
+
+5. Login:
+   - Use the credentials created during setup to log in
+   - The login form is currently a placeholder as per project requirements
+
+6. To stop the containers:
    ```bash
    docker-compose down
    ```
