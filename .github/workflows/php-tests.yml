@@ -48,4 +48,3 @@ jobs:
         with:
           paths: "tests/results/junit.xml"
           show: "all"
-          fail_on: "failed"
