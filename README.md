@@ -25,7 +25,7 @@ Are you ready to elevate your cron job management? Try CronBeat today and experi
 
 ---
 
-**Disclaimer:** This repository is a test project fully developed by "JetBrains Junie on GitHub". All code will be reviewed by a senior PHP developer before release.
+**Disclaimer:** This repository is a test project fully developed by "JetBrains Junie (on GitHub)". All code will be reviewed by a senior PHP developer before release.
 
 ## Project Setup
 
