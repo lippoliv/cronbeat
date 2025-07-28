@@ -4,54 +4,63 @@
 define('APP_DIR', dirname(__DIR__));
 
 // Include class files
-require_once __DIR__ . '/classes/database.php';
-require_once __DIR__ . '/classes/ui.php';
-require_once __DIR__ . '/views/base.view.php';
-require_once __DIR__ . '/views/setup.view.php';
-require_once __DIR__ . '/views/login.view.php';
-require_once __DIR__ . '/views/dashboard.view.php';
+require_once APP_DIR . '/src/classes/database.php';
+require_once APP_DIR . '/src/classes/ui.php';
+require_once APP_DIR . '/src/views/base.view.php';
+require_once APP_DIR . '/src/views/setup.view.php';
+require_once APP_DIR . '/src/views/login.view.php';
+require_once APP_DIR . '/src/views/dashboard.view.php';
+require_once APP_DIR . '/src/controllers/BaseController.php';
+require_once APP_DIR . '/src/controllers/SetupController.php';
+require_once APP_DIR . '/src/controllers/LoginController.php';
+require_once APP_DIR . '/src/controllers/DashboardController.php';
 
 use Cronbeat\Database;
-use Cronbeat\UI;
+use Cronbeat\Controllers\SetupController;
+use Cronbeat\Controllers\LoginController;
+use Cronbeat\Controllers\DashboardController;
 
-// Initialize classes
-$database = new Database();
-$ui = new UI();
+// Parse the URL
+$uri = $_SERVER['REQUEST_URI'];
+$uri = trim($uri, '/');
+$uri = explode('/', $uri);
+
+// Get the controller and action
+$controllerName = !empty($uri[0]) ? $uri[0] : 'login';
+$action = isset($uri[1]) ? $uri[1] : 'index';
 
 // Handle form submissions
-$action = $_POST['action'] ?? null;
-$error = null;
-
-if ($action === 'setup' && isset($_POST['username']) && isset($_POST['password_hash'])) {
-    $username = trim($_POST['username']);
-    $passwordHash = $_POST['password_hash'];
-    
-    // Validate input
-    if (empty($username) || empty($passwordHash)) {
-        $error = 'Username and password are required';
-    } elseif (strlen($username) < 3) {
-        $error = 'Username must be at least 3 characters';
-    } else {
-        try {
-            // Create database and user
-            $database->createDatabase();
-            $database->createUser($username, $passwordHash);
-            
-            // Redirect to login page
-            header('Location: index.php');
-            exit;
-        } catch (\Exception $e) {
-            $error = 'Error creating user: ' . $e->getMessage();
-        }
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = 'process';
 }
 
-// Check if database exists
-if (!$database->databaseExists()) {
-    // Show setup form
-    echo $ui->renderSetupForm($error);
+// Initialize database to check if it exists
+$database = new Database();
+
+// Route to the appropriate controller
+if (!$database->databaseExists() && $controllerName !== 'setup') {
+    // Redirect to setup if database doesn't exist
+    header('Location: /setup');
+    exit;
 } else {
-    // Show login form (dummy for now)
-    echo $ui->renderLoginForm();
+    switch ($controllerName) {
+        case 'setup':
+            $controller = new SetupController();
+            break;
+        case 'dashboard':
+            $controller = new DashboardController();
+            break;
+        case 'login':
+        default:
+            $controller = new LoginController();
+            break;
+    }
+    
+    // Call the appropriate method
+    if (method_exists($controller, $action)) {
+        $controller->$action();
+    } else {
+        $controller->index();
+    }
 }
 ?>
