@@ -4,40 +4,31 @@ namespace Cronbeat\Tests;
 
 use PHPUnit\Framework\TestCase;
 
-/**
- * Dummy test class to demonstrate the Given-When-Then pattern
- */
 class DummyTest extends TestCase
 {
-    /**
-     * Test that a simple addition works correctly
-     */
     public function testSimpleAddition(): void
     {
-        // Given two numbers
+        // Given
         $firstNumber = 2;
         $secondNumber = 3;
         
-        // When we add them together
+        // When
         $result = $firstNumber + $secondNumber;
         
-        // Then the result should be their sum
+        // Then
         $this->assertEquals(5, $result);
     }
     
-    /**
-     * Test that a string concatenation works correctly
-     */
     public function testStringConcatenation(): void
     {
-        // Given two strings
+        // Given
         $firstString = "Hello, ";
         $secondString = "World!";
         
-        // When we concatenate them
+        // When
         $result = $firstString . $secondString;
         
-        // Then the result should be the combined string
+        // Then
         $this->assertEquals("Hello, World!", $result);
     }
 }
