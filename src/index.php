@@ -8,8 +8,8 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
     require_once __DIR__ . '/../vendor/autoload.php';
 } else {
     // Manual class loading if autoloader is not available
-    require_once __DIR__ . '/Classes/Database.php';
-    require_once __DIR__ . '/Classes/UI.php';
+    require_once __DIR__ . '/Classes/database.php';
+    require_once __DIR__ . '/Classes/ui.php';
 }
 
 use Cronbeat\Database;
