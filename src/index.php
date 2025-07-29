@@ -1,9 +1,7 @@
 <?php
 
-// Define application root directory
 define('APP_DIR', dirname(__DIR__));
 
-// Include only the necessary files
 require_once APP_DIR . '/src/classes/database.php';
 require_once APP_DIR . '/src/controllers/BaseController.php';
 require_once APP_DIR . '/src/controllers/SetupController.php';
@@ -24,16 +22,13 @@ function parseControllerFromUrl() {
 
 $controllerName = parseControllerFromUrl();
 
-// Initialize database to check if it exists
 $database = new Database();
 
-// Redirect to setup if database doesn't exist and not already on setup page
 if (!$database->databaseExists() && $controllerName !== 'setup') {
     header('Location: /setup');
     exit;
 }
 
-// Create the appropriate controller and let it handle routing
 switch ($controllerName) {
     case 'setup':
         $controller = new SetupController();
@@ -47,6 +42,5 @@ switch ($controllerName) {
         break;
 }
 
-// Let the controller handle its own routing
 $controller->doRouting();
 ?>
