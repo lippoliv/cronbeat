@@ -6,25 +6,7 @@ use Cronbeat\Views\DashboardView;
 
 class DashboardController extends BaseController {
     public function doRouting() {
-        $path = $this->parsePathWithoutController();
-        $pathParts = explode('/', $path);
-        $action = !empty($pathParts[0]) ? $pathParts[0] : 'index';
-        
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $action = 'process';
-        }
-        
-        switch ($action) {
-            case 'index':
-                $this->showDashboard();
-                break;
-            case 'process':
-                $this->processDashboard();
-                break;
-            default:
-                $this->showDashboard();
-                break;
-        }
+        $this->showDashboard();
     }
     
     public function showDashboard() {
@@ -32,7 +14,4 @@ class DashboardController extends BaseController {
         $this->render($view);
     }
     
-    public function processDashboard() {
-        $this->showDashboard();
-    }
 }
