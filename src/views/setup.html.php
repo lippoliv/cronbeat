@@ -2,7 +2,7 @@
 <?php if ($error): ?>
 <div class='error'><?= $error ?></div>
 <?php endif; ?>
-<form method="post" action="index.php" class="hash-password">
+<form method="post" action="/setup" class="hash-password">
     <input type="hidden" name="action" value="setup">
     <div class="form-group">
         <label for="username">Username</label>
