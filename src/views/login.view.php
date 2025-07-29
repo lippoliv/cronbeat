@@ -19,7 +19,7 @@ class LoginView extends BaseView {
         
         ob_start();
         
-        include APP_DIR . '/src/views/login.html.php';
+        include APP_DIR . '/views/login.html.php';
         
         $this->setContent(ob_get_clean());
         

@@ -1,13 +1,13 @@
 <?php
 
-define('APP_DIR', dirname(__DIR__));
+define('APP_DIR', __DIR__);
 
-require_once APP_DIR . '/src/classes/database.php';
-require_once APP_DIR . '/src/classes/UrlHelper.php';
-require_once APP_DIR . '/src/controllers/BaseController.php';
-require_once APP_DIR . '/src/controllers/SetupController.php';
-require_once APP_DIR . '/src/controllers/LoginController.php';
-require_once APP_DIR . '/src/controllers/DashboardController.php';
+require_once APP_DIR . '/classes/database.php';
+require_once APP_DIR . '/classes/UrlHelper.php';
+require_once APP_DIR . '/controllers/BaseController.php';
+require_once APP_DIR . '/controllers/SetupController.php';
+require_once APP_DIR . '/controllers/LoginController.php';
+require_once APP_DIR . '/controllers/DashboardController.php';
 
 use Cronbeat\Database;
 use Cronbeat\UrlHelper;

@@ -19,7 +19,7 @@ class SetupView extends BaseView {
         
         ob_start();
         
-        include APP_DIR . '/src/views/setup.html.php';
+        include APP_DIR . '/views/setup.html.php';
         
         $this->setContent(ob_get_clean());
         

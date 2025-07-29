@@ -22,7 +22,7 @@ class BaseView {
         
         ob_start();
         
-        include APP_DIR . '/src/views/base.html.php';
+        include APP_DIR . '/views/base.html.php';
         
         return ob_get_clean();
     }
