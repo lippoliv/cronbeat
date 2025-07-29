@@ -15,11 +15,14 @@ use Cronbeat\Controllers\SetupController;
 use Cronbeat\Controllers\LoginController;
 use Cronbeat\Controllers\DashboardController;
 
-// Parse the URL to get the controller name
-$uri = $_SERVER['REQUEST_URI'];
-$uri = trim($uri, '/');
-$uri = explode('/', $uri);
-$controllerName = !empty($uri[0]) ? $uri[0] : 'login';
+function parseControllerFromUrl() {
+    $uri = $_SERVER['REQUEST_URI'];
+    $uri = trim($uri, '/');
+    $uri = explode('/', $uri);
+    return !empty($uri[0]) ? $uri[0] : 'login';
+}
+
+$controllerName = parseControllerFromUrl();
 
 // Initialize database to check if it exists
 $database = new Database();
