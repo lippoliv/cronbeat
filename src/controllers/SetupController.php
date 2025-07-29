@@ -5,24 +5,24 @@ namespace Cronbeat\Controllers;
 use Cronbeat\Views\SetupView;
 
 class SetupController extends BaseController {
-    private $routeMap = [
-        'index' => 'showSetupForm',
-        'process' => 'processSetupForm'
-    ];
-    
     public function doRouting() {
-        $path = $this->parsePath();
+        $path = $this->parsePathWithoutController();
         $action = !empty($path[0]) ? $path[0] : 'index';
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = 'process';
         }
         
-        if (isset($this->routeMap[$action]) && method_exists($this, $this->routeMap[$action])) {
-            $method = $this->routeMap[$action];
-            $this->$method();
-        } else {
-            $this->showSetupForm();
+        switch ($action) {
+            case 'index':
+                $this->showSetupForm();
+                break;
+            case 'process':
+                $this->processSetupForm();
+                break;
+            default:
+                $this->showSetupForm();
+                break;
         }
     }
     

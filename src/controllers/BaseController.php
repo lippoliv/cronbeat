@@ -15,7 +15,7 @@ class BaseController {
         echo $view->render();
     }
     
-    protected function parsePath() {
+    protected function parsePathWithoutController() {
         $uri = $_SERVER['REQUEST_URI'];
         $uri = trim($uri, '/');
         $uri = explode('/', $uri);
