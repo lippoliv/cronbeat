@@ -21,9 +21,9 @@ class BaseController {
         $uri = explode('/', $uri);
         
         if (count($uri) > 1) {
-            return array_slice($uri, 1);
+            return implode('/', array_slice($uri, 1));
         }
         
-        return [];
+        return '';
     }
 }

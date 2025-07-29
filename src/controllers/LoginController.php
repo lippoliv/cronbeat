@@ -7,7 +7,8 @@ use Cronbeat\Views\LoginView;
 class LoginController extends BaseController {
     public function doRouting() {
         $path = $this->parsePathWithoutController();
-        $action = !empty($path[0]) ? $path[0] : 'index';
+        $pathParts = explode('/', $path);
+        $action = !empty($pathParts[0]) ? $pathParts[0] : 'index';
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = 'process';
