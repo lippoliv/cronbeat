@@ -20,10 +20,8 @@ class LoginController extends BaseController {
             if (empty($username) || empty($password)) {
                 $error = 'Username and password are required';
             } else {
-                // Authentication logic would go here
-                // For now, just redirect to dashboard
-                header('Location: /dashboard');
-                exit;
+                // Show hello message instead of redirecting to dashboard
+                $error = "hello $username";
             }
         }
         
