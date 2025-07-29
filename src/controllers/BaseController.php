@@ -2,6 +2,8 @@
 
 namespace Cronbeat\Controllers;
 
+require_once APP_DIR . '/classes/database.php';
+
 use Cronbeat\Database;
 
 class BaseController {

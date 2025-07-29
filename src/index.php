@@ -2,14 +2,10 @@
 
 define('APP_DIR', __DIR__);
 
-require_once APP_DIR . '/classes/database.php';
 require_once APP_DIR . '/classes/UrlHelper.php';
-require_once APP_DIR . '/controllers/BaseController.php';
+require_once APP_DIR . '/classes/database.php';
 require_once APP_DIR . '/controllers/SetupController.php';
 require_once APP_DIR . '/controllers/LoginController.php';
-require_once APP_DIR . '/views/base.view.php';
-require_once APP_DIR . '/views/setup.view.php';
-require_once APP_DIR . '/views/login.view.php';
 
 use Cronbeat\Database;
 use Cronbeat\UrlHelper;

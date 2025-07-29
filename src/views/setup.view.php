@@ -2,6 +2,8 @@
 
 namespace Cronbeat\Views;
 
+require_once APP_DIR . '/views/base.view.php';
+
 class SetupView extends BaseView {
     protected $error = null;
 

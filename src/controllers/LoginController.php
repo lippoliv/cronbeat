@@ -2,6 +2,9 @@
 
 namespace Cronbeat\Controllers;
 
+require_once APP_DIR . '/controllers/BaseController.php';
+require_once APP_DIR . '/views/login.view.php';
+
 use Cronbeat\Views\LoginView;
 
 class LoginController extends BaseController {
