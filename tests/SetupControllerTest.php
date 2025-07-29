@@ -2,148 +2,114 @@
 
 namespace Cronbeat\Tests;
 
+define('APP_DIR', __DIR__ . '/../src');
+
+require_once APP_DIR . '/classes/Database.php';
+require_once APP_DIR . '/controllers/SetupController.php';
+
 use PHPUnit\Framework\TestCase;
+use Cronbeat\Controllers\SetupController;
+use Cronbeat\Database;
 
 class SetupControllerTest extends TestCase
 {
-    public function testProcessSetupFormValidatesValidInput()
+    private $tempDbPath;
+    private $controller;
+    private $database;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->tempDbPath = sys_get_temp_dir() . '/test_cronbeat_' . uniqid() . '.sqlite';
+        $this->database = new Database($this->tempDbPath);
+        $this->controller = new SetupController($this->database);
+    }
+
+    private function cleanupTestDatabase($tempDbPath)
+    {
+        if (file_exists($tempDbPath)) {
+            unlink($tempDbPath);
+        }
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->tempDbPath) {
+            $this->cleanupTestDatabase($this->tempDbPath);
+            $this->tempDbPath = null;
+        }
+        parent::tearDown();
+    }
+
+    public function testValidateSetupDataAcceptsValidInput()
     {
         // Given
-        $_POST = [
-            'username' => 'admin',
-            'password_hash' => hash('sha256', 'password123')
-        ];
+        $username = 'admin';
+        $passwordHash = hash('sha256', 'password123');
 
         // When
-        $result = $this->processSetupForm($_POST);
+        $result = $this->controller->validateSetupData($username, $passwordHash);
 
         // Then
         $this->assertNull($result, "Valid input should return null");
     }
 
-    public function testProcessSetupFormRejectsEmptyUsername()
+    public function testValidateSetupDataRejectsEmptyUsername()
     {
         // Given
-        $_POST = [
-            'username' => '',  // Empty username
-            'password_hash' => hash('sha256', 'password123')
-        ];
+        $username = '';
+        $passwordHash = hash('sha256', 'password123');
 
         // When
-        $result = $this->processSetupForm($_POST);
+        $result = $this->controller->validateSetupData($username, $passwordHash);
 
         // Then
         $this->assertEquals('Username and password are required', $result);
     }
 
-    public function testProcessSetupFormRejectsTooShortUsername()
+    public function testValidateSetupDataRejectsTooShortUsername()
     {
         // Given
-        $_POST = [
-            'username' => 'ab',  // Too short
-            'password_hash' => hash('sha256', 'password123')
-        ];
+        $username = 'ab';
+        $passwordHash = hash('sha256', 'password123');
 
         // When
-        $result = $this->processSetupForm($_POST);
+        $result = $this->controller->validateSetupData($username, $passwordHash);
 
         // Then
         $this->assertEquals('Username must be at least 3 characters', $result);
     }
 
-    public function testProcessSetupFormCreatesUser()
+    public function testRunSetupCreatesUserSuccessfully()
     {
         // Given
-        $_POST = [
-            'username' => 'admin',
-            'password_hash' => hash('sha256', 'password123')
-        ];
-
-        // Create a custom mock database object
-        $mockDb = new class {
-            public function createDatabase() { return true; }
-            public function createUser($username, $passwordHash) { return true; }
-        };
+        $username = 'admin';
+        $passwordHash = hash('sha256', 'password123');
 
         // When
-        $result = $this->processSetupForm($_POST, $mockDb);
+        $result = $this->controller->runSetup($username, $passwordHash);
 
         // Then
-        $this->assertNull($result, "Database creation should succeed");
+        $this->assertNull($result, "Setup should succeed with valid data");
+
+        // And the user should exist in the database
+        $this->assertTrue($this->database->userExists($username), "User should be created in database");
     }
 
-    public function testProcessSetupFormHandlesDatabaseErrors()
+    public function testRunSetupHandlesDatabaseErrors()
     {
         // Given
-        $_POST = [
-            'username' => 'admin',
-            'password_hash' => hash('sha256', 'password123')
-        ];
+        $invalidDbPath = '/invalid/path/that/does/not/exist/test.sqlite';
+        $invalidDatabase = new Database($invalidDbPath);
+        $controller = new SetupController($invalidDatabase);
 
-        // Create a custom mock database object that throws an exception
-        $mockDb = new class {
-            public function createDatabase() { throw new \RuntimeException("Database error"); }
-            public function createUser($username, $passwordHash) { return true; }
-        };
+        $username = 'admin';
+        $passwordHash = hash('sha256', 'password123');
 
         // When
-        $result = $this->processSetupForm($_POST, $mockDb);
+        $result = $controller->runSetup($username, $passwordHash);
 
         // Then
-        $this->assertEquals('Error creating user: Database error', $result);
-    }
-
-    public function testProcessSetupFormHandlesUserCreationErrors()
-    {
-        // Given
-        $_POST = [
-            'username' => 'admin',
-            'password_hash' => hash('sha256', 'password123')
-        ];
-
-        // Create a custom mock database object that returns failure for createUser
-        $mockDb = new class {
-            public function createDatabase() { return true; }
-            public function createUser($username, $passwordHash) { return false; }
-        };
-
-        // When
-        $result = $this->processSetupForm($_POST, $mockDb);
-
-        // Then
-        $this->assertEquals('Failed to create user. Please check the logs for more information.', $result);
-    }
-
-    private function processSetupForm($post, $database = null)
-    {
-        if (isset($post['username']) && isset($post['password_hash'])) {
-            $username = trim($post['username']);
-            $passwordHash = $post['password_hash'];
-
-            // Validate input
-            if (empty($username) || empty($passwordHash)) {
-                return 'Username and password are required';
-            } elseif (strlen($username) < 3) {
-                return 'Username must be at least 3 characters';
-            }
-
-            // Run setup
-            try {
-                if ($database) {
-                    $database->createDatabase();
-                    $result = $database->createUser($username, $passwordHash);
-
-                    if (!$result) {
-                        return 'Failed to create user. Please check the logs for more information.';
-                    }
-                }
-
-                return null;
-            } catch (\Exception $e) {
-                return 'Error creating user: ' . $e->getMessage();
-            }
-        }
-
-        return 'Username and password are required';
+        $this->assertStringContainsString('Error creating user:', $result);
     }
 }

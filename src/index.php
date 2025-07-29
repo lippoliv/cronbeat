@@ -3,7 +3,7 @@
 define('APP_DIR', __DIR__);
 
 require_once APP_DIR . '/classes/UrlHelper.php';
-require_once APP_DIR . '/classes/database.php';
+require_once APP_DIR . '/classes/Database.php';
 require_once APP_DIR . '/controllers/SetupController.php';
 require_once APP_DIR . '/controllers/LoginController.php';
 
@@ -23,11 +23,11 @@ if (!$database->databaseExists() && $controllerName !== 'setup') {
 
 switch ($controllerName) {
     case 'setup':
-        $controller = new SetupController();
+        $controller = new SetupController($database);
         break;
     case 'login':
     default:
-        $controller = new LoginController();
+        $controller = new LoginController($database);
         break;
 }
 
