@@ -7,13 +7,11 @@ require_once APP_DIR . '/classes/UrlHelper.php';
 require_once APP_DIR . '/controllers/BaseController.php';
 require_once APP_DIR . '/controllers/SetupController.php';
 require_once APP_DIR . '/controllers/LoginController.php';
-require_once APP_DIR . '/controllers/DashboardController.php';
 
 use Cronbeat\Database;
 use Cronbeat\UrlHelper;
 use Cronbeat\Controllers\SetupController;
 use Cronbeat\Controllers\LoginController;
-use Cronbeat\Controllers\DashboardController;
 
 $controllerName = UrlHelper::parseControllerFromUrl();
 
@@ -27,9 +25,6 @@ if (!$database->databaseExists() && $controllerName !== 'setup') {
 switch ($controllerName) {
     case 'setup':
         $controller = new SetupController();
-        break;
-    case 'dashboard':
-        $controller = new DashboardController();
         break;
     case 'login':
     default:
