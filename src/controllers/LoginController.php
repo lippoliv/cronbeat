@@ -12,11 +12,11 @@ class LoginController extends BaseController {
         $path = $this->parsePathWithoutController();
         $pathParts = explode('/', $path);
         $action = !empty($pathParts[0]) ? $pathParts[0] : 'index';
-        
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = 'process';
         }
-        
+
         switch ($action) {
             case 'index':
                 $this->showLoginForm();
@@ -29,26 +29,28 @@ class LoginController extends BaseController {
                 break;
         }
     }
-    
+
     public function showLoginForm() {
         $view = new LoginView();
         $this->render($view);
     }
-    
+
     public function processLogin() {
         $error = null;
-        
-        if (isset($_POST['username']) && isset($_POST['password'])) {
+
+        if (isset($_POST['username']) && isset($_POST['password_hash'])) {
             $username = trim($_POST['username']);
-            $password = $_POST['password'];
-            
-            if (empty($username) || empty($password)) {
+            $passwordHash = $_POST['password_hash'];
+
+            if (empty($username) || empty($passwordHash)) {
                 $error = 'Username and password are required';
             } else {
                 $error = "hello $username";
             }
+        } else {
+            $error = 'Username and password are required';
         }
-        
+
         $view = new LoginView();
         $view->setError($error);
         $this->render($view);
