@@ -9,8 +9,7 @@ function sha256(str) {
         });
 }
 
-// Find all forms with the class 'hash-password'
-document.addEventListener('DOMContentLoaded', function() {
+function initPasswordHashForms() {
     document.querySelectorAll('form.hash-password').forEach(form => {
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -35,4 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-});
+}
+
+document.addEventListener('DOMContentLoaded', initPasswordHashForms);
