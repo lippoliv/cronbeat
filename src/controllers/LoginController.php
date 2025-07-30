@@ -19,20 +19,17 @@ class LoginController extends BaseController {
 
         switch ($action) {
             case 'index':
-                $this->showLoginForm();
-                break;
+                return $this->showLoginForm();
             case 'process':
-                $this->processLogin();
-                break;
+                return $this->processLogin();
             default:
-                $this->showLoginForm();
-                break;
+                return $this->showLoginForm();
         }
     }
 
     public function showLoginForm() {
         $view = new LoginView();
-        $this->render($view);
+        return $this->render($view);
     }
 
     public function processLogin() {
@@ -53,6 +50,6 @@ class LoginController extends BaseController {
 
         $view = new LoginView();
         $view->setError($error);
-        $this->render($view);
+        return $this->render($view);
     }
 }

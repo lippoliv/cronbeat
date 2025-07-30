@@ -14,7 +14,7 @@ class BaseController {
     }
 
     public function render($view) {
-        echo $view->render();
+        return $view->render();
     }
 
     protected function parsePathWithoutController() {

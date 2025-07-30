@@ -31,5 +31,5 @@ switch ($controllerName) {
         break;
 }
 
-$controller->doRouting();
+echo $controller->doRouting();
 ?>
