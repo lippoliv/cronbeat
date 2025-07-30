@@ -24,6 +24,16 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl
           coverage: xdebug
 
+      - name: Lint PHP files
+        run: |
+          echo "Linting PHP files..."
+          find src -name "*.php" -print0 | xargs -0 -n1 php -l
+          if [ $? -ne 0 ]; then
+            echo "PHP linting failed!"
+            exit 1
+          fi
+          echo "All PHP files passed linting!"
+
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
 
