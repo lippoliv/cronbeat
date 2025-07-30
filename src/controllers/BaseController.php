@@ -9,8 +9,8 @@ use Cronbeat\Database;
 class BaseController {
     protected $database;
 
-    public function __construct($database = null) {
-        $this->database = $database ?: new Database();
+    public function __construct($database) {
+        $this->database = $database;
     }
 
     public function render($view) {
