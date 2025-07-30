@@ -22,7 +22,7 @@ class Database {
 
     public function createDatabase() {
         if (!is_dir($this->dbDir)) {
-            if (!mkdir($this->dbDir, 0755, true)) {
+            if (!@mkdir($this->dbDir, 0755, true)) {
                 throw new \RuntimeException("Failed to create database directory: {$this->dbDir}");
             }
         }
@@ -55,7 +55,7 @@ class Database {
             password TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )";
-        
+
         $this->pdo->exec($sql);
     }
 
@@ -86,7 +86,7 @@ class Database {
         $stmt = $this->pdo->prepare("SELECT password FROM users WHERE username = ?");
         $stmt->execute([$username]);
         $storedHash = $stmt->fetchColumn();
-        
+
         return $storedHash && $storedHash === $passwordHash;
     }
 

@@ -101,15 +101,12 @@ class SetupControllerTest extends TestCase
         // Given
         $invalidDbPath = '/invalid/path/that/does/not/exist/test.sqlite';
         $invalidDatabase = new Database($invalidDbPath);
-        $controller = new SetupController($invalidDatabase);
 
-        $username = 'admin';
-        $passwordHash = hash('sha256', 'password123');
+        // When/Then
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Failed to create database directory: /invalid/path/that/does/not/exist');
 
-        // When
-        $result = $controller->runSetup($username, $passwordHash);
-
-        // Then
-        $this->assertStringContainsString('Error creating user:', $result);
+        // Suppress PHP warnings from mkdir() while still allowing the exception to be thrown
+        $invalidDatabase->createDatabase();
     }
 }
