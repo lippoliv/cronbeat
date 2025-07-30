@@ -102,33 +102,22 @@ All tests should:
 Here's an example of a properly structured test:
 
 ```php
-/**
- * Test that a job becomes late after the expected interval plus grace period
- */
 public function testJobBecomesLateAfterExpectedIntervalPlusGracePeriod(): void
 {
-    // Given a job with a 1-hour interval and 5-minute grace period
+    // Given
     $job = new Job(
         'Hourly Report',
         'hourly-report',
-        3600, // 1 hour in seconds
-        300   // 5 minutes grace period
+        3600,
+        300
     );
     
-    // When the job checks in
+    // When
     $job->checkIn();
+    $currentTime = time() + 3600 + 299;
     
-    // And we mock time to be before the late threshold
-    $currentTime = time() + 3600 + 299; // Just before becoming late
-    
-    // Then the job should not be considered late yet
+    // Then 
     $this->assertFalse($this->isJobLateAt($job, $currentTime));
-    
-    // When time advances past the grace period
-    $currentTime = time() + 3600 + 301; // Just after becoming late
-    
-    // Then the job should be considered late
-    $this->assertTrue($this->isJobLateAt($job, $currentTime));
 }
 ```
 
