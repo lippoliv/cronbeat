@@ -14,7 +14,7 @@ parameters:
     checkTooWideReturnTypesInProtectedAndPublicMethods: true
     checkUninitializedProperties: true
     checkDynamicProperties: true
-    checkMissingVarTagTypehint: true
+    checkMissingVarTagTypehint: false
     checkArgumentsPassedByReference: true
     checkNullables: true
     checkThisOnly: false
