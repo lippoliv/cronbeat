@@ -14,7 +14,7 @@ use Cronbeat\Controllers\LoginController;
 
 $controllerName = UrlHelper::parseControllerFromUrl();
 
-$database = new Database();
+$database = new Database(APP_DIR . '/db/db.sqlite');
 
 if (!$database->databaseExists() && $controllerName !== 'setup') {
     header('Location: /setup');

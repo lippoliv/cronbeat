@@ -7,12 +7,8 @@ class Database {
     private $dbDir;
     private $pdo;
 
-    public function __construct($dbPath = null) {
-        if ($dbPath !== null) {
-            $this->dbPath = $dbPath;
-        } else if (defined('APP_DIR')) {
-            $this->dbPath = APP_DIR . '/db/db.sqlite';
-        }
+    public function __construct($dbPath) {
+        $this->dbPath = $dbPath;
         $this->dbDir = dirname($this->dbPath);
     }
 
