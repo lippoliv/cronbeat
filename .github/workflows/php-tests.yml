@@ -34,16 +34,6 @@ jobs:
           fi
           echo "All PHP files passed linting!"
 
-      - name: Check type annotations with PHPStan
-        run: |
-          echo "Checking type annotations..."
-          vendor/bin/phpstan analyse --error-format=table --no-progress
-          if [ $? -ne 0 ]; then
-            echo "PHPStan type checking failed!"
-            exit 1
-          fi
-          echo "All type annotations are correct!"
-
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
 
@@ -58,6 +48,26 @@ jobs:
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
+
+      - name: Check type annotations with PHPStan
+        run: |
+          echo "Checking type annotations..."
+          vendor/bin/phpstan analyse --error-format=table --no-progress
+          if [ $? -ne 0 ]; then
+            echo "PHPStan type checking failed!"
+            exit 1
+          fi
+          echo "All type annotations are correct!"
+
+      - name: Check for unused functions and variables with PHP_CodeSniffer
+        run: |
+          echo "Checking for unused functions and variables..."
+          vendor/bin/phpcs --standard=phpcs.xml
+          if [ $? -ne 0 ]; then
+            echo "PHP_CodeSniffer found unused functions or variables!"
+            exit 1
+          fi
+          echo "No unused functions or variables found!"
 
       - name: Run test suite
         run: vendor/bin/phpunit --testdox
