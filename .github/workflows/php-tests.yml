@@ -34,6 +34,16 @@ jobs:
           fi
           echo "All PHP files passed linting!"
 
+      - name: Check type annotations with PHPStan
+        run: |
+          echo "Checking type annotations..."
+          vendor/bin/phpstan analyse --error-format=table --no-progress
+          if [ $? -ne 0 ]; then
+            echo "PHPStan type checking failed!"
+            exit 1
+          fi
+          echo "All type annotations are correct!"
+
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
 
