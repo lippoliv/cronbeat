@@ -8,12 +8,26 @@
 
     <!-- Exclude vendor directory -->
     <exclude-pattern>vendor/*</exclude-pattern>
+    <exclude-pattern>**.css</exclude-pattern>
+    <exclude-pattern>**.js</exclude-pattern>
 
     <!-- Include PSR-12 coding standard -->
     <rule ref="PSR12">
         <!-- Exclude the FileHeader rule that requires blank lines between header blocks -->
         <exclude name="PSR12.Files.FileHeader"/>
+        <!-- Exclude brace placement rules to allow braces on same line -->
+        <exclude name="PSR12.Classes.OpeningBraceSpace"/>
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing"/>
+        <exclude name="PSR2.Classes.ClassDeclaration"/>
+        <exclude name="PSR2.Methods.MethodDeclaration"/>
+        <exclude name="Squiz.Functions.FunctionDeclaration"/>
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine"/>
     </rule>
+
+    <!-- Use Generic rules for brace placement on same line -->
+    <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie"/>
+    <rule ref="Generic.Classes.OpeningBraceSameLine"/>
+    <rule ref="Squiz.ControlStructures.ControlSignature"/>
 
     <!-- Include SlevomatCodingStandard for unused code detection -->
     <rule ref="SlevomatCodingStandard.Variables.UnusedVariable"/>
