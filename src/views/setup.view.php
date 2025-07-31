@@ -2,10 +2,8 @@
 
 namespace Cronbeat\Views;
 
-require_once APP_DIR . '/views/base.view.php';
-
 class SetupView extends BaseView {
-    protected $error = null;
+    protected ?string $error = null;
 
     public function __construct() {
         $this->setTitle('CronBeat Setup');
@@ -17,14 +15,16 @@ class SetupView extends BaseView {
     }
 
     public function render(): string {
+        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $error = $this->error;
-        
+
         ob_start();
-        
+
         include APP_DIR . '/views/setup.html.php';
-        
-        $this->setContent(ob_get_clean());
-        
+
+        $result = ob_get_clean();
+        $this->setContent($result !== false ? $result : '');
+
         return parent::render();
     }
 }

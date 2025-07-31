@@ -2,22 +2,16 @@
 
 namespace Cronbeat\Controllers;
 
-require_once APP_DIR . '/classes/Database.php';
-
 use Cronbeat\Database;
 
 class BaseController {
-    protected $database;
+    protected Database $database;
 
-    public function __construct($database) {
+    public function __construct(Database $database) {
         $this->database = $database;
     }
 
-    public function render($view) {
-        return $view->render();
-    }
-
-    protected function parsePathWithoutController() {
+    protected function parsePathWithoutController(): string {
         $uri = $_SERVER['REQUEST_URI'];
         $uri = trim($uri, '/');
         $uri = explode('/', $uri);

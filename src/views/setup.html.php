@@ -1,5 +1,5 @@
 <h1>CronBeat Setup</h1>
-<?php if ($error): ?>
+<?php if (isset($error) && $error) : ?>
 <div class='error'><?= $error ?></div>
 <?php endif; ?>
 <form method="post" action="/setup" class="hash-password">

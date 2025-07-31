@@ -2,16 +2,13 @@
 
 namespace Cronbeat\Controllers;
 
-require_once APP_DIR . '/controllers/BaseController.php';
-require_once APP_DIR . '/views/setup.view.php';
-
 use Cronbeat\Views\SetupView;
 
 class SetupController extends BaseController {
-    public function doRouting() {
+    public function doRouting(): string {
         $path = $this->parsePathWithoutController();
         $pathParts = explode('/', $path);
-        $action = !empty($pathParts[0]) ? $pathParts[0] : 'index';
+        $action = ($pathParts[0] !== '' && $pathParts[0] !== null) ? $pathParts[0] : 'index';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = 'process';
@@ -27,7 +24,7 @@ class SetupController extends BaseController {
         }
     }
 
-    public function processSetupForm() {
+    public function processSetupForm(): string {
         error_log("Setup: Processing form submission");
 
         if (isset($_POST['username']) && isset($_POST['password_hash'])) {
@@ -55,7 +52,7 @@ class SetupController extends BaseController {
                 }
             }
 
-            error_log("Setup: Showing setup form with error: " . ($error ?? 'none'));
+            error_log("Setup: Showing setup form with error: " . ($error !== null ? $error : 'none'));
             return $this->showSetupForm($error);
         } else {
             error_log("Setup: Form data missing, showing setup form");
@@ -63,15 +60,15 @@ class SetupController extends BaseController {
         }
     }
 
-    public function showSetupForm($error = null) {
+    public function showSetupForm(?string $error = null): string {
         error_log("Setup: Showing setup form" . ($error ? " with error: " . $error : " without error"));
         $view = new SetupView();
         $view->setError($error);
-        return $this->render($view);
+        return $view->render();
     }
 
-    public function validateSetupData($username, $passwordHash) {
-        if (empty($username) || empty($passwordHash)) {
+    public function validateSetupData(string $username, string $passwordHash): ?string {
+        if ($username === '' || $passwordHash === '') {
             return 'Username and password are required';
         } elseif (strlen($username) < 3) {
             return 'Username must be at least 3 characters';
@@ -80,7 +77,7 @@ class SetupController extends BaseController {
         return null;
     }
 
-    public function runSetup($username, $passwordHash) {
+    public function runSetup(string $username, string $passwordHash): ?string {
         try {
             $this->database->createDatabase();
             $result = $this->database->createUser($username, $passwordHash);

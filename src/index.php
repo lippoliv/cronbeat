@@ -1,20 +1,23 @@
 <?php
 
-define('APP_DIR', __DIR__);
+const APP_DIR = __DIR__;
 
 require_once APP_DIR . '/classes/UrlHelper.php';
 require_once APP_DIR . '/classes/Database.php';
+require_once APP_DIR . '/controllers/BaseController.php';
+require_once APP_DIR . '/views/base.view.php';
+require_once APP_DIR . '/views/setup.view.php';
 require_once APP_DIR . '/controllers/SetupController.php';
 require_once APP_DIR . '/controllers/LoginController.php';
 
+use Cronbeat\Controllers\LoginController;
+use Cronbeat\Controllers\SetupController;
 use Cronbeat\Database;
 use Cronbeat\UrlHelper;
-use Cronbeat\Controllers\SetupController;
-use Cronbeat\Controllers\LoginController;
 
 $controllerName = UrlHelper::parseControllerFromUrl();
 
-$database = new Database(APP_DIR . '/db/db.sqlite');
+$database = new Database(__DIR__ . '/db/db.sqlite');
 
 if (!$database->databaseExists() && $controllerName !== 'setup') {
     header('Location: /setup');
@@ -31,5 +34,4 @@ switch ($controllerName) {
         break;
 }
 
-echo $controller->doRouting();
-?>
+    echo $controller->doRouting();

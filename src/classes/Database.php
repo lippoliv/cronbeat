@@ -3,20 +3,20 @@
 namespace Cronbeat;
 
 class Database {
-    private $dbPath;
-    private $dbDir;
-    private $pdo;
+    private string $dbPath;
+    private string $dbDir;
+    private ?\PDO $pdo = null;
 
-    public function __construct($dbPath) {
+    public function __construct(string $dbPath) {
         $this->dbPath = $dbPath;
         $this->dbDir = dirname($this->dbPath);
     }
 
-    public function databaseExists() {
+    public function databaseExists(): bool {
         return file_exists($this->dbPath);
     }
 
-    public function createDatabase() {
+    public function createDatabase(): bool {
         if (!is_dir($this->dbDir)) {
             if (!@mkdir($this->dbDir, 0755, true)) {
                 throw new \RuntimeException("Failed to create database directory: {$this->dbDir}");
@@ -28,7 +28,7 @@ class Database {
         return true;
     }
 
-    public function connect() {
+    public function connect(): \PDO {
         if ($this->pdo) {
             return $this->pdo;
         }
@@ -44,7 +44,7 @@ class Database {
         return $this->pdo;
     }
 
-    private function createTables() {
+    private function createTables(): void {
         $sql = "CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
@@ -55,7 +55,7 @@ class Database {
         $this->pdo->exec($sql);
     }
 
-    public function createUser($username, $passwordHash) {
+    public function createUser(string $username, string $passwordHash): bool {
         if (!$this->pdo) {
             $this->connect();
         }
@@ -64,7 +64,7 @@ class Database {
         return $stmt->execute([$username, $passwordHash]);
     }
 
-    public function userExists($username) {
+    public function userExists(string $username): bool {
         if (!$this->pdo) {
             $this->connect();
         }
@@ -74,7 +74,7 @@ class Database {
         return (int) $stmt->fetchColumn() > 0;
     }
 
-    public function validateUser($username, $passwordHash) {
+    public function validateUser(string $username, string $passwordHash): bool {
         if (!$this->pdo) {
             $this->connect();
         }
@@ -86,7 +86,7 @@ class Database {
         return $storedHash && $storedHash === $passwordHash;
     }
 
-    public function getDbPath() {
+    public function getDbPath(): string {
         return $this->dbPath;
     }
 }
