@@ -8,7 +8,7 @@ class LoginController extends BaseController {
     public function doRouting(): string {
         $path = $this->parsePathWithoutController();
         $pathParts = explode('/', $path);
-        $action = ($pathParts[0] !== '' && $pathParts[0] !== null) ? $pathParts[0] : 'index';
+        $action = ($pathParts[0] !== '') ? $pathParts[0] : 'index';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $action = 'process';

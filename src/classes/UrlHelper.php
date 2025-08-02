@@ -7,6 +7,6 @@ class UrlHelper {
         $uri = $_SERVER['REQUEST_URI'];
         $uri = trim($uri, '/');
         $uri = explode('/', $uri);
-        return ($uri[0] !== '' && $uri[0] !== null) ? $uri[0] : 'login';
+        return ($uri[0] !== '') ? $uri[0] : 'login';
     }
 }

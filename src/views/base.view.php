@@ -32,7 +32,7 @@ class BaseView {
 
         ob_start();
 
-        include APP_DIR . '/views/base.html.php';
+        include (defined('APP_DIR') ? APP_DIR : __DIR__) . '/base.html.php';
 
         $result = ob_get_clean();
 

@@ -52,11 +52,15 @@ class Database {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )";
 
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+        
         $this->pdo->exec($sql);
     }
 
     public function createUser(string $username, string $passwordHash): bool {
-        if (!$this->pdo) {
+        if ($this->pdo === null) {
             $this->connect();
         }
 
@@ -65,7 +69,7 @@ class Database {
     }
 
     public function userExists(string $username): bool {
-        if (!$this->pdo) {
+        if ($this->pdo === null) {
             $this->connect();
         }
 
@@ -75,7 +79,7 @@ class Database {
     }
 
     public function validateUser(string $username, string $passwordHash): bool {
-        if (!$this->pdo) {
+        if ($this->pdo === null) {
             $this->connect();
         }
 
@@ -83,7 +87,7 @@ class Database {
         $stmt->execute([$username]);
         $storedHash = $stmt->fetchColumn();
 
-        return $storedHash && $storedHash === $passwordHash;
+        return $storedHash !== false && $storedHash === $passwordHash;
     }
 
     public function getDbPath(): string {

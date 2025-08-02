@@ -12,9 +12,9 @@ use Cronbeat\Controllers\SetupController;
 use Cronbeat\Database;
 
 class SetupControllerTest extends TestCase {
-    private $tempDbPath;
-    private $controller;
-    private $database;
+    private ?string $tempDbPath = null;
+    private ?SetupController $controller = null;
+    private ?Database $database = null;
 
     protected function setUp(): void {
         parent::setUp();
@@ -23,7 +23,7 @@ class SetupControllerTest extends TestCase {
         $this->controller = new SetupController($this->database);
     }
 
-    private function cleanupTestDatabase($tempDbPath) {
+    private function cleanupTestDatabase(string $tempDbPath): void {
         if (file_exists($tempDbPath)) {
             unlink($tempDbPath);
         }
