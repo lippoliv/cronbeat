@@ -19,7 +19,7 @@ class BaseController {
         Logger::debug("Parsed path without controller", ['path' => $path]);
         return $path;
     }
-    
+
     public function doRouting(): string {
         Logger::info("Processing route", [
             'controller' => static::class,
