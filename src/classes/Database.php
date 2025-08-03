@@ -37,7 +37,7 @@ class Database {
     }
 
     public function connect(): \PDO {
-        if ($this->pdo) {
+        if ($this->pdo !== null) {
             Logger::debug("Reusing existing database connection");
             return $this->pdo;
         }
@@ -80,6 +80,11 @@ class Database {
         }
         
         try {
+            // Ensure PDO is not null after connect
+            if ($this->pdo === null) {
+                throw new \RuntimeException("Failed to connect to database");
+            }
+            
             $this->pdo->exec($sql);
             Logger::info("Database tables created successfully");
         } catch (\PDOException $e) {
@@ -93,6 +98,11 @@ class Database {
         
         if ($this->pdo === null) {
             $this->connect();
+        }
+        
+        // Ensure PDO is not null after connect
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
         }
 
         try {
@@ -121,6 +131,11 @@ class Database {
         if ($this->pdo === null) {
             $this->connect();
         }
+        
+        // Ensure PDO is not null after connect
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
 
         try {
             $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
@@ -147,6 +162,11 @@ class Database {
         
         if ($this->pdo === null) {
             $this->connect();
+        }
+        
+        // Ensure PDO is not null after connect
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
         }
 
         try {
