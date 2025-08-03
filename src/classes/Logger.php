@@ -9,6 +9,7 @@ class Logger {
     public const ERROR = 'ERROR';
     
     private static string $minLevel = self::INFO;
+    private static $logStream = null;
     
     private const LEVEL_PRIORITIES = [
         self::DEBUG => 0,
@@ -44,7 +45,19 @@ class Logger {
         
         $formattedMessage = "[$timestamp] [$level] $message$contextStr" . PHP_EOL;
         
-        fwrite(fopen('php://stdout', 'w'), $formattedMessage);
+        $stream = self::getLogStream();
+        fwrite($stream, $formattedMessage);
+    }
+    
+    public static function getLogStream() {
+        if (self::$logStream === null) {
+            self::$logStream = fopen('php://stdout', 'w');
+        }
+        return self::$logStream;
+    }
+    
+    public static function setLogStream($stream): void {
+        self::$logStream = $stream;
     }
     
     public static function setMinLevel(string $level): void {
