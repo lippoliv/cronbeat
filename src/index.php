@@ -7,6 +7,7 @@ require_once APP_DIR . '/classes/Database.php';
 require_once APP_DIR . '/controllers/BaseController.php';
 require_once APP_DIR . '/views/base.view.php';
 require_once APP_DIR . '/views/setup.view.php';
+require_once APP_DIR . '/views/login.view.php';
 require_once APP_DIR . '/controllers/SetupController.php';
 require_once APP_DIR . '/controllers/LoginController.php';
 
