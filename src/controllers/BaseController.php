@@ -20,20 +20,12 @@ class BaseController {
         return $path;
     }
     
-    /**
-     * Handle routing for the controller
-     * 
-     * @return string HTML output
-     */
     public function doRouting(): string {
         Logger::info("Processing route", [
             'controller' => static::class,
             'path' => $this->parsePathWithoutController()
         ]);
-        
-        // This method should be overridden by child classes
         Logger::warning("doRouting method not implemented", ['controller' => static::class]);
-        
         return '';
     }
 }

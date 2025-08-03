@@ -18,43 +18,26 @@ use Cronbeat\Database;
 use Cronbeat\Logger;
 use Cronbeat\UrlHelper;
 
-// Initialize logger with INFO level
-Logger::setMinLevel(Logger::INFO);
-Logger::info("Application starting", ['controller' => UrlHelper::parseControllerFromUrl()]);
+$logLevel = getenv('LOG_LEVEL') ?: Logger::INFO;
+Logger::setMinLevel($logLevel);
 
 $controllerName = UrlHelper::parseControllerFromUrl();
 
 $database = new Database(__DIR__ . '/db/db.sqlite');
-Logger::debug("Database initialized");
 
 if (!$database->databaseExists() && $controllerName !== 'setup') {
     header('Location: /setup');
     exit;
 }
 
-Logger::info("Routing to controller", ['controller' => $controllerName]);
-
 switch ($controllerName) {
     case 'setup':
         $controller = new SetupController($database);
-        Logger::info("Setup controller initialized");
         break;
     case 'login':
     default:
         $controller = new LoginController($database);
-        Logger::info("Login controller initialized");
         break;
 }
 
-try {
-    $output = $controller->doRouting();
-    Logger::info("Controller routing completed successfully");
-    echo $output;
-} catch (\Exception $e) {
-    Logger::error("Error during controller routing", [
-        'error' => $e->getMessage(),
-        'controller' => $controllerName
-    ]);
-    // Re-throw the exception to maintain original error handling
-    throw $e;
-}
+echo $controller->doRouting();
