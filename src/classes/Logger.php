@@ -9,7 +9,7 @@ class Logger {
     public const ERROR = 'ERROR';
     
     private static string $minLevel = self::INFO;
-    private static resource|null $logStream = null;
+    private static mixed $logStream = null;
     
     private const LEVEL_PRIORITIES = [
         self::DEBUG => 0,
@@ -18,23 +18,23 @@ class Logger {
         self::ERROR => 3
     ];
     
-    public static function debug(string $message, array<string, mixed> $context = []): void {
+    public static function debug(string $message, array $context = []): void {
         self::log(self::DEBUG, $message, $context);
     }
     
-    public static function info(string $message, array<string, mixed> $context = []): void {
+    public static function info(string $message, array $context = []): void {
         self::log(self::INFO, $message, $context);
     }
     
-    public static function warning(string $message, array<string, mixed> $context = []): void {
+    public static function warning(string $message, array $context = []): void {
         self::log(self::WARNING, $message, $context);
     }
     
-    public static function error(string $message, array<string, mixed> $context = []): void {
+    public static function error(string $message, array $context = []): void {
         self::log(self::ERROR, $message, $context);
     }
     
-    private static function log(string $level, string $message, array<string, mixed> $context = []): void {
+    private static function log(string $level, string $message, array $context = []): void {
         if (self::LEVEL_PRIORITIES[$level] < self::LEVEL_PRIORITIES[self::$minLevel]) {
             return;
         }
@@ -52,7 +52,7 @@ class Logger {
     /**
      * @throws \RuntimeException If unable to open the log stream
      */
-    public static function getLogStream(): resource {
+    public static function getLogStream(): mixed {
         if (self::$logStream === null) {
             $stream = fopen('php://stdout', 'w');
             if ($stream === false) {
@@ -63,7 +63,7 @@ class Logger {
         return self::$logStream;
     }
     
-    public static function setLogStream(resource $stream): void {
+    public static function setLogStream(mixed $stream): void {
         self::$logStream = $stream;
     }
     
