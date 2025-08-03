@@ -9,8 +9,15 @@ on:
       - 'phpunit.xml'
       - '.github/workflows/php-tests.yml'
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - main
+    paths:
+      - '**.php'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'phpunit.xml'
+      - '.github/workflows/php-tests.yml'
 
 jobs:
   test:
