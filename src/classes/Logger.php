@@ -9,7 +9,8 @@ class Logger {
     public const ERROR = 'ERROR';
     
     private static string $minLevel = self::INFO;
-    private static mixed $logStream = null;
+    /** @var resource|null */
+    private static $logStream = null;
     
     private const LEVEL_PRIORITIES = [
         self::DEBUG => 0,
@@ -18,22 +19,43 @@ class Logger {
         self::ERROR => 3
     ];
     
+    /**
+     * @param string $message The message to log
+     * @param array<string, mixed> $context Additional context data
+     */
     public static function debug(string $message, array $context = []): void {
         self::log(self::DEBUG, $message, $context);
     }
     
+    /**
+     * @param string $message The message to log
+     * @param array<string, mixed> $context Additional context data
+     */
     public static function info(string $message, array $context = []): void {
         self::log(self::INFO, $message, $context);
     }
     
+    /**
+     * @param string $message The message to log
+     * @param array<string, mixed> $context Additional context data
+     */
     public static function warning(string $message, array $context = []): void {
         self::log(self::WARNING, $message, $context);
     }
     
+    /**
+     * @param string $message The message to log
+     * @param array<string, mixed> $context Additional context data
+     */
     public static function error(string $message, array $context = []): void {
         self::log(self::ERROR, $message, $context);
     }
     
+    /**
+     * @param string $level The log level
+     * @param string $message The message to log
+     * @param array<string, mixed> $context Additional context data
+     */
     private static function log(string $level, string $message, array $context = []): void {
         if (self::LEVEL_PRIORITIES[$level] < self::LEVEL_PRIORITIES[self::$minLevel]) {
             return;
@@ -51,8 +73,9 @@ class Logger {
     
     /**
      * @throws \RuntimeException If unable to open the log stream
+     * @return resource The log stream resource
      */
-    public static function getLogStream(): mixed {
+    public static function getLogStream() {
         if (self::$logStream === null) {
             $stream = fopen('php://stdout', 'w');
             if ($stream === false) {
@@ -63,7 +86,10 @@ class Logger {
         return self::$logStream;
     }
     
-    public static function setLogStream(mixed $stream): void {
+    /**
+     * @param resource $stream The log stream resource
+     */
+    public static function setLogStream($stream): void {
         self::$logStream = $stream;
     }
     
