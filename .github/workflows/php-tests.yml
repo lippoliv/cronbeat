@@ -8,6 +8,9 @@ on:
       - 'composer.lock'
       - 'phpunit.xml'
       - '.github/workflows/php-tests.yml'
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
