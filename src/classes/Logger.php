@@ -44,7 +44,7 @@ class Logger {
         
         $formattedMessage = "[$timestamp] [$level] $message$contextStr" . PHP_EOL;
         
-        fwrite(\STDOUT, $formattedMessage);
+        fwrite(fopen('php://stdout', 'w'), $formattedMessage);
     }
     
     public static function setMinLevel(string $level): void {
