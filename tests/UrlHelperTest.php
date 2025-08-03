@@ -49,4 +49,59 @@ class UrlHelperTest extends TestCase {
         // Then
         $this->assertEquals('login', $result);
     }
+
+    public function testParsePathWithoutControllerWithEmptyUri() {
+        // Given
+        $_SERVER['REQUEST_URI'] = '/';
+
+        // When
+        $result = UrlHelper::parsePathWithoutController();
+
+        // Then
+        $this->assertEquals('', $result);
+    }
+
+    public function testParsePathWithoutControllerWithControllerOnly() {
+        // Given
+        $_SERVER['REQUEST_URI'] = '/setup';
+
+        // When
+        $result = UrlHelper::parsePathWithoutController();
+
+        // Then
+        $this->assertEquals('', $result);
+    }
+
+    public function testParsePathWithoutControllerWithControllerAndPath() {
+        // Given
+        $_SERVER['REQUEST_URI'] = '/dashboard/stats';
+
+        // When
+        $result = UrlHelper::parsePathWithoutController();
+
+        // Then
+        $this->assertEquals('stats', $result);
+    }
+
+    public function testParsePathWithoutControllerWithTrailingSlash() {
+        // Given
+        $_SERVER['REQUEST_URI'] = '/login/';
+
+        // When
+        $result = UrlHelper::parsePathWithoutController();
+
+        // Then
+        $this->assertEquals('', $result);
+    }
+
+    public function testParsePathWithoutControllerWithMultiplePathSegments() {
+        // Given
+        $_SERVER['REQUEST_URI'] = '/dashboard/stats/monthly/2025';
+
+        // When
+        $result = UrlHelper::parsePathWithoutController();
+
+        // Then
+        $this->assertEquals('stats/monthly/2025', $result);
+    }
 }
