@@ -5,7 +5,7 @@ namespace Cronbeat;
 /**
  * Logger class for CronBeat application
  * 
- * Provides logging functionality with different log levels:
+ * Provides static logging functionality with different log levels:
  * - debug: Detailed information for debugging purposes
  * - info: General information about application flow
  * - warning: Warning messages that don't affect application functionality
@@ -18,8 +18,8 @@ class Logger {
     public const WARNING = 'WARNING';
     public const ERROR = 'ERROR';
     
-    // Current minimum log level
-    private string $minLevel;
+    // Current minimum log level (static)
+    private static string $minLevel = self::INFO;
     
     // Log level priorities (higher number = higher priority)
     private const LEVEL_PRIORITIES = [
@@ -30,23 +30,14 @@ class Logger {
     ];
     
     /**
-     * Constructor
-     * 
-     * @param string $minLevel Minimum log level to output (default: INFO)
-     */
-    public function __construct(string $minLevel = self::INFO) {
-        $this->minLevel = $minLevel;
-    }
-    
-    /**
      * Log a debug message
      * 
      * @param string $message Message to log
      * @param array $context Additional context data
      * @return void
      */
-    public function debug(string $message, array $context = []): void {
-        $this->log(self::DEBUG, $message, $context);
+    public static function debug(string $message, array $context = []): void {
+        self::log(self::DEBUG, $message, $context);
     }
     
     /**
@@ -56,8 +47,8 @@ class Logger {
      * @param array $context Additional context data
      * @return void
      */
-    public function info(string $message, array $context = []): void {
-        $this->log(self::INFO, $message, $context);
+    public static function info(string $message, array $context = []): void {
+        self::log(self::INFO, $message, $context);
     }
     
     /**
@@ -67,8 +58,8 @@ class Logger {
      * @param array $context Additional context data
      * @return void
      */
-    public function warning(string $message, array $context = []): void {
-        $this->log(self::WARNING, $message, $context);
+    public static function warning(string $message, array $context = []): void {
+        self::log(self::WARNING, $message, $context);
     }
     
     /**
@@ -78,8 +69,8 @@ class Logger {
      * @param array $context Additional context data
      * @return void
      */
-    public function error(string $message, array $context = []): void {
-        $this->log(self::ERROR, $message, $context);
+    public static function error(string $message, array $context = []): void {
+        self::log(self::ERROR, $message, $context);
     }
     
     /**
@@ -90,9 +81,9 @@ class Logger {
      * @param array $context Additional context data
      * @return void
      */
-    private function log(string $level, string $message, array $context = []): void {
+    private static function log(string $level, string $message, array $context = []): void {
         // Check if this log level should be output
-        if (self::LEVEL_PRIORITIES[$level] < self::LEVEL_PRIORITIES[$this->minLevel]) {
+        if (self::LEVEL_PRIORITIES[$level] < self::LEVEL_PRIORITIES[self::$minLevel]) {
             return;
         }
         
@@ -115,12 +106,12 @@ class Logger {
      * @param string $level Minimum log level
      * @return void
      */
-    public function setMinLevel(string $level): void {
+    public static function setMinLevel(string $level): void {
         if (!isset(self::LEVEL_PRIORITIES[$level])) {
             throw new \InvalidArgumentException("Invalid log level: $level");
         }
         
-        $this->minLevel = $level;
+        self::$minLevel = $level;
     }
     
     /**
@@ -128,7 +119,7 @@ class Logger {
      * 
      * @return string Current minimum log level
      */
-    public function getMinLevel(): string {
-        return $this->minLevel;
+    public static function getMinLevel(): string {
+        return self::$minLevel;
     }
 }

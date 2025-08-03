@@ -18,40 +18,40 @@ use Cronbeat\Database;
 use Cronbeat\Logger;
 use Cronbeat\UrlHelper;
 
-// Initialize logger
-$logger = new Logger(Logger::INFO);
-$logger->info("Application starting", ['controller' => UrlHelper::parseControllerFromUrl()]);
+// Initialize logger with INFO level
+Logger::setMinLevel(Logger::INFO);
+Logger::info("Application starting", ['controller' => UrlHelper::parseControllerFromUrl()]);
 
 $controllerName = UrlHelper::parseControllerFromUrl();
 
-$database = new Database(__DIR__ . '/db/db.sqlite', $logger);
-$logger->debug("Database initialized");
+$database = new Database(__DIR__ . '/db/db.sqlite');
+Logger::debug("Database initialized");
 
 if (!$database->databaseExists() && $controllerName !== 'setup') {
     header('Location: /setup');
     exit;
 }
 
-$logger->info("Routing to controller", ['controller' => $controllerName]);
+Logger::info("Routing to controller", ['controller' => $controllerName]);
 
 switch ($controllerName) {
     case 'setup':
-        $controller = new SetupController($database, $logger);
-        $logger->info("Setup controller initialized");
+        $controller = new SetupController($database);
+        Logger::info("Setup controller initialized");
         break;
     case 'login':
     default:
-        $controller = new LoginController($database, $logger);
-        $logger->info("Login controller initialized");
+        $controller = new LoginController($database);
+        Logger::info("Login controller initialized");
         break;
 }
 
 try {
     $output = $controller->doRouting();
-    $logger->info("Controller routing completed successfully");
+    Logger::info("Controller routing completed successfully");
     echo $output;
 } catch (\Exception $e) {
-    $logger->error("Error during controller routing", [
+    Logger::error("Error during controller routing", [
         'error' => $e->getMessage(),
         'controller' => $controllerName
     ]);
