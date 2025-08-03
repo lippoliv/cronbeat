@@ -25,43 +25,28 @@ class SetupController extends BaseController {
     }
 
     public function processSetupForm(): string {
-        error_log("Setup: Processing form submission");
-
         if (isset($_POST['username']) && isset($_POST['password_hash'])) {
             $username = trim($_POST['username']);
             $passwordHash = $_POST['password_hash'];
 
-            error_log("Setup: Form data received - username: " . $username);
-
             $error = $this->validateSetupData($username, $passwordHash);
 
-            if ($error !== null) {
-                error_log("Setup: Validation error - " . $error);
-            }
-
             if ($error === null) {
-                error_log("Setup: Validation successful, running setup");
                 $error = $this->runSetup($username, $passwordHash);
 
                 if ($error === null) {
-                    error_log("Setup: Setup successful, redirecting to login");
                     header('Location: /login');
                     exit;
-                } else {
-                    error_log("Setup: Setup failed - " . $error);
                 }
             }
 
-            error_log("Setup: Showing setup form with error: " . ($error !== null ? $error : 'none'));
             return $this->showSetupForm($error);
         } else {
-            error_log("Setup: Form data missing, showing setup form");
             return $this->showSetupForm();
         }
     }
 
     public function showSetupForm(?string $error = null): string {
-        error_log("Setup: Showing setup form" . ($error ? " with error: " . $error : " without error"));
         $view = new SetupView();
         $view->setError($error);
         return $view->render();
@@ -82,9 +67,6 @@ class SetupController extends BaseController {
             $this->database->createDatabase();
             $result = $this->database->createUser($username, $passwordHash);
 
-            // Log the result of the database operation
-            error_log("Setup: Database creation result: " . ($result ? "success" : "failure"));
-
             if (!$result) {
                 return 'Failed to create user. Please check the logs for more information.';
             }
@@ -92,7 +74,6 @@ class SetupController extends BaseController {
             return null;
         } catch (\Exception $e) {
             $errorMessage = 'Error creating user: ' . $e->getMessage();
-            error_log("Setup error: " . $errorMessage);
             return $errorMessage;
         }
     }

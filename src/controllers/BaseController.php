@@ -3,6 +3,7 @@
 namespace Cronbeat\Controllers;
 
 use Cronbeat\Database;
+use Cronbeat\UrlHelper;
 
 class BaseController {
     protected Database $database;
@@ -12,14 +13,6 @@ class BaseController {
     }
 
     protected function parsePathWithoutController(): string {
-        $uri = $_SERVER['REQUEST_URI'];
-        $uri = trim($uri, '/');
-        $uri = explode('/', $uri);
-
-        if (count($uri) > 1) {
-            return implode('/', array_slice($uri, 1));
-        }
-
-        return '';
+        return UrlHelper::parsePathWithoutController();
     }
 }

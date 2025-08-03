@@ -83,8 +83,6 @@ class SetupControllerTest extends TestCase {
 
         // Then
         $this->assertNull($result, "Setup should succeed with valid data");
-
-        // And the user should exist in the database
         $this->assertTrue($this->database->userExists($username), "User should be created in database");
     }
 
@@ -97,7 +95,6 @@ class SetupControllerTest extends TestCase {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Failed to create database directory: /invalid/path/that/does/not/exist');
 
-        // Suppress PHP warnings from mkdir() while still allowing the exception to be thrown
         $invalidDatabase->createDatabase();
     }
 }

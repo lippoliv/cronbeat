@@ -49,7 +49,7 @@ class DatabaseTest extends TestCase {
         $this->assertTrue($exists);
     }
 
-    public function testCreateDatabaseReturnsTrue() {
+    public function testCreateDatabase() {
         // Given
         $testDbDir = sys_get_temp_dir() . '/cronbeat_test_dir';
         $testDbPath = $testDbDir . '/test.sqlite';
@@ -60,31 +60,7 @@ class DatabaseTest extends TestCase {
 
         // Then
         $this->assertTrue($result);
-    }
-
-    public function testCreateDatabaseCreatesFile() {
-        // Given
-        $testDbDir = sys_get_temp_dir() . '/cronbeat_test_dir';
-        $testDbPath = $testDbDir . '/test.sqlite';
-        $database = new Database($testDbPath);
-
-        // When
-        $database->createDatabase();
-
-        // Then
         $this->assertTrue(file_exists($testDbPath));
-    }
-
-    public function testCreateDatabaseCreatesDirectory() {
-        // Given
-        $testDbDir = sys_get_temp_dir() . '/cronbeat_test_dir';
-        $testDbPath = $testDbDir . '/test.sqlite';
-        $database = new Database($testDbPath);
-
-        // When
-        $database->createDatabase();
-
-        // Then
         $this->assertTrue(is_dir($testDbDir));
     }
 
@@ -106,14 +82,15 @@ class DatabaseTest extends TestCase {
         // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
-
-        // When
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $database->createUser($username, $passwordHash);
-
+        
+        // When
+        $userExists = $database->userExists($username);
+        
         // Then
-        $this->assertTrue($database->userExists($username));
+        $this->assertTrue($userExists);
     }
 
     public function testValidateUserWithCorrectCredentials() {
