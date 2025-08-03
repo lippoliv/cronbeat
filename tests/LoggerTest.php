@@ -18,7 +18,11 @@ class LoggerTest extends TestCase
         
         // Create a temporary file for capturing log output
         $this->tempFile = tempnam(sys_get_temp_dir(), 'logger_test_');
-        $this->tempStream = fopen($this->tempFile, 'w+');
+        $stream = fopen($this->tempFile, 'w+');
+        if ($stream === false) {
+            throw new \RuntimeException('Unable to open temporary file for testing');
+        }
+        $this->tempStream = $stream;
         
         // Store the original log stream
         $this->originalLogStream = Logger::getLogStream();
@@ -202,7 +206,7 @@ class LoggerTest extends TestCase
         putenv('LOG_LEVEL=DEBUG');
         
         // When
-        $logLevel = getenv('LOG_LEVEL') ?: Logger::INFO;
+        $logLevel = getenv('LOG_LEVEL') !== false ? getenv('LOG_LEVEL') : Logger::INFO;
         Logger::setMinLevel($logLevel);
         
         // Then
@@ -224,7 +228,7 @@ class LoggerTest extends TestCase
         putenv('LOG_LEVEL'); // Unset the environment variable
         
         // When
-        $logLevel = getenv('LOG_LEVEL') ?: Logger::INFO;
+        $logLevel = getenv('LOG_LEVEL') !== false ? getenv('LOG_LEVEL') : Logger::INFO;
         Logger::setMinLevel($logLevel);
         
         // Then

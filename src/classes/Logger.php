@@ -9,6 +9,7 @@ class Logger {
     public const ERROR = 'ERROR';
     
     private static string $minLevel = self::INFO;
+    /** @var resource|null */
     private static $logStream = null;
     
     private const LEVEL_PRIORITIES = [
@@ -18,22 +19,37 @@ class Logger {
         self::ERROR => 3
     ];
     
+    /**
+     * @param array<string, mixed> $context
+     */
     public static function debug(string $message, array $context = []): void {
         self::log(self::DEBUG, $message, $context);
     }
     
+    /**
+     * @param array<string, mixed> $context
+     */
     public static function info(string $message, array $context = []): void {
         self::log(self::INFO, $message, $context);
     }
     
+    /**
+     * @param array<string, mixed> $context
+     */
     public static function warning(string $message, array $context = []): void {
         self::log(self::WARNING, $message, $context);
     }
     
+    /**
+     * @param array<string, mixed> $context
+     */
     public static function error(string $message, array $context = []): void {
         self::log(self::ERROR, $message, $context);
     }
     
+    /**
+     * @param array<string, mixed> $context
+     */
     private static function log(string $level, string $message, array $context = []): void {
         if (self::LEVEL_PRIORITIES[$level] < self::LEVEL_PRIORITIES[self::$minLevel]) {
             return;
@@ -41,7 +57,7 @@ class Logger {
         
         $timestamp = date('Y-m-d H:i:s');
         
-        $contextStr = !empty($context) ? ' ' . json_encode($context) : '';
+        $contextStr = $context !== [] ? ' ' . json_encode($context) : '';
         
         $formattedMessage = "[$timestamp] [$level] $message$contextStr" . PHP_EOL;
         
@@ -49,13 +65,24 @@ class Logger {
         fwrite($stream, $formattedMessage);
     }
     
+    /**
+     * @return resource
+     * @throws \RuntimeException If unable to open the log stream
+     */
     public static function getLogStream() {
         if (self::$logStream === null) {
-            self::$logStream = fopen('php://stdout', 'w');
+            $stream = fopen('php://stdout', 'w');
+            if ($stream === false) {
+                throw new \RuntimeException('Unable to open log stream');
+            }
+            self::$logStream = $stream;
         }
         return self::$logStream;
     }
     
+    /**
+     * @param resource $stream
+     */
     public static function setLogStream($stream): void {
         self::$logStream = $stream;
     }

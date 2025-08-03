@@ -18,7 +18,7 @@ use Cronbeat\Database;
 use Cronbeat\Logger;
 use Cronbeat\UrlHelper;
 
-$logLevel = getenv('LOG_LEVEL') ?: Logger::INFO;
+$logLevel = getenv('LOG_LEVEL') !== false ? getenv('LOG_LEVEL') : Logger::INFO;
 Logger::setMinLevel($logLevel);
 
 $controllerName = UrlHelper::parseControllerFromUrl();
