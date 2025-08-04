@@ -81,32 +81,55 @@ class CLI {
             
             echo "Running migrations...\n\n";
             
+            // Get all available migrations
+            $allMigrations = $this->database->getAllMigrations();
+            
+            // Filter migrations that need to be run
+            $pendingMigrations = array_filter($allMigrations, function($migration) use ($currentVersion, $force, $expectedVersion) {
+                if ($force) {
+                    // If force is true, run all migrations up to expected version
+                    return $migration->getVersion() <= $expectedVersion;
+                } else {
+                    // Otherwise, only run migrations that are newer than current version and up to expected version
+                    return $migration->getVersion() > $currentVersion && $migration->getVersion() <= $expectedVersion;
+                }
+            });
+            
+            if (empty($pendingMigrations)) {
+                echo "No migrations were needed.\n";
+                exit(0);
+            }
+            
+            // Sort migrations by version
+            ksort($pendingMigrations);
+            
             // Run migrations sequentially
             $migrationsRun = 0;
             
-            for ($version = $currentVersion + 1; $version <= $expectedVersion; $version++) {
-                $migration = $this->getMigration($version);
+            foreach ($pendingMigrations as $migration) {
+                $version = $migration->getVersion();
+                $name = $migration->getName();
                 
-                if ($migration) {
-                    echo "Migrating to version {$version}: {$migration['name']}... ";
-                    
-                    try {
-                        $this->database->runMigration($version, $migration['name'], $migration['sql']);
-                        echo "Done.\n";
-                        $migrationsRun++;
-                    } catch (\Exception $e) {
-                        echo "Failed!\n";
-                        echo "Error: {$e->getMessage()}\n";
-                        exit(1);
-                    }
-                } else {
-                    echo "Error: Migration to version {$version} not found.\n";
+                echo "Migrating to version {$version}: {$name}... ";
+                
+                try {
+                    $this->database->runMigration($migration);
+                    echo "Done.\n";
+                    $migrationsRun++;
+                } catch (\Exception $e) {
+                    echo "Failed!\n";
+                    echo "Error: {$e->getMessage()}\n";
                     exit(1);
                 }
             }
             
             if ($migrationsRun > 0) {
-                echo "\nSuccessfully migrated database from version {$currentVersion} to {$expectedVersion}.\n";
+                echo "\nSuccessfully migrated database";
+                if ($force) {
+                    echo " (forced)";
+                }
+                echo ".\n";
+                echo "Final database version: {$expectedVersion}\n";
             } else {
                 echo "\nNo migrations were needed.\n";
             }
@@ -114,45 +137,5 @@ class CLI {
             echo "Error: {$e->getMessage()}\n";
             exit(1);
         }
-    }
-    
-    /**
-     * Get migration details for a specific version
-     */
-    private function getMigration(int $version): ?array {
-        // Define migrations
-        $migrations = [
-            0 => [
-                'name' => 'Initial schema setup',
-                'sql' => "CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL UNIQUE,
-                    password TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-                
-                CREATE TABLE IF NOT EXISTS migrations (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    version INTEGER NOT NULL UNIQUE,
-                    name TEXT NOT NULL,
-                    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );"
-            ],
-            1 => [
-                'name' => 'Add jobs table',
-                'sql' => "CREATE TABLE IF NOT EXISTS jobs (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    identifier TEXT NOT NULL UNIQUE,
-                    expected_interval INTEGER NOT NULL,
-                    grace_period INTEGER NOT NULL DEFAULT 0,
-                    last_check_in TIMESTAMP NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )"
-            ],
-            // Add more migrations as needed
-        ];
-        
-        return $migrations[$version] ?? null;
     }
 }

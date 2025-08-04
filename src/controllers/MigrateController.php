@@ -45,26 +45,33 @@ class MigrateController extends BaseController {
                 return $this->showMigratePage(null, "Database is already up to date (version {$currentVersion}).");
             }
             
+            // Get all available migrations
+            $allMigrations = $this->database->getAllMigrations();
+            
+            // Filter migrations that need to be run
+            $pendingMigrations = array_filter($allMigrations, function($migration) use ($currentVersion) {
+                return $migration->getVersion() > $currentVersion && $migration->getVersion() <= DB_VERSION;
+            });
+            
+            if (empty($pendingMigrations)) {
+                return $this->showMigratePage(null, "No migrations were needed.");
+            }
+            
             // Run migrations sequentially
-            $success = true;
             $migrationsRun = 0;
             
-            for ($version = $currentVersion + 1; $version <= $expectedVersion; $version++) {
-                $migration = $this->getMigration($version);
+            foreach ($pendingMigrations as $migration) {
+                $version = $migration->getVersion();
+                $name = $migration->getName();
                 
-                if ($migration) {
-                    Logger::info("Running migration", ['version' => $version, 'name' => $migration['name']]);
-                    
-                    try {
-                        $this->database->runMigration($version, $migration['name'], $migration['sql']);
-                        $migrationsRun++;
-                    } catch (\Exception $e) {
-                        Logger::error("Migration failed", ['version' => $version, 'error' => $e->getMessage()]);
-                        return $this->showMigratePage("Migration to version {$version} failed: " . $e->getMessage());
-                    }
-                } else {
-                    Logger::error("Migration not found", ['version' => $version]);
-                    return $this->showMigratePage("Migration to version {$version} not found.");
+                Logger::info("Running migration", ['version' => $version, 'name' => $name]);
+                
+                try {
+                    $this->database->runMigration($migration);
+                    $migrationsRun++;
+                } catch (\Exception $e) {
+                    Logger::error("Migration failed", ['version' => $version, 'error' => $e->getMessage()]);
+                    return $this->showMigratePage("Migration to version {$version} failed: " . $e->getMessage());
                 }
             }
             
@@ -77,42 +84,5 @@ class MigrateController extends BaseController {
             Logger::error("Error during migration process", ['error' => $e->getMessage()]);
             return $this->showMigratePage("Error during migration process: " . $e->getMessage());
         }
-    }
-    
-    private function getMigration(int $version): ?array {
-        // Define migrations
-        $migrations = [
-            0 => [
-                'name' => 'Initial schema setup',
-                'sql' => "CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL UNIQUE,
-                    password TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-                
-                CREATE TABLE IF NOT EXISTS migrations (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    version INTEGER NOT NULL UNIQUE,
-                    name TEXT NOT NULL,
-                    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );"
-            ],
-            1 => [
-                'name' => 'Add jobs table',
-                'sql' => "CREATE TABLE IF NOT EXISTS jobs (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    identifier TEXT NOT NULL UNIQUE,
-                    expected_interval INTEGER NOT NULL,
-                    grace_period INTEGER NOT NULL DEFAULT 0,
-                    last_check_in TIMESTAMP NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )"
-            ],
-            // Add more migrations as needed
-        ];
-        
-        return $migrations[$version] ?? null;
     }
 }

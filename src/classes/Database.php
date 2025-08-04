@@ -77,46 +77,123 @@ class Database {
                 throw new \RuntimeException("Failed to connect to database");
             }
 
-            // Run the initial migration (version 0)
-            $migration = $this->getMigration(0);
-            if ($migration) {
-                $this->runMigration(0, $migration['name'], $migration['sql']);
+            // Create migrations table first to track migrations
+            $this->pdo->exec("CREATE TABLE IF NOT EXISTS migrations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                version INTEGER NOT NULL UNIQUE,
+                name TEXT NOT NULL,
+                executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )");
+
+            // Insert initial version record if not exists
+            $stmt = $this->pdo->query("SELECT COUNT(*) FROM migrations");
+            $count = $stmt->fetchColumn();
+            
+            if ((int)$count === 0) {
+                Logger::debug("Setting initial database version");
+                
+                // Insert the initial migration record
+                $stmt = $this->pdo->prepare("INSERT INTO migrations (version, name) VALUES (?, ?)");
+                $stmt->execute([0, 'Initial setup']);
+            }
+
+            // Run all available migrations
+            $allMigrations = $this->getAllMigrations();
+            
+            if (!empty($allMigrations)) {
+                foreach ($allMigrations as $migration) {
+                    $this->runMigration($migration);
+                }
                 Logger::info("Database initialized successfully");
             } else {
-                Logger::error("Initial migration not found");
-                throw new \RuntimeException("Initial migration not found");
+                Logger::warning("No migrations found");
             }
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             Logger::error("Failed to initialize database", ['error' => $e->getMessage()]);
             throw $e;
         }
     }
     
     /**
-     * Get migration details for a specific version
+     * Get migration instance for a specific version
+     * 
+     * @param int $version The migration version to get
+     * @return \Cronbeat\Migration|null The migration instance or null if not found
      */
-    private function getMigration(int $version): ?array {
-        // Define migrations
-        $migrations = [
-            0 => [
-                'name' => 'Initial schema setup',
-                'sql' => "CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL UNIQUE,
-                    password TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-                
-                CREATE TABLE IF NOT EXISTS migrations (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    version INTEGER NOT NULL UNIQUE,
-                    name TEXT NOT NULL,
-                    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );"
-            ]
-        ];
+    public function getMigration(int $version): ?\Cronbeat\Migration {
+        $migrationFile = APP_DIR . '/migrations/' . sprintf('%04d', $version) . '.php';
         
-        return $migrations[$version] ?? null;
+        if (!file_exists($migrationFile)) {
+            Logger::error("Migration file not found", ['version' => $version, 'file' => $migrationFile]);
+            return null;
+        }
+        
+        // Include the migration file
+        require_once $migrationFile;
+        
+        // Construct the class name
+        $className = '\\Cronbeat\\Migrations\\Migration' . sprintf('%04d', $version);
+        
+        if (!class_exists($className)) {
+            Logger::error("Migration class not found", ['version' => $version, 'class' => $className]);
+            return null;
+        }
+        
+        // Create an instance of the migration class
+        try {
+            $migration = new $className();
+            
+            if (!$migration instanceof \Cronbeat\Migration) {
+                Logger::error("Invalid migration class", ['version' => $version, 'class' => $className]);
+                return null;
+            }
+            
+            return $migration;
+        } catch (\Exception $e) {
+            Logger::error("Error creating migration instance", [
+                'version' => $version,
+                'class' => $className,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
+    }
+    
+    /**
+     * Get all available migrations
+     * 
+     * @return array<int, \Cronbeat\Migration> Array of migration instances indexed by version
+     */
+    public function getAllMigrations(): array {
+        $migrations = [];
+        $migrationDir = APP_DIR . '/migrations';
+        
+        if (!is_dir($migrationDir)) {
+            Logger::warning("Migrations directory not found", ['dir' => $migrationDir]);
+            return [];
+        }
+        
+        // Scan the migrations directory for migration files
+        $files = scandir($migrationDir);
+        
+        foreach ($files as $file) {
+            // Skip non-PHP files and directories
+            if (!preg_match('/^(\d{4})\.php$/', $file, $matches)) {
+                continue;
+            }
+            
+            $version = (int) $matches[1];
+            $migration = $this->getMigration($version);
+            
+            if ($migration) {
+                $migrations[$version] = $migration;
+            }
+        }
+        
+        // Sort migrations by version
+        ksort($migrations);
+        
+        return $migrations;
     }
 
     public function createUser(string $username, string $passwordHash): bool {
@@ -322,7 +399,30 @@ class Database {
         return $needsMigration;
     }
     
-    public function runMigration(int $version, string $name, string $sql): bool {
+    /**
+     * Run a migration
+     * 
+     * @param \Cronbeat\Migration|int $migration The migration instance or version number
+     * @return bool True if the migration was successful, false otherwise
+     * @throws \Exception If the migration fails
+     */
+    public function runMigration($migration): bool {
+        if (is_int($migration)) {
+            $migrationVersion = $migration;
+            $migration = $this->getMigration($migrationVersion);
+            
+            if (!$migration) {
+                throw new \RuntimeException("Migration not found for version {$migrationVersion}");
+            }
+        }
+        
+        if (!$migration instanceof \Cronbeat\Migration) {
+            throw new \InvalidArgumentException("Invalid migration object");
+        }
+        
+        $version = $migration->getVersion();
+        $name = $migration->getName();
+        
         Logger::info("Running migration", ['version' => $version, 'name' => $name]);
         
         if ($this->pdo === null) {
@@ -334,26 +434,15 @@ class Database {
         }
         
         try {
-            // Start transaction
-            $this->pdo->beginTransaction();
-            
-            // Execute migration SQL
-            $this->pdo->exec($sql);
+            // Execute the migration
+            $migration->up($this->pdo);
             
             // Update database version
             $this->setDatabaseVersion($version, $name);
             
-            // Commit transaction
-            $this->pdo->commit();
-            
             Logger::info("Migration completed successfully", ['version' => $version]);
             return true;
-        } catch (\PDOException $e) {
-            // Rollback transaction on error
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
-            }
-            
+        } catch (\Exception $e) {
             Logger::error("Error running migration", [
                 'version' => $version,
                 'error' => $e->getMessage()
