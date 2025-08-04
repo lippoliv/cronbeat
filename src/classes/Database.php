@@ -30,7 +30,6 @@ class Database {
         }
 
         $this->connect();
-        $this->createTables();
 
         Logger::info("Database created successfully");
         return true;
@@ -65,34 +64,6 @@ class Database {
         }
     }
 
-    private function createTables(): void {
-        Logger::debug("Initializing database with migrations");
-
-        if ($this->pdo === null) {
-            $this->connect();
-        }
-
-        try {
-            if ($this->pdo === null) {
-                throw new \RuntimeException("Failed to connect to database");
-            }
-
-            // Run all available migrations
-            $allMigrations = $this->getAllMigrations();
-            
-            if (!empty($allMigrations)) {
-                foreach ($allMigrations as $migration) {
-                    $this->runMigration($migration);
-                }
-                Logger::info("Database initialized successfully");
-            } else {
-                Logger::warning("No migrations found");
-            }
-        } catch (\Exception $e) {
-            Logger::error("Failed to initialize database", ['error' => $e->getMessage()]);
-            throw $e;
-        }
-    }
     
     /**
      * Get migration instance for a specific version
@@ -290,23 +261,8 @@ class Database {
             // Check if migrations table exists
             $tableExists = $this->pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'");
             if ($tableExists->fetch() === false) {
-                Logger::debug("Migrations table does not exist, running initial migration");
-                
-                // Run the initial migration (version 0)
-                $migration = $this->getMigration(0);
-                if ($migration) {
-                    $this->pdo->exec($migration['sql']);
-                    
-                    // Insert the version 0 record directly
-                    $stmt = $this->pdo->prepare("INSERT INTO migrations (version, name) VALUES (?, ?)");
-                    $stmt->execute([0, $migration['name']]);
-                    
-                    Logger::info("Initial migration completed successfully");
-                    return 0;
-                } else {
-                    Logger::error("Initial migration not found");
-                    throw new \RuntimeException("Initial migration not found");
-                }
+                Logger::debug("Migrations table does not exist, returning version 0");
+                return 0;
             }
             
             $stmt = $this->pdo->query("SELECT MAX(version) FROM migrations");
