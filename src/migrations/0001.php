@@ -69,20 +69,4 @@ class Migration0001 extends BaseMigration {
         }
     }
     
-    /**
-     * Revert the migration logic
-     * 
-     * @param \PDO $pdo The PDO database connection
-     * @return void
-     * @throws \Exception If reverting the migration logic fails
-     */
-    protected function revert(\PDO $pdo): void {
-        // This is the initial migration, so reverting would drop all tables
-        // This is dangerous, so we'll just log a warning
-        Logger::warning("Attempting to revert initial migration - this would drop all tables");
-        
-        // Uncomment the following lines to actually drop the tables
-        // $pdo->exec("DROP TABLE IF EXISTS users");
-        // $pdo->exec("DROP TABLE IF EXISTS migrations");
-    }
 }

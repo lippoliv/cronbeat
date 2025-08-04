@@ -28,15 +28,6 @@ interface Migration {
      * @throws \Exception If the migration fails
      */
     public function up(\PDO $pdo): bool;
-    
-    /**
-     * Revert the migration
-     * 
-     * @param \PDO $pdo The PDO database connection
-     * @return bool True if the migration was successfully reverted, false otherwise
-     * @throws \Exception If reverting the migration fails
-     */
-    public function down(\PDO $pdo): bool;
 }
 
 /**
@@ -81,42 +72,6 @@ abstract class BaseMigration implements Migration {
     }
     
     /**
-     * Revert the migration within a transaction
-     * 
-     * @param \PDO $pdo The PDO database connection
-     * @return bool True if the migration was successfully reverted, false otherwise
-     * @throws \Exception If reverting the migration fails
-     */
-    public function down(\PDO $pdo): bool {
-        Logger::info("Reverting migration", ['version' => $this->getVersion(), 'name' => $this->getName()]);
-        
-        try {
-            // Start transaction
-            $pdo->beginTransaction();
-            
-            // Execute revert logic
-            $this->revert($pdo);
-            
-            // Commit transaction
-            $pdo->commit();
-            
-            Logger::info("Migration reverted successfully", ['version' => $this->getVersion()]);
-            return true;
-        } catch (\Exception $e) {
-            // Rollback transaction on error
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            
-            Logger::error("Error reverting migration", [
-                'version' => $this->getVersion(),
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
-    }
-    
-    /**
      * Execute the migration logic
      * This method should be implemented by each migration class
      * 
@@ -125,14 +80,4 @@ abstract class BaseMigration implements Migration {
      * @throws \Exception If the migration logic fails
      */
     abstract protected function execute(\PDO $pdo): void;
-    
-    /**
-     * Revert the migration logic
-     * This method should be implemented by each migration class
-     * 
-     * @param \PDO $pdo The PDO database connection
-     * @return void
-     * @throws \Exception If reverting the migration logic fails
-     */
-    abstract protected function revert(\PDO $pdo): void;
 }

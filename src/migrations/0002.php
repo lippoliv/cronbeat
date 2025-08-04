@@ -54,17 +54,4 @@ class Migration0002 extends BaseMigration {
         $pdo->exec("CREATE INDEX IF NOT EXISTS idx_jobs_last_check_in ON jobs (last_check_in)");
     }
     
-    /**
-     * Revert the migration logic
-     * 
-     * @param \PDO $pdo The PDO database connection
-     * @return void
-     * @throws \Exception If reverting the migration logic fails
-     */
-    protected function revert(\PDO $pdo): void {
-        Logger::debug("Dropping jobs table");
-        
-        // Drop the jobs table
-        $pdo->exec("DROP TABLE IF EXISTS jobs");
-    }
 }
