@@ -40,28 +40,30 @@ class Migration0001 extends BaseMigration {
         Logger::debug("Creating users table");
         
         // Create users table
-        $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+        $result = $pdo->exec("CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
         
+        if ($result === false) {
+            throw new \Exception("Failed to create users table: " . implode(", ", $pdo->errorInfo()));
+        }
+        
         Logger::debug("Creating migrations table");
         
         // Create migrations table
-        $pdo->exec("CREATE TABLE IF NOT EXISTS migrations (
+        $result = $pdo->exec("CREATE TABLE IF NOT EXISTS migrations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             version INTEGER NOT NULL UNIQUE,
             name TEXT NOT NULL,
             executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
         
-        Logger::debug("Setting initial database version");
-        
-        // Insert the initial migration record
-        $stmt = $pdo->prepare("INSERT INTO migrations (version, name) VALUES (?, ?)");
-        $stmt->execute([0, 'Initial setup']);
+        if ($result === false) {
+            throw new \Exception("Failed to create migrations table: " . implode(", ", $pdo->errorInfo()));
+        }
     }
     
 }
