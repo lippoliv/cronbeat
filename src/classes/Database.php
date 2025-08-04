@@ -80,7 +80,6 @@ class Database {
         }
 
         try {
-            // Ensure PDO is not null after connect
             if ($this->pdo === null) {
                 throw new \RuntimeException("Failed to connect to database");
             }
@@ -100,7 +99,6 @@ class Database {
             $this->connect();
         }
 
-        // Ensure PDO is not null after connect
         if ($this->pdo === null) {
             throw new \RuntimeException("Failed to connect to database");
         }
@@ -132,7 +130,6 @@ class Database {
             $this->connect();
         }
 
-        // Ensure PDO is not null after connect
         if ($this->pdo === null) {
             throw new \RuntimeException("Failed to connect to database");
         }
@@ -164,7 +161,6 @@ class Database {
             $this->connect();
         }
 
-        // Ensure PDO is not null after connect
         if ($this->pdo === null) {
             throw new \RuntimeException("Failed to connect to database");
         }

@@ -10,7 +10,7 @@ class Logger {
 
     private static string $minLevel = self::INFO;
     /** @var resource|null */
-    private static $logStream = null;
+    private static mixed $logStream = null;
 
     private const LEVEL_PRIORITIES = [
         self::DEBUG => 0,
@@ -65,11 +65,8 @@ class Logger {
         fwrite($stream, $formattedMessage);
     }
 
-    /**
-     * @throws \RuntimeException If unable to open the log stream
-     * @return resource The log stream resource
-     */
-    public static function getLogStream() {
+    /** @return resource */
+    public static function getLogStream(): mixed {
         if (self::$logStream === null) {
             $stream = fopen('php://stdout', 'w');
             if ($stream === false) {
@@ -80,10 +77,8 @@ class Logger {
         return self::$logStream;
     }
 
-    /**
-     * @param resource $stream The log stream resource
-     */
-    public static function setLogStream($stream): void {
+    /** @param resource $stream */
+    public static function setLogStream(mixed $stream): void {
         self::$logStream = $stream;
     }
 

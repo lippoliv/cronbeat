@@ -4,8 +4,7 @@ namespace Cronbeat;
 
 class UrlHelper {
     /**
-     * Parse the REQUEST_URI into an array of path segments
-     * @return array<int, string>
+     * @return array<string>
      */
     private static function parseUri(): array {
         $uri = $_SERVER['REQUEST_URI'];

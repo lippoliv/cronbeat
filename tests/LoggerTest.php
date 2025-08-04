@@ -9,9 +9,9 @@ use PHPUnit\Framework\Assert;
 class LoggerTest extends TestCase {
 
     /** @var resource|null */
-    private $originalLogStream = null;
+    private mixed $originalLogStream = null;
     /** @var resource|null */
-    private $tempStream = null;
+    private mixed $tempStream = null;
     private ?string $tempFile = null;
 
     protected function setUp(): void {
