@@ -2,10 +2,6 @@
 
 namespace Cronbeat\Tests;
 
-require_once __DIR__ . '/../src/controllers/BaseController.php';
-require_once __DIR__ . '/../src/views/base.view.php';
-require_once __DIR__ . '/../src/views/setup.view.php';
-require_once __DIR__ . '/../src/controllers/SetupController.php';
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Assert;
