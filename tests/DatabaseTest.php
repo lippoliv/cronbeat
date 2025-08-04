@@ -4,9 +4,10 @@ namespace Cronbeat\Tests;
 
 use Cronbeat\Database;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Assert;
 
 class DatabaseTest extends TestCase {
-    private $testDbPath;
+    private string $testDbPath = '';
 
     protected function setUp(): void {
         // Create a temporary test database path
@@ -26,7 +27,7 @@ class DatabaseTest extends TestCase {
         }
     }
 
-    public function testDatabaseDoesNotExistInitially() {
+    public function testDatabaseDoesNotExistInitially(): void {
         // Given
         $database = new Database($this->testDbPath);
 
@@ -34,10 +35,10 @@ class DatabaseTest extends TestCase {
         $exists = $database->databaseExists();
 
         // Then
-        $this->assertFalse($exists);
+        Assert::assertFalse($exists);
     }
 
-    public function testDatabaseExistsAfterCreation() {
+    public function testDatabaseExistsAfterCreation(): void {
         // Given
         $database = new Database($this->testDbPath);
         touch($this->testDbPath);
@@ -46,10 +47,10 @@ class DatabaseTest extends TestCase {
         $exists = $database->databaseExists();
 
         // Then
-        $this->assertTrue($exists);
+        Assert::assertTrue($exists);
     }
 
-    public function testCreateDatabase() {
+    public function testCreateDatabase(): void {
         // Given
         $testDbDir = sys_get_temp_dir() . '/cronbeat_test_dir';
         $testDbPath = $testDbDir . '/test.sqlite';
@@ -59,12 +60,12 @@ class DatabaseTest extends TestCase {
         $result = $database->createDatabase();
 
         // Then
-        $this->assertTrue($result);
-        $this->assertTrue(file_exists($testDbPath));
-        $this->assertTrue(is_dir($testDbDir));
+        Assert::assertTrue($result);
+        Assert::assertTrue(file_exists($testDbPath));
+        Assert::assertTrue(is_dir($testDbDir));
     }
 
-    public function testCreateUserReturnsTrue() {
+    public function testCreateUserReturnsTrue(): void {
         // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
@@ -75,25 +76,25 @@ class DatabaseTest extends TestCase {
         $result = $database->createUser($username, $passwordHash);
 
         // Then
-        $this->assertTrue($result);
+        Assert::assertTrue($result);
     }
 
-    public function testCreatedUserExists() {
+    public function testCreatedUserExists(): void {
         // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $database->createUser($username, $passwordHash);
-        
+
         // When
         $userExists = $database->userExists($username);
-        
+
         // Then
-        $this->assertTrue($userExists);
+        Assert::assertTrue($userExists);
     }
 
-    public function testValidateUserWithCorrectCredentials() {
+    public function testValidateUserWithCorrectCredentials(): void {
         // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
@@ -105,10 +106,10 @@ class DatabaseTest extends TestCase {
         $validResult = $database->validateUser($username, $passwordHash);
 
         // Then
-        $this->assertTrue($validResult);
+        Assert::assertTrue($validResult);
     }
 
-    public function testValidateUserWithIncorrectPassword() {
+    public function testValidateUserWithIncorrectPassword(): void {
         // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
@@ -120,10 +121,10 @@ class DatabaseTest extends TestCase {
         $invalidResult = $database->validateUser($username, 'wronghash');
 
         // Then
-        $this->assertFalse($invalidResult);
+        Assert::assertFalse($invalidResult);
     }
 
-    public function testValidateUserWithNonExistentUser() {
+    public function testValidateUserWithNonExistentUser(): void {
         // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
@@ -135,6 +136,6 @@ class DatabaseTest extends TestCase {
         $nonExistentResult = $database->validateUser('nonexistent', $passwordHash);
 
         // Then
-        $this->assertFalse($nonExistentResult);
+        Assert::assertFalse($nonExistentResult);
     }
 }

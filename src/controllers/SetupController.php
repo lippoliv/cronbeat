@@ -73,8 +73,7 @@ class SetupController extends BaseController {
 
             return null;
         } catch (\Exception $e) {
-            $errorMessage = 'Error creating user: ' . $e->getMessage();
-            return $errorMessage;
+            return 'Error creating user: ' . $e->getMessage();
         }
     }
 }

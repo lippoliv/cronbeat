@@ -99,6 +99,29 @@ CronBeat implements several security features:
 - **Input Validation**: All user input is validated before processing
 - **Error Handling**: Detailed error messages are shown only when appropriate
 
+### Logging
+
+CronBeat includes a comprehensive logging system that helps developers and administrators monitor application activity and troubleshoot issues:
+
+- **Log Levels**: Four log levels are available:
+  - `DEBUG`: Detailed information for debugging purposes
+  - `INFO`: General information about application flow
+  - `WARNING`: Warning messages that don't affect application functionality
+  - `ERROR`: Error messages that affect application functionality
+
+- **Log Format**: Logs include timestamp, level, message, and optional context data:
+  ```
+  [2025-08-03 09:15:30] [INFO] Application starting {"controller":"login"}
+  [2025-08-03 09:15:31] [DEBUG] Connecting to database at /var/www/html/db/db.sqlite
+  [2025-08-03 09:15:31] [INFO] Successfully connected to database
+  ```
+
+- **Context Data**: Additional data can be included as JSON to provide context for log messages
+
+- **Output**: Logs are written to stdout, making them accessible in the console and Docker logs
+
+- **Configuration**: The minimum log level can be configured to control verbosity
+
 ### Making Changes
 
 The PHP source code is located in the `src` directory. Any changes made to files in this directory will be immediately reflected in the running application due to the volume mapping in Docker Compose.

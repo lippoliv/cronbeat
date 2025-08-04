@@ -4,6 +4,7 @@ const APP_DIR = __DIR__;
 
 require_once APP_DIR . '/classes/UrlHelper.php';
 require_once APP_DIR . '/classes/Database.php';
+require_once APP_DIR . '/classes/Logger.php';
 require_once APP_DIR . '/controllers/BaseController.php';
 require_once APP_DIR . '/views/base.view.php';
 require_once APP_DIR . '/views/setup.view.php';
@@ -14,7 +15,11 @@ require_once APP_DIR . '/controllers/LoginController.php';
 use Cronbeat\Controllers\LoginController;
 use Cronbeat\Controllers\SetupController;
 use Cronbeat\Database;
+use Cronbeat\Logger;
 use Cronbeat\UrlHelper;
+
+$logLevel = getenv('LOG_LEVEL') !== false ? getenv('LOG_LEVEL') : Logger::INFO;
+Logger::setMinLevel($logLevel);
 
 $controllerName = UrlHelper::parseControllerFromUrl();
 
@@ -35,4 +40,4 @@ switch ($controllerName) {
         break;
 }
 
-    echo $controller->doRouting();
+echo $controller->doRouting();

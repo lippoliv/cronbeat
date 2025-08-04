@@ -4,9 +4,10 @@ namespace Cronbeat\Tests;
 
 use Cronbeat\UrlHelper;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Assert;
 
 class UrlHelperTest extends TestCase {
-    public function testParseControllerFromUrlWithEmptyUri() {
+    public function testParseControllerFromUrlWithEmptyUri(): void {
         // Given
         $_SERVER['REQUEST_URI'] = '/';
 
@@ -14,10 +15,10 @@ class UrlHelperTest extends TestCase {
         $result = UrlHelper::parseControllerFromUrl();
 
         // Then
-        $this->assertEquals('login', $result);
+        Assert::assertEquals('login', $result);
     }
 
-    public function testParseControllerFromUrlWithControllerOnly() {
+    public function testParseControllerFromUrlWithControllerOnly(): void {
         // Given
         $_SERVER['REQUEST_URI'] = '/setup';
 
@@ -25,10 +26,10 @@ class UrlHelperTest extends TestCase {
         $result = UrlHelper::parseControllerFromUrl();
 
         // Then
-        $this->assertEquals('setup', $result);
+        Assert::assertEquals('setup', $result);
     }
 
-    public function testParseControllerFromUrlWithControllerAndPath() {
+    public function testParseControllerFromUrlWithControllerAndPath(): void {
         // Given
         $_SERVER['REQUEST_URI'] = '/dashboard/stats';
 
@@ -36,10 +37,10 @@ class UrlHelperTest extends TestCase {
         $result = UrlHelper::parseControllerFromUrl();
 
         // Then
-        $this->assertEquals('dashboard', $result);
+        Assert::assertEquals('dashboard', $result);
     }
 
-    public function testParseControllerFromUrlWithTrailingSlash() {
+    public function testParseControllerFromUrlWithTrailingSlash(): void {
         // Given
         $_SERVER['REQUEST_URI'] = '/login/';
 
@@ -47,10 +48,10 @@ class UrlHelperTest extends TestCase {
         $result = UrlHelper::parseControllerFromUrl();
 
         // Then
-        $this->assertEquals('login', $result);
+        Assert::assertEquals('login', $result);
     }
 
-    public function testParsePathWithoutControllerWithEmptyUri() {
+    public function testParsePathWithoutControllerWithEmptyUri(): void {
         // Given
         $_SERVER['REQUEST_URI'] = '/';
 
@@ -58,10 +59,10 @@ class UrlHelperTest extends TestCase {
         $result = UrlHelper::parsePathWithoutController();
 
         // Then
-        $this->assertEquals('', $result);
+        Assert::assertEquals('', $result);
     }
 
-    public function testParsePathWithoutControllerWithControllerOnly() {
+    public function testParsePathWithoutControllerWithControllerOnly(): void {
         // Given
         $_SERVER['REQUEST_URI'] = '/setup';
 
@@ -69,10 +70,10 @@ class UrlHelperTest extends TestCase {
         $result = UrlHelper::parsePathWithoutController();
 
         // Then
-        $this->assertEquals('', $result);
+        Assert::assertEquals('', $result);
     }
 
-    public function testParsePathWithoutControllerWithControllerAndPath() {
+    public function testParsePathWithoutControllerWithControllerAndPath(): void {
         // Given
         $_SERVER['REQUEST_URI'] = '/dashboard/stats';
 
@@ -80,10 +81,10 @@ class UrlHelperTest extends TestCase {
         $result = UrlHelper::parsePathWithoutController();
 
         // Then
-        $this->assertEquals('stats', $result);
+        Assert::assertEquals('stats', $result);
     }
 
-    public function testParsePathWithoutControllerWithTrailingSlash() {
+    public function testParsePathWithoutControllerWithTrailingSlash(): void {
         // Given
         $_SERVER['REQUEST_URI'] = '/login/';
 
@@ -91,10 +92,10 @@ class UrlHelperTest extends TestCase {
         $result = UrlHelper::parsePathWithoutController();
 
         // Then
-        $this->assertEquals('', $result);
+        Assert::assertEquals('', $result);
     }
 
-    public function testParsePathWithoutControllerWithMultiplePathSegments() {
+    public function testParsePathWithoutControllerWithMultiplePathSegments(): void {
         // Given
         $_SERVER['REQUEST_URI'] = '/dashboard/stats/monthly/2025';
 
@@ -102,6 +103,6 @@ class UrlHelperTest extends TestCase {
         $result = UrlHelper::parsePathWithoutController();
 
         // Then
-        $this->assertEquals('stats/monthly/2025', $result);
+        Assert::assertEquals('stats/monthly/2025', $result);
     }
 }
