@@ -82,6 +82,22 @@ class MigrateController extends BaseController {
     private function getMigration(int $version): ?array {
         // Define migrations
         $migrations = [
+            0 => [
+                'name' => 'Initial schema setup',
+                'sql' => "CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT NOT NULL UNIQUE,
+                    password TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+                
+                CREATE TABLE IF NOT EXISTS migrations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    version INTEGER NOT NULL UNIQUE,
+                    name TEXT NOT NULL,
+                    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );"
+            ],
             1 => [
                 'name' => 'Add jobs table',
                 'sql' => "CREATE TABLE IF NOT EXISTS jobs (

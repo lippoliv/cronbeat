@@ -66,21 +66,7 @@ class Database {
     }
 
     private function createTables(): void {
-        Logger::debug("Creating database tables");
-
-        $sql = "CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE,
-            password TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        
-        CREATE TABLE IF NOT EXISTS migrations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            version INTEGER NOT NULL UNIQUE,
-            name TEXT NOT NULL,
-            executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )";
+        Logger::debug("Initializing database with migrations");
 
         if ($this->pdo === null) {
             $this->connect();
@@ -91,16 +77,46 @@ class Database {
                 throw new \RuntimeException("Failed to connect to database");
             }
 
-            $this->pdo->exec($sql);
-            
-            // Set initial database version to 0
-            $this->setDatabaseVersion(0);
-            
-            Logger::info("Database tables created successfully");
+            // Run the initial migration (version 0)
+            $migration = $this->getMigration(0);
+            if ($migration) {
+                $this->runMigration(0, $migration['name'], $migration['sql']);
+                Logger::info("Database initialized successfully");
+            } else {
+                Logger::error("Initial migration not found");
+                throw new \RuntimeException("Initial migration not found");
+            }
         } catch (\PDOException $e) {
-            Logger::error("Failed to create database tables", ['error' => $e->getMessage()]);
+            Logger::error("Failed to initialize database", ['error' => $e->getMessage()]);
             throw $e;
         }
+    }
+    
+    /**
+     * Get migration details for a specific version
+     */
+    private function getMigration(int $version): ?array {
+        // Define migrations
+        $migrations = [
+            0 => [
+                'name' => 'Initial schema setup',
+                'sql' => "CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT NOT NULL UNIQUE,
+                    password TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+                
+                CREATE TABLE IF NOT EXISTS migrations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    version INTEGER NOT NULL UNIQUE,
+                    name TEXT NOT NULL,
+                    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );"
+            ]
+        ];
+        
+        return $migrations[$version] ?? null;
     }
 
     public function createUser(string $username, string $passwordHash): bool {
@@ -217,8 +233,23 @@ class Database {
             // Check if migrations table exists
             $tableExists = $this->pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'");
             if ($tableExists->fetch() === false) {
-                Logger::debug("Migrations table does not exist, returning version 0");
-                return 0;
+                Logger::debug("Migrations table does not exist, running initial migration");
+                
+                // Run the initial migration (version 0)
+                $migration = $this->getMigration(0);
+                if ($migration) {
+                    $this->pdo->exec($migration['sql']);
+                    
+                    // Insert the version 0 record directly
+                    $stmt = $this->pdo->prepare("INSERT INTO migrations (version, name) VALUES (?, ?)");
+                    $stmt->execute([0, $migration['name']]);
+                    
+                    Logger::info("Initial migration completed successfully");
+                    return 0;
+                } else {
+                    Logger::error("Initial migration not found");
+                    throw new \RuntimeException("Initial migration not found");
+                }
             }
             
             $stmt = $this->pdo->query("SELECT MAX(version) FROM migrations");
@@ -249,18 +280,6 @@ class Database {
         }
         
         try {
-            // Check if migrations table exists
-            $tableExists = $this->pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'");
-            if ($tableExists->fetch() === false) {
-                Logger::debug("Creating migrations table");
-                $this->pdo->exec("CREATE TABLE IF NOT EXISTS migrations (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    version INTEGER NOT NULL UNIQUE,
-                    name TEXT NOT NULL,
-                    executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )");
-            }
-            
             // Check if this version already exists
             $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM migrations WHERE version = ?");
             $stmt->execute([$version]);

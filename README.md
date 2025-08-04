@@ -70,13 +70,13 @@ To update your database:
 2. **Command Line**:
    ```bash
    # Run migrations
-   php src/cli.php migrate
+   php cli.php migrate
    
    # Force migrations even if database is up to date
-   php src/cli.php migrate --force
+   php cli.php migrate --force
    
    # Show CLI help
-   php src/cli.php help
+   php cli.php help
    ```
 
 The migration system ensures that:
