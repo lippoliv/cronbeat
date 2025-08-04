@@ -8,6 +8,7 @@ use Cronbeat\Logger;
 /**
  * Migration 0001: Initial schema setup
  * Creates the users and migrations tables
+ * @noinspection PhpUnused
  */
 class Migration0001 extends BaseMigration {
     /**
@@ -56,17 +57,11 @@ class Migration0001 extends BaseMigration {
             executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
         
-        // Check if this is a fresh installation (no migrations record exists)
-        $stmt = $pdo->query("SELECT COUNT(*) FROM migrations");
-        $count = $stmt->fetchColumn();
+        Logger::debug("Setting initial database version");
         
-        if ((int)$count === 0) {
-            Logger::debug("Setting initial database version");
-            
-            // Insert the initial migration record
-            $stmt = $pdo->prepare("INSERT INTO migrations (version, name) VALUES (?, ?)");
-            $stmt->execute([0, 'Initial setup']);
-        }
+        // Insert the initial migration record
+        $stmt = $pdo->prepare("INSERT INTO migrations (version, name) VALUES (?, ?)");
+        $stmt->execute([0, 'Initial setup']);
     }
     
 }

@@ -1,7 +1,7 @@
 <?php
 
 const APP_DIR = __DIR__;
-const DB_VERSION = 2; // Current expected database version
+const DB_VERSION = 1; // Current expected database version
 
 require_once APP_DIR . '/classes/UrlHelper.php';
 require_once APP_DIR . '/classes/Database.php';

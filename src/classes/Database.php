@@ -77,26 +77,6 @@ class Database {
                 throw new \RuntimeException("Failed to connect to database");
             }
 
-            // Create migrations table first to track migrations
-            $this->pdo->exec("CREATE TABLE IF NOT EXISTS migrations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                version INTEGER NOT NULL UNIQUE,
-                name TEXT NOT NULL,
-                executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )");
-
-            // Insert initial version record if not exists
-            $stmt = $this->pdo->query("SELECT COUNT(*) FROM migrations");
-            $count = $stmt->fetchColumn();
-            
-            if ((int)$count === 0) {
-                Logger::debug("Setting initial database version");
-                
-                // Insert the initial migration record
-                $stmt = $this->pdo->prepare("INSERT INTO migrations (version, name) VALUES (?, ?)");
-                $stmt->execute([0, 'Initial setup']);
-            }
-
             // Run all available migrations
             $allMigrations = $this->getAllMigrations();
             
