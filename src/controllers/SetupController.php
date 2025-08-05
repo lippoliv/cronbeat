@@ -3,6 +3,7 @@
 namespace Cronbeat\Controllers;
 
 use Cronbeat\Views\SetupView;
+use Cronbeat\MigrationHelper;
 
 class SetupController extends BaseController {
     public function doRouting(): string {
@@ -68,7 +69,7 @@ class SetupController extends BaseController {
 
             \Cronbeat\Logger::info("Running migrations during setup");
 
-            $migrations = $this->database->getAllMigrations();
+            $migrations = MigrationHelper::loadAllMigrations();
             foreach ($migrations as $migration) {
                 try {
                     $this->database->runMigration($migration);

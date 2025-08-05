@@ -3,6 +3,7 @@
 namespace Cronbeat\Tests;
 
 use Cronbeat\Database;
+use Cronbeat\MigrationHelper;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -32,7 +33,7 @@ abstract class DatabaseTestCase extends TestCase {
             return;
         }
 
-        $migrations = $this->database->getAllMigrations();
+        $migrations = MigrationHelper::loadAllMigrations();
         foreach ($migrations as $migration) {
             $this->database->runMigration($migration);
         }

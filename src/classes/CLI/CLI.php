@@ -4,6 +4,7 @@ namespace Cronbeat\CLI;
 
 use Cronbeat\Database;
 use Cronbeat\Logger;
+use Cronbeat\MigrationHelper;
 
 class CLI {
 
@@ -72,7 +73,7 @@ class CLI {
 
             echo "Running migrations...\n\n";
 
-            $allMigrations = $this->database->getAllMigrations();
+            $allMigrations = MigrationHelper::loadAllMigrations();
 
             // Filter migrations that need to be run
             $pendingMigrations = array_filter(

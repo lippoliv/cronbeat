@@ -4,6 +4,7 @@ namespace Cronbeat\Controllers;
 
 use Cronbeat\Views\MigrateView;
 use Cronbeat\Logger;
+use Cronbeat\MigrationHelper;
 
 class MigrateController extends BaseController {
 
@@ -46,7 +47,7 @@ class MigrateController extends BaseController {
                 return $this->showMigratePage(null, "Database is already up to date (version {$currentVersion}).");
             }
 
-            $allMigrations = $this->database->getAllMigrations();
+            $allMigrations = MigrationHelper::loadAllMigrations();
 
             $pendingMigrations = array_filter($allMigrations, function ($migration) use ($currentVersion) {
                 return $migration->getVersion() > $currentVersion && $migration->getVersion() <= DB_VERSION;
