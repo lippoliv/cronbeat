@@ -8,7 +8,6 @@ parameters:
         - tests
     excludePaths:
         - vendor
-        - src/views/*.html.php
     checkMissingIterableValueType: true
     checkGenericClassInNonGenericObjectType: true
     reportUnmatchedIgnoredErrors: true
