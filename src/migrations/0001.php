@@ -6,8 +6,6 @@ use Cronbeat\BaseMigration;
 use Cronbeat\Logger;
 
 /**
- * Migration 0001: Initial schema setup
- * Creates the users and migrations tables
  * @noinspection PhpUnused
  */
 class Migration0001 extends BaseMigration {

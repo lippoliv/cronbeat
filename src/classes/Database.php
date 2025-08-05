@@ -295,15 +295,6 @@ class Database {
         }
 
         try {
-            // Check if this version already exists
-            $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM migrations WHERE version = ?");
-            $stmt->execute([$version]);
-            $exists = (int) $stmt->fetchColumn() > 0;
-
-            if ($exists) {
-                Logger::debug("Version already exists, skipping", ['version' => $version]);
-                return true;
-            }
 
             $stmt = $this->pdo->prepare("INSERT INTO migrations (version, name) VALUES (?, ?)");
             $result = $stmt->execute([$version, $name]);
@@ -362,10 +353,7 @@ class Database {
         }
 
         try {
-            // Execute the migration
             $migration->up($this->pdo);
-
-            // Update database version
             $this->setDatabaseVersion($version, $name);
 
             Logger::info("Migration completed successfully", ['version' => $version]);
