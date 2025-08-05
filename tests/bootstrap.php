@@ -9,6 +9,7 @@ const DB_VERSION = 1;
 require_once APP_DIR . '/classes/Database.php';
 require_once APP_DIR . '/classes/Logger.php';
 require_once APP_DIR . '/classes/Migration.php';
+require_once APP_DIR . '/classes/MigrationHelper.php';
 require_once APP_DIR . '/controllers/BaseController.php';
 require_once APP_DIR . '/views/base.view.php';
 require_once APP_DIR . '/views/setup.view.php';
