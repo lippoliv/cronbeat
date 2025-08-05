@@ -46,5 +46,11 @@ class Migration0001 extends BaseMigration {
         if ($result === false) {
             throw new \Exception("Failed to create migrations table: " . implode(", ", $pdo->errorInfo()));
         }
+        
+        $result = $pdo->exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_migrations_version ON migrations (version)");
+        
+        if ($result === false) {
+            throw new \Exception("Failed to create index on migrations table: " . implode(", ", $pdo->errorInfo()));
+        }
     }
 }

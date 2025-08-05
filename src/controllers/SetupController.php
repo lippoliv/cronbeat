@@ -64,10 +64,8 @@ class SetupController extends BaseController {
 
     public function runSetup(string $username, string $passwordHash): ?string {
         try {
-            // Create database if it doesn't exist
             $this->database->createDatabase();
             
-            // Run migrations to ensure tables exist
             \Cronbeat\Logger::info("Running migrations during setup");
             
             $migrations = $this->database->getAllMigrations();
@@ -81,7 +79,6 @@ class SetupController extends BaseController {
                 }
             }
             
-            // Create user after migrations have been run
             $result = $this->database->createUser($username, $passwordHash);
 
             if (!$result) {

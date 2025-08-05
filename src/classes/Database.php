@@ -73,18 +73,14 @@ class Database {
             return null;
         }
 
-        // Include the migration file
         require_once $migrationFile;
 
-        // Construct the class name
         $className = '\\Cronbeat\\Migrations\\Migration' . sprintf('%04d', $version);
 
         if (!class_exists($className)) {
             Logger::error("Migration class not found", ['version' => $version, 'class' => $className]);
             return null;
         }
-
-        // Create an instance of the migration class
         try {
             $migration = new $className();
 
@@ -114,7 +110,6 @@ class Database {
             return [];
         }
 
-        // Scan the migrations directory for migration files
         $files = scandir($migrationDir);
         if ($files === false) {
             Logger::error("Failed to scan migrations directory", ['dir' => $migrationDir]);
@@ -134,7 +129,6 @@ class Database {
             }
         }
 
-        // Sort migrations by version
         ksort($migrations);
 
         return $migrations;
@@ -239,6 +233,19 @@ class Database {
         return $this->dbPath;
     }
 
+    private function migrationsTableExists(): bool {
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        $tableExists = $this->pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'");
+        return $tableExists !== false && $tableExists->fetch() !== false;
+    }
+
     public function getDatabaseVersion(): int {
         Logger::debug("Getting database version");
 
@@ -251,9 +258,7 @@ class Database {
         }
 
         try {
-            // Check if migrations table exists
-            $tableExists = $this->pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'");
-            if ($tableExists === false || $tableExists->fetch() === false) {
+            if (!$this->migrationsTableExists()) {
                 Logger::debug("Migrations table does not exist, returning version 0");
                 return 0;
             }

@@ -72,7 +72,6 @@ class CLI {
 
             echo "Running migrations...\n\n";
 
-            // Get all available migrations
             $allMigrations = $this->database->getAllMigrations();
 
             // Filter migrations that need to be run
