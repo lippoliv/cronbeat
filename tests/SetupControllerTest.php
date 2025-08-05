@@ -3,32 +3,16 @@
 namespace Cronbeat\Tests;
 
 
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Assert;
 use Cronbeat\Controllers\SetupController;
 use Cronbeat\Database;
 
-class SetupControllerTest extends TestCase {
-    private string $tempDbPath = '';
+class SetupControllerTest extends DatabaseTestCase {
     private ?SetupController $controller = null;
-    private ?Database $database = null;
 
     protected function setUp(): void {
         parent::setUp();
-        $this->tempDbPath = sys_get_temp_dir() . '/test_cronbeat_' . uniqid() . '.sqlite';
-        $this->database = new Database($this->tempDbPath);
         $this->controller = new SetupController($this->database);
-    }
-
-    private function cleanupTestDatabase(string $tempDbPath): void {
-        if (file_exists($tempDbPath)) {
-            unlink($tempDbPath);
-        }
-    }
-
-    protected function tearDown(): void {
-        $this->cleanupTestDatabase($this->tempDbPath);
-        parent::tearDown();
     }
 
     public function testValidateSetupDataAcceptsValidInput(): void {
