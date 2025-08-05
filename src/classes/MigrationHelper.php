@@ -3,12 +3,6 @@
 namespace Cronbeat;
 
 class MigrationHelper {
-    /**
-     * Load a migration by version number
-     * 
-     * @param int $version The version number of the migration to load
-     * @return \Cronbeat\Migration|null The migration instance or null if not found
-     */
     public static function loadMigration(int $version): ?\Cronbeat\Migration {
         $migrationFile = APP_DIR . '/migrations/' . sprintf('%04d', $version) . '.php';
 
@@ -45,8 +39,6 @@ class MigrationHelper {
     }
 
     /**
-     * Load all available migrations
-     * 
      * @return array<int, \Cronbeat\Migration> Array of migrations indexed by version number
      */
     public static function loadAllMigrations(): array {
