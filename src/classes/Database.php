@@ -64,41 +64,35 @@ class Database {
         }
     }
 
-    
-    /**
-     * Get migration instance for a specific version
-     * 
-     * @param int $version The migration version to get
-     * @return \Cronbeat\Migration|null The migration instance or null if not found
-     */
+
     public function getMigration(int $version): ?\Cronbeat\Migration {
         $migrationFile = APP_DIR . '/migrations/' . sprintf('%04d', $version) . '.php';
-        
+
         if (!file_exists($migrationFile)) {
             Logger::error("Migration file not found", ['version' => $version, 'file' => $migrationFile]);
             return null;
         }
-        
+
         // Include the migration file
         require_once $migrationFile;
-        
+
         // Construct the class name
         $className = '\\Cronbeat\\Migrations\\Migration' . sprintf('%04d', $version);
-        
+
         if (!class_exists($className)) {
             Logger::error("Migration class not found", ['version' => $version, 'class' => $className]);
             return null;
         }
-        
+
         // Create an instance of the migration class
         try {
             $migration = new $className();
-            
+
             if (!$migration instanceof \Cronbeat\Migration) {
                 Logger::error("Invalid migration class", ['version' => $version, 'class' => $className]);
                 return null;
             }
-            
+
             return $migration;
         } catch (\Exception $e) {
             Logger::error("Error creating migration instance", [
@@ -109,41 +103,40 @@ class Database {
             return null;
         }
     }
-    
-    /**
-     * Get all available migrations
-     * 
-     * @return array<int, \Cronbeat\Migration> Array of migration instances indexed by version
-     */
+
+    /** @return array<int, \Cronbeat\Migration> */
     public function getAllMigrations(): array {
         $migrations = [];
         $migrationDir = APP_DIR . '/migrations';
-        
+
         if (!is_dir($migrationDir)) {
             Logger::warning("Migrations directory not found", ['dir' => $migrationDir]);
             return [];
         }
-        
+
         // Scan the migrations directory for migration files
         $files = scandir($migrationDir);
-        
+        if ($files === false) {
+            Logger::error("Failed to scan migrations directory", ['dir' => $migrationDir]);
+            return [];
+        }
+
         foreach ($files as $file) {
-            // Skip non-PHP files and directories
-            if (!preg_match('/^(\d{4})\.php$/', $file, $matches)) {
+            if (preg_match('/^(\d{4})\.php$/', $file, $matches) !== 1) {
                 continue;
             }
-            
+
             $version = (int) $matches[1];
             $migration = $this->getMigration($version);
-            
-            if ($migration) {
+
+            if ($migration !== null) {
                 $migrations[$version] = $migration;
             }
         }
-        
+
         // Sort migrations by version
         ksort($migrations);
-        
+
         return $migrations;
     }
 
@@ -245,34 +238,38 @@ class Database {
     public function getDbPath(): string {
         return $this->dbPath;
     }
-    
+
     public function getDatabaseVersion(): int {
         Logger::debug("Getting database version");
-        
+
         if ($this->pdo === null) {
             $this->connect();
         }
-        
+
         if ($this->pdo === null) {
             throw new \RuntimeException("Failed to connect to database");
         }
-        
+
         try {
             // Check if migrations table exists
             $tableExists = $this->pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'");
-            if ($tableExists->fetch() === false) {
+            if ($tableExists === false || $tableExists->fetch() === false) {
                 Logger::debug("Migrations table does not exist, returning version 0");
                 return 0;
             }
-            
+
             $stmt = $this->pdo->query("SELECT MAX(version) FROM migrations");
+            if ($stmt === false) {
+                Logger::error("Failed to query migrations table");
+                return 0;
+            }
             $version = $stmt->fetchColumn();
-            
+
             if ($version === false) {
                 Logger::debug("No migrations found, returning version 0");
                 return 0;
             }
-            
+
             Logger::debug("Current database version", ['version' => $version]);
             return (int) $version;
         } catch (\PDOException $e) {
@@ -280,38 +277,38 @@ class Database {
             throw $e;
         }
     }
-    
+
     public function setDatabaseVersion(int $version, string $name = 'Initial setup'): bool {
         Logger::info("Setting database version", ['version' => $version, 'name' => $name]);
-        
+
         if ($this->pdo === null) {
             $this->connect();
         }
-        
+
         if ($this->pdo === null) {
             throw new \RuntimeException("Failed to connect to database");
         }
-        
+
         try {
             // Check if this version already exists
             $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM migrations WHERE version = ?");
             $stmt->execute([$version]);
             $exists = (int) $stmt->fetchColumn() > 0;
-            
+
             if ($exists) {
                 Logger::debug("Version already exists, skipping", ['version' => $version]);
                 return true;
             }
-            
+
             $stmt = $this->pdo->prepare("INSERT INTO migrations (version, name) VALUES (?, ?)");
             $result = $stmt->execute([$version, $name]);
-            
+
             if ($result) {
                 Logger::info("Database version set successfully", ['version' => $version]);
             } else {
                 Logger::warning("Failed to set database version", ['version' => $version]);
             }
-            
+
             return $result;
         } catch (\PDOException $e) {
             Logger::error("Error setting database version", [
@@ -321,61 +318,51 @@ class Database {
             throw $e;
         }
     }
-    
+
     public function needsMigration(int $expectedVersion): bool {
         $currentVersion = $this->getDatabaseVersion();
         $needsMigration = $currentVersion < $expectedVersion;
-        
+
         Logger::debug("Checking if database needs migration", [
             'current_version' => $currentVersion,
             'expected_version' => $expectedVersion,
             'needs_migration' => $needsMigration
         ]);
-        
+
         return $needsMigration;
     }
-    
-    /**
-     * Run a migration
-     * 
-     * @param \Cronbeat\Migration|int $migration The migration instance or version number
-     * @return bool True if the migration was successful, false otherwise
-     * @throws \Exception If the migration fails
-     */
+
+    /** @param \Cronbeat\Migration|int $migration */
     public function runMigration($migration): bool {
         if (is_int($migration)) {
             $migrationVersion = $migration;
             $migration = $this->getMigration($migrationVersion);
-            
-            if (!$migration) {
+
+            if ($migration === null) {
                 throw new \RuntimeException("Migration not found for version {$migrationVersion}");
             }
         }
-        
-        if (!$migration instanceof \Cronbeat\Migration) {
-            throw new \InvalidArgumentException("Invalid migration object");
-        }
-        
+
         $version = $migration->getVersion();
         $name = $migration->getName();
-        
+
         Logger::info("Running migration", ['version' => $version, 'name' => $name]);
-        
+
         if ($this->pdo === null) {
             $this->connect();
         }
-        
+
         if ($this->pdo === null) {
             throw new \RuntimeException("Failed to connect to database");
         }
-        
+
         try {
             // Execute the migration
             $migration->up($this->pdo);
-            
+
             // Update database version
             $this->setDatabaseVersion($version, $name);
-            
+
             Logger::info("Migration completed successfully", ['version' => $version]);
             return true;
         } catch (\Exception $e) {

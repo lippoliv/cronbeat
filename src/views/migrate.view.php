@@ -3,6 +3,7 @@
 namespace Cronbeat\Views;
 
 class MigrateView extends BaseView {
+
     protected ?string $error = null;
     protected ?string $success = null;
     protected int $currentVersion = 0;
