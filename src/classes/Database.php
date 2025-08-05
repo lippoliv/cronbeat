@@ -295,7 +295,6 @@ class Database {
         }
 
         try {
-
             $stmt = $this->pdo->prepare("INSERT INTO migrations (version, name) VALUES (?, ?)");
             $result = $stmt->execute([$version, $name]);
 
