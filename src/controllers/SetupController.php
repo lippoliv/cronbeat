@@ -64,7 +64,36 @@ class SetupController extends BaseController {
 
     public function runSetup(string $username, string $passwordHash): ?string {
         try {
+            // Create database if it doesn't exist
             $this->database->createDatabase();
+            
+            // Run migrations to ensure tables exist
+            $currentVersion = $this->database->getDatabaseVersion();
+            $expectedVersion = DB_VERSION;
+            
+            if ($currentVersion < $expectedVersion) {
+                $allMigrations = $this->database->getAllMigrations();
+                
+                $pendingMigrations = array_filter($allMigrations, function ($migration) use ($currentVersion) {
+                    return $migration->getVersion() > $currentVersion && $migration->getVersion() <= DB_VERSION;
+                });
+                
+                foreach ($pendingMigrations as $migration) {
+                    $version = $migration->getVersion();
+                    $name = $migration->getName();
+                    
+                    \Cronbeat\Logger::info("Running migration during setup", ['version' => $version, 'name' => $name]);
+                    
+                    try {
+                        $this->database->runMigration($migration);
+                    } catch (\Exception $e) {
+                        \Cronbeat\Logger::error("Migration failed during setup", ['version' => $version, 'error' => $e->getMessage()]);
+                        return "Migration to version {$version} failed: " . $e->getMessage();
+                    }
+                }
+            }
+            
+            // Create user after migrations have been run
             $result = $this->database->createUser($username, $passwordHash);
 
             if (!$result) {
