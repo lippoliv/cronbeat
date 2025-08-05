@@ -341,6 +341,11 @@ class Database {
         $version = $migration->getVersion();
         $name = $migration->getName();
 
+        if (!$this->needsMigration($version)) {
+            Logger::info("Migration already run, skipping", ['version' => $version, 'name' => $name]);
+            return true;
+        }
+
         Logger::info("Running migration", ['version' => $version, 'name' => $name]);
 
         if ($this->pdo === null) {
