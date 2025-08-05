@@ -69,8 +69,6 @@ class DatabaseTest extends TestCase {
         // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
-        // Initialize database with tables
-        TestDatabaseInitializer::initializeDatabase($this->testDbPath);
 
         // When
         $username = 'testuser';
@@ -85,8 +83,6 @@ class DatabaseTest extends TestCase {
         // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
-        // Initialize database with tables
-        TestDatabaseInitializer::initializeDatabase($this->testDbPath);
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $database->createUser($username, $passwordHash);
@@ -102,8 +98,6 @@ class DatabaseTest extends TestCase {
         // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
-        // Initialize database with tables
-        TestDatabaseInitializer::initializeDatabase($this->testDbPath);
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $database->createUser($username, $passwordHash);
@@ -119,8 +113,6 @@ class DatabaseTest extends TestCase {
         // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
-        // Initialize database with tables
-        TestDatabaseInitializer::initializeDatabase($this->testDbPath);
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $database->createUser($username, $passwordHash);
@@ -136,8 +128,6 @@ class DatabaseTest extends TestCase {
         // Given
         $database = new Database($this->testDbPath);
         $database->createDatabase();
-        // Initialize database with tables
-        TestDatabaseInitializer::initializeDatabase($this->testDbPath);
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $database->createUser($username, $passwordHash);
