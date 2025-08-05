@@ -12,7 +12,7 @@ class SetupControllerTest extends DatabaseTestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        $this->controller = new SetupController($this->database);
+        $this->controller = new SetupController($this->getDatabase());
     }
 
     public function testValidateSetupDataAcceptsValidInput(): void {

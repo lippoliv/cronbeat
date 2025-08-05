@@ -24,7 +24,7 @@ class DatabaseTest extends DatabaseTestCase {
         // Database is already created in setUp()
 
         // When
-        $exists = $this->database->databaseExists();
+        $exists = $this->getDatabase()->databaseExists();
 
         // Then
         Assert::assertTrue($exists);
@@ -60,7 +60,7 @@ class DatabaseTest extends DatabaseTestCase {
         // When
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
-        $result = $this->database->createUser($username, $passwordHash);
+        $result = $this->getDatabase()->createUser($username, $passwordHash);
 
         // Then
         Assert::assertTrue($result);
@@ -71,10 +71,10 @@ class DatabaseTest extends DatabaseTestCase {
         // Database and migrations are already set up in setUp()
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
-        $this->database->createUser($username, $passwordHash);
+        $this->getDatabase()->createUser($username, $passwordHash);
 
         // When
-        $userExists = $this->database->userExists($username);
+        $userExists = $this->getDatabase()->userExists($username);
 
         // Then
         Assert::assertTrue($userExists);
@@ -85,10 +85,10 @@ class DatabaseTest extends DatabaseTestCase {
         // Database and migrations are already set up in setUp()
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
-        $this->database->createUser($username, $passwordHash);
+        $this->getDatabase()->createUser($username, $passwordHash);
 
         // When
-        $validResult = $this->database->validateUser($username, $passwordHash);
+        $validResult = $this->getDatabase()->validateUser($username, $passwordHash);
 
         // Then
         Assert::assertTrue($validResult);
@@ -99,10 +99,10 @@ class DatabaseTest extends DatabaseTestCase {
         // Database and migrations are already set up in setUp()
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
-        $this->database->createUser($username, $passwordHash);
+        $this->getDatabase()->createUser($username, $passwordHash);
 
         // When
-        $invalidResult = $this->database->validateUser($username, 'wronghash');
+        $invalidResult = $this->getDatabase()->validateUser($username, 'wronghash');
 
         // Then
         Assert::assertFalse($invalidResult);
@@ -112,10 +112,10 @@ class DatabaseTest extends DatabaseTestCase {
         // Given
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
-        $this->database->createUser($username, $passwordHash);
+        $this->getDatabase()->createUser($username, $passwordHash);
 
         // When
-        $nonExistentResult = $this->database->validateUser('nonexistent', $passwordHash);
+        $nonExistentResult = $this->getDatabase()->validateUser('nonexistent', $passwordHash);
 
         // Then
         Assert::assertFalse($nonExistentResult);
