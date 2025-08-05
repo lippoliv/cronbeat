@@ -68,28 +68,16 @@ class SetupController extends BaseController {
             $this->database->createDatabase();
             
             // Run migrations to ensure tables exist
-            $currentVersion = $this->database->getDatabaseVersion();
-            $expectedVersion = DB_VERSION;
+            \Cronbeat\Logger::info("Running migrations during setup");
             
-            if ($currentVersion < $expectedVersion) {
-                $allMigrations = $this->database->getAllMigrations();
-                
-                $pendingMigrations = array_filter($allMigrations, function ($migration) use ($currentVersion) {
-                    return $migration->getVersion() > $currentVersion && $migration->getVersion() <= DB_VERSION;
-                });
-                
-                foreach ($pendingMigrations as $migration) {
+            $migrations = $this->database->getAllMigrations();
+            foreach ($migrations as $migration) {
+                try {
+                    $this->database->runMigration($migration);
+                } catch (\Exception $e) {
                     $version = $migration->getVersion();
-                    $name = $migration->getName();
-                    
-                    \Cronbeat\Logger::info("Running migration during setup", ['version' => $version, 'name' => $name]);
-                    
-                    try {
-                        $this->database->runMigration($migration);
-                    } catch (\Exception $e) {
-                        \Cronbeat\Logger::error("Migration failed during setup", ['version' => $version, 'error' => $e->getMessage()]);
-                        return "Migration to version {$version} failed: " . $e->getMessage();
-                    }
+                    \Cronbeat\Logger::error("Migration failed during setup", ['version' => $version, 'error' => $e->getMessage()]);
+                    return "Migration to version {$version} failed: " . $e->getMessage();
                 }
             }
             
