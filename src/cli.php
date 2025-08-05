@@ -16,6 +16,14 @@ use Cronbeat\CLI\CLI;
 $logLevel = getenv('LOG_LEVEL') !== false ? getenv('LOG_LEVEL') : Logger::INFO;
 Logger::setMinLevel($logLevel);
 
+// Configure logger to write to cli.log file instead of STDOUT
+$logFile = APP_DIR . '/cli.log';
+$logStream = fopen($logFile, 'a');
+if ($logStream === false) {
+    throw new \RuntimeException("Unable to open log file: $logFile");
+}
+Logger::setLogStream($logStream);
+
 // Initialize database
 $database = new Database(APP_DIR . '/db/db.sqlite');
 
