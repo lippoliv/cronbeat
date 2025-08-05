@@ -45,9 +45,7 @@ class DatabaseTest extends DatabaseTestCase {
         Assert::assertTrue(is_dir($testDbDir));
 
         // Cleanup
-        if (file_exists($testDbPath)) {
-            unlink($testDbPath);
-        }
+        unlink($testDbPath);
         if (is_dir($testDbDir)) {
             rmdir($testDbDir);
         }
