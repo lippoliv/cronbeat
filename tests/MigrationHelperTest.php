@@ -5,7 +5,6 @@ namespace Cronbeat\Tests;
 use Cronbeat\MigrationHelper;
 use Cronbeat\Migration;
 use Cronbeat\Logger;
-use Cronbeat\Tests\TestMigrationHelperInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Assert;
 
@@ -13,18 +12,22 @@ class MigrationHelperTest extends TestCase {
     private string $tempMigrationsDir = '';
     private string $originalLogLevel = '';
     private string $testAppDir = '';
-    private string $testId = '';
+
+    private string $originalMigrationsDir = '';
 
     protected function setUp(): void {
         parent::setUp();
 
-        // Create unique test ID for this test run
-        $this->testId = uniqid();
+        // Store original migrations directory before changing it
+        $this->originalMigrationsDir = MigrationHelper::$migrationsDir;
 
         // Create temporary app directory structure
-        $this->testAppDir = sys_get_temp_dir() . '/cronbeat_test_app_' . $this->testId;
+        $this->testAppDir = sys_get_temp_dir() . '/cronbeat_test_app_' . uniqid();
         $this->tempMigrationsDir = $this->testAppDir . '/migrations';
         mkdir($this->tempMigrationsDir, 0777, true);
+
+        // Set the static migrations directory for this test
+        MigrationHelper::$migrationsDir = $this->tempMigrationsDir;
 
         // Store original log level and set to ERROR to reduce noise in tests
         $this->originalLogLevel = Logger::getMinLevel();
@@ -32,11 +35,13 @@ class MigrationHelperTest extends TestCase {
     }
 
     protected function tearDown(): void {
-        // Restore original log level
+        // Restore
+        MigrationHelper::$migrationsDir = $this->originalMigrationsDir;
         Logger::setMinLevel($this->originalLogLevel);
 
-        // Clean up temporary app directory
+        // Clean up
         $this->cleanupTempDirectory($this->testAppDir);
+        $this->cleanupTempDirectory($this->tempMigrationsDir);
 
         parent::tearDown();
     }
@@ -76,9 +81,6 @@ class MigrationHelperTest extends TestCase {
         $filename = sprintf('%04d', $version) . '.php';
         $filePath = $this->tempMigrationsDir . '/' . $filename;
 
-        // Make class name unique by adding testId
-        $uniqueClassName = $className . '_' . $this->testId;
-
         if ($validClass) {
             $constructorCode = $throwException ?
                 "public function __construct() { throw new \\Exception('Test exception during instantiation'); }" :
@@ -89,7 +91,7 @@ namespace Cronbeat\\Migrations;
 
 use Cronbeat\\BaseMigration;
 
-class {$uniqueClassName} extends BaseMigration {
+class {$className} extends BaseMigration {
     {$constructorCode}
 
     public function getName(): string {
@@ -108,7 +110,7 @@ class {$uniqueClassName} extends BaseMigration {
             $content = "<?php
 namespace Cronbeat\\Migrations;
 
-class {$uniqueClassName} {
+class {$className} {
     // Invalid migration class - doesn't implement Migration interface
 }";
         }
@@ -117,105 +119,13 @@ class {$uniqueClassName} {
         return $filePath;
     }
 
-    private function createTestMigrationHelper(?string $appDir = null): TestMigrationHelperInterface {
-        // Create a test version of MigrationHelper that uses our test directory or a custom directory
-        $testId = $this->testId;
-        $appDirectory = $appDir ?? $this->testAppDir;
-        return new class ($appDirectory, $testId) implements TestMigrationHelperInterface {
-            private string $appDir;
-            private string $testId;
-
-            public function __construct(string $appDir, string $testId) {
-                $this->appDir = $appDir;
-                $this->testId = $testId;
-            }
-
-            public function loadMigration(int $version): ?\Cronbeat\Migration {
-                $migrationFile = $this->appDir . '/migrations/' . sprintf('%04d', $version) . '.php';
-
-                if (!file_exists($migrationFile)) {
-                    Logger::error("Migration file not found", ['version' => $version, 'file' => $migrationFile]);
-                    return null;
-                }
-
-                require_once $migrationFile;
-
-                // Try both the standard class name and the unique class name
-                $standardClassName = '\\Cronbeat\\Migrations\\Migration' . sprintf('%04d', $version);
-                $uniqueClassName = '\\Cronbeat\\Migrations\\Migration' . sprintf('%04d', $version)
-                    . '_' . $this->testId;
-
-                $className = class_exists($uniqueClassName) ? $uniqueClassName : $standardClassName;
-
-                if (!class_exists($className)) {
-                    Logger::error("Migration class not found", ['version' => $version, 'class' => $className]);
-                    return null;
-                }
-
-                try {
-                    $migration = new $className();
-
-                    if (!$migration instanceof \Cronbeat\Migration) {
-                        Logger::error("Invalid migration class", ['version' => $version, 'class' => $className]);
-                        return null;
-                    }
-
-                    return $migration;
-                } catch (\Exception $e) {
-                    Logger::error("Error creating migration instance", [
-                        'version' => $version,
-                        'class' => $className,
-                        'error' => $e->getMessage()
-                    ]);
-                    return null;
-                }
-            }
-
-            /**
-             * @return array<int, \Cronbeat\Migration>
-             */
-            public function loadAllMigrations(): array {
-                $migrations = [];
-                $migrationDir = $this->appDir . '/migrations';
-
-                if (!is_dir($migrationDir)) {
-                    Logger::warning("Migrations directory not found", ['dir' => $migrationDir]);
-                    return [];
-                }
-
-                $files = scandir($migrationDir);
-                if ($files === false) {
-                    Logger::error("Failed to scan migrations directory", ['dir' => $migrationDir]);
-                    return [];
-                }
-
-                foreach ($files as $file) {
-                    if (preg_match('/^(\d{4})\.php$/', $file, $matches) !== 1) {
-                        continue;
-                    }
-
-                    $version = (int) $matches[1];
-                    $migration = $this->loadMigration($version);
-
-                    if ($migration !== null) {
-                        $migrations[$version] = $migration;
-                    }
-                }
-
-                ksort($migrations);
-
-                return $migrations;
-            }
-        };
-    }
 
     public function testLoadMigrationReturnsNullWhenFileNotFound(): void {
         // Given
-        $helper = $this->createTestMigrationHelper();
         $nonExistentVersion = 9999;
 
         // When
-        $result = $helper->loadMigration($nonExistentVersion);
+        $result = MigrationHelper::loadMigration($nonExistentVersion);
 
         // Then
         Assert::assertNull($result);
@@ -223,13 +133,12 @@ class {$uniqueClassName} {
 
     public function testLoadMigrationReturnsNullWhenClassNotFound(): void {
         // Given
-        $helper = $this->createTestMigrationHelper();
-        $version = 1001;
-        $filePath = $this->tempMigrationsDir . '/1001.php';
+        $version = 5001; // Use a unique version number to avoid conflicts
+        $filePath = $this->tempMigrationsDir . '/5001.php';
         file_put_contents($filePath, "<?php\n// File exists but no class defined");
 
         // When
-        $result = $helper->loadMigration($version);
+        $result = MigrationHelper::loadMigration($version);
 
         // Then
         Assert::assertNull($result);
@@ -237,13 +146,12 @@ class {$uniqueClassName} {
 
     public function testLoadMigrationReturnsNullWhenClassDoesNotImplementMigrationInterface(): void {
         // Given
-        $helper = $this->createTestMigrationHelper();
         $version = 1002;
         $className = 'Migration1002';
         $this->createTestMigrationFile($version, $className, false);
 
         // When
-        $result = $helper->loadMigration($version);
+        $result = MigrationHelper::loadMigration($version);
 
         // Then
         Assert::assertNull($result);
@@ -251,13 +159,12 @@ class {$uniqueClassName} {
 
     public function testLoadMigrationHandlesExceptionDuringInstantiation(): void {
         // Given
-        $helper = $this->createTestMigrationHelper();
         $version = 1003;
         $className = 'Migration1003';
         $this->createTestMigrationFile($version, $className, true, true);
 
         // When
-        $result = $helper->loadMigration($version);
+        $result = MigrationHelper::loadMigration($version);
 
         // Then
         Assert::assertNull($result);
@@ -265,13 +172,12 @@ class {$uniqueClassName} {
 
     public function testLoadMigrationWithValidMigrationFile(): void {
         // Given
-        $helper = $this->createTestMigrationHelper();
-        $version = 1001; // Use high version number to avoid conflicts
+        $version = 1001;
         $className = 'Migration1001';
         $this->createTestMigrationFile($version, $className, true);
 
         // When
-        $result = $helper->loadMigration($version);
+        $result = MigrationHelper::loadMigration($version);
 
         // Then
         Assert::assertInstanceOf(Migration::class, $result);
@@ -282,10 +188,10 @@ class {$uniqueClassName} {
     public function testLoadAllMigrationsReturnsEmptyArrayWhenDirectoryNotFound(): void {
         // Given
         $nonExistentAppDir = sys_get_temp_dir() . '/nonexistent_' . uniqid();
-        $helper = $this->createTestMigrationHelper($nonExistentAppDir);
+        MigrationHelper::$migrationsDir = $nonExistentAppDir . '/migrations';
 
         // When
-        $result = $helper->loadAllMigrations();
+        $result = MigrationHelper::loadAllMigrations();
 
         // Then
         Assert::assertIsArray($result);
@@ -294,11 +200,9 @@ class {$uniqueClassName} {
 
     public function testLoadAllMigrationsIgnoresNonMigrationFiles(): void {
         // Given
-        $helper = $this->createTestMigrationHelper();
-
-        // Create valid migration files
-        $this->createTestMigrationFile(1001, 'Migration1001', true);
-        $this->createTestMigrationFile(1002, 'Migration1002', true);
+        // Create valid migration files (using different version numbers to avoid conflicts)
+        $this->createTestMigrationFile(2001, 'Migration2001', true);
+        $this->createTestMigrationFile(2002, 'Migration2002', true);
 
         // Create non-migration files that should be ignored
         file_put_contents($this->tempMigrationsDir . '/readme.txt', 'Not a migration');
@@ -307,59 +211,50 @@ class {$uniqueClassName} {
         file_put_contents($this->tempMigrationsDir . '/12345.php', '<?php // Too many digits');
 
         // When
-        $result = $helper->loadAllMigrations();
+        $result = MigrationHelper::loadAllMigrations();
 
         // Then
         Assert::assertIsArray($result);
         Assert::assertCount(2, $result);
-        Assert::assertArrayHasKey(1001, $result);
-        Assert::assertArrayHasKey(1002, $result);
-        Assert::assertInstanceOf(Migration::class, $result[1001]);
-        Assert::assertInstanceOf(Migration::class, $result[1002]);
+        Assert::assertArrayHasKey(2001, $result);
+        Assert::assertArrayHasKey(2002, $result);
+        Assert::assertInstanceOf(Migration::class, $result[2001]);
+        Assert::assertInstanceOf(Migration::class, $result[2002]);
     }
 
     public function testLoadAllMigrationsSortsResultsByVersion(): void {
         // Given
-        $helper = $this->createTestMigrationHelper();
-
-        // Create migrations in reverse order to test sorting
-        $this->createTestMigrationFile(1005, 'Migration1005', true);
-        $this->createTestMigrationFile(1001, 'Migration1001', true);
-        $this->createTestMigrationFile(1003, 'Migration1003', true);
+        // Create migrations in reverse order to test sorting (using different version numbers to avoid conflicts)
+        $this->createTestMigrationFile(3005, 'Migration3005', true);
+        $this->createTestMigrationFile(3001, 'Migration3001', true);
+        $this->createTestMigrationFile(3003, 'Migration3003', true);
 
         // When
-        $result = $helper->loadAllMigrations();
+        $result = MigrationHelper::loadAllMigrations();
 
         // Then
         Assert::assertIsArray($result);
 
         $versions = array_keys($result);
-        Assert::assertEquals([1001, 1003, 1005], $versions);
-
-        // Verify that keys are sorted (versions should be in ascending order)
-        $sortedVersions = $versions;
-        sort($sortedVersions);
-        Assert::assertEquals($sortedVersions, $versions);
+        Assert::assertEquals([3001, 3003, 3005], $versions);
     }
 
     public function testLoadAllMigrationsReturnsOnlyValidMigrations(): void {
         // Given
-        $helper = $this->createTestMigrationHelper();
-
         // Create mix of valid and invalid migrations
-        $this->createTestMigrationFile(1001, 'Migration1001', true);  // Valid
-        $this->createTestMigrationFile(1002, 'Migration1002', false); // Invalid - doesn't implement interface
-        $this->createTestMigrationFile(1003, 'Migration1003', true, true); // Invalid - throws exception
-        $this->createTestMigrationFile(1004, 'Migration1004', true);  // Valid
+        $this->createTestMigrationFile(4001, 'Migration4001', true);  // Valid
+        $this->createTestMigrationFile(4002, 'Migration4002', false); // Invalid - doesn't implement interface
+        $this->createTestMigrationFile(4003, 'Migration4003', true, true); // Invalid - throws exception
+        $this->createTestMigrationFile(4004, 'Migration4004', true);  // Valid
 
         // When
-        $result = $helper->loadAllMigrations();
+        $result = MigrationHelper::loadAllMigrations();
 
         // Then
         Assert::assertIsArray($result);
         Assert::assertCount(2, $result); // Only valid migrations should be returned
-        Assert::assertArrayHasKey(1001, $result);
-        Assert::assertArrayHasKey(1004, $result);
+        Assert::assertArrayHasKey(4001, $result);
+        Assert::assertArrayHasKey(4004, $result);
 
         // Verify all returned items implement Migration interface
         foreach ($result as $migration) {
@@ -369,39 +264,32 @@ class {$uniqueClassName} {
 
     public function testLoadAllMigrationsWithEmptyDirectory(): void {
         // Given
-        $helper = $this->createTestMigrationHelper();
         // Directory exists but is empty (no migration files created)
 
         // When
-        $result = $helper->loadAllMigrations();
+        $result = MigrationHelper::loadAllMigrations();
 
         // Then
         Assert::assertIsArray($result);
         Assert::assertEmpty($result);
     }
 
-    // Test the actual MigrationHelper class with existing migrations
     public function testActualMigrationHelperLoadMigrationWithExistingMigration(): void {
         // Given
-        // Use the real MigrationHelper with existing migrations
+        MigrationHelper::$migrationsDir = APP_DIR . '/migrations';
 
         // When
         $result = MigrationHelper::loadMigration(1); // Assuming migration 0001 exists
 
         // Then
-        if ($result !== null) {
-            Assert::assertInstanceOf(Migration::class, $result);
-            Assert::assertEquals(1, $result->getVersion());
-            Assert::assertIsString($result->getName());
-        } else {
-            // If no migration exists, that's also a valid test result
-            Assert::assertNull($result);
-        }
+        Assert::assertInstanceOf(Migration::class, $result);
+        Assert::assertEquals(1, $result->getVersion());
+        Assert::assertIsString($result->getName());
     }
 
     public function testActualMigrationHelperLoadAllMigrationsWithExistingMigrations(): void {
         // Given
-        // Use the real MigrationHelper with existing migrations
+        // Use the real MigrationHelper with existing migrations (uses default migrations directory)
 
         // When
         $result = MigrationHelper::loadAllMigrations();

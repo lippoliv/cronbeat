@@ -6,10 +6,6 @@ use Cronbeat\Database;
 use Cronbeat\MigrationHelper;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Base test case for database-related tests.
- * Automatically creates a test database and runs all migrations.
- */
 abstract class DatabaseTestCase extends TestCase {
     protected string $tempDbPath = '';
     protected ?Database $database = null;
@@ -29,13 +25,9 @@ abstract class DatabaseTestCase extends TestCase {
     }
 
     private function runAllMigrations(): void {
-        if ($this->database === null) {
-            return;
-        }
-
         $migrations = MigrationHelper::loadAllMigrations();
         foreach ($migrations as $migration) {
-            $this->database->runMigration($migration);
+            $this->getDatabase()->runMigration($migration);
         }
     }
 

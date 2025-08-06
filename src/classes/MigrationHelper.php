@@ -3,8 +3,10 @@
 namespace Cronbeat;
 
 class MigrationHelper {
+    public static string $migrationsDir = APP_DIR . '/migrations';
+
     public static function loadMigration(int $version): ?\Cronbeat\Migration {
-        $migrationFile = APP_DIR . '/migrations/' . sprintf('%04d', $version) . '.php';
+        $migrationFile = self::$migrationsDir . '/' . sprintf('%04d', $version) . '.php';
 
         if (!file_exists($migrationFile)) {
             Logger::error("Migration file not found", ['version' => $version, 'file' => $migrationFile]);
@@ -43,16 +45,15 @@ class MigrationHelper {
      */
     public static function loadAllMigrations(): array {
         $migrations = [];
-        $migrationDir = APP_DIR . '/migrations';
 
-        if (!is_dir($migrationDir)) {
-            Logger::warning("Migrations directory not found", ['dir' => $migrationDir]);
+        if (!is_dir(self::$migrationsDir)) {
+            Logger::warning("Migrations directory not found", ['dir' => self::$migrationsDir]);
             return [];
         }
 
-        $files = scandir($migrationDir);
+        $files = scandir(self::$migrationsDir);
         if ($files === false) {
-            Logger::error("Failed to scan migrations directory", ['dir' => $migrationDir]);
+            Logger::error("Failed to scan migrations directory", ['dir' => self::$migrationsDir]);
             return [];
         }
 
@@ -73,4 +74,5 @@ class MigrationHelper {
 
         return $migrations;
     }
+
 }
