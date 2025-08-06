@@ -2,7 +2,7 @@
 
 namespace Cronbeat;
 
-class MigrationHelper {
+abstract class MigrationHelper {
     public static string $migrationsDir = APP_DIR . '/migrations';
 
     public static function loadMigration(int $version): ?\Cronbeat\Migration {
@@ -40,9 +40,7 @@ class MigrationHelper {
         }
     }
 
-    /**
-     * @return array<int, \Cronbeat\Migration> Array of migrations indexed by version number
-     */
+    /** @return array<int, \Cronbeat\Migration> */
     public static function loadAllMigrations(): array {
         $migrations = [];
 

@@ -133,7 +133,7 @@ class {$className} {
 
     public function testLoadMigrationReturnsNullWhenClassNotFound(): void {
         // Given
-        $version = 5001; // Use a unique version number to avoid conflicts
+        $version = 5001;
         $filePath = $this->tempMigrationsDir . '/5001.php';
         file_put_contents($filePath, "<?php\n// File exists but no class defined");
 

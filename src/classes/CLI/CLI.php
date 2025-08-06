@@ -48,7 +48,6 @@ class CLI {
         echo "==========================\n\n";
 
         try {
-            // Check if database exists, create it if it doesn't
             if (!$this->database->databaseExists()) {
                 echo "Database does not exist. Creating it...\n";
                 try {
@@ -75,7 +74,6 @@ class CLI {
 
             $allMigrations = MigrationHelper::loadAllMigrations();
 
-            // Filter migrations that need to be run
             $pendingMigrations = array_filter(
                 $allMigrations,
                 function ($migration) use ($currentVersion, $expectedVersion) {
