@@ -3,6 +3,7 @@
 namespace Cronbeat\Controllers;
 
 use Cronbeat\Views\SetupView;
+use Cronbeat\MigrationHelper;
 
 class SetupController extends BaseController {
     public function doRouting(): string {
@@ -65,6 +66,23 @@ class SetupController extends BaseController {
     public function runSetup(string $username, string $passwordHash): ?string {
         try {
             $this->database->createDatabase();
+
+            \Cronbeat\Logger::info("Running migrations during setup");
+
+            $migrations = MigrationHelper::loadAllMigrations();
+            foreach ($migrations as $migration) {
+                try {
+                    $this->database->runMigration($migration);
+                } catch (\Exception $e) {
+                    $version = $migration->getVersion();
+                    \Cronbeat\Logger::error(
+                        "Migration failed during setup",
+                        ['version' => $version, 'error' => $e->getMessage()]
+                    );
+                    return "Migration to version {$version} failed: " . $e->getMessage();
+                }
+            }
+
             $result = $this->database->createUser($username, $passwordHash);
 
             if (!$result) {

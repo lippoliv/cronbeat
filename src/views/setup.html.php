@@ -1,5 +1,10 @@
+<?php
+/**
+ * @var string|null $error Error message to display
+ */
+?>
 <h1>CronBeat Setup</h1>
-<?php if (isset($error) && $error) : ?>
+<?php if (isset($error) && $error !== '') : ?>
 <div class='error'><?= $error ?></div>
 <?php endif; ?>
 <form method="post" action="/setup" class="hash-password">

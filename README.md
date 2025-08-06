@@ -52,6 +52,38 @@ cronbeat/
 
 CronBeat uses SQLite for data storage. The database is automatically created on first run when you set up your admin account.
 
+#### Database Migrations
+
+CronBeat includes a database migration system to handle schema changes between versions:
+
+- **Automatic Checks**: The application automatically checks if your database needs to be updated.
+- **Web Interface**: If a migration is needed, you'll be redirected to a migration page with instructions.
+- **CLI Support**: Migrations can also be run from the command line.
+
+To update your database:
+
+1. **Web Interface**:
+   - When a migration is needed, you'll be automatically redirected to `/migrate`
+   - Click the "Update Database" button to run all pending migrations
+   - Once complete, you'll be able to continue using the application
+
+2. **Command Line**:
+   ```bash
+   # Run migrations
+   php cli.php migrate
+   
+   # Force migrations even if database is up to date
+   php cli.php migrate --force
+   
+   # Show CLI help
+   php cli.php help
+   ```
+
+The migration system ensures that:
+- Migrations run in transactions for data safety
+- Each migration runs only once
+- The database version is tracked and verified
+
 ## Getting Started
 
 1. Clone this repository:

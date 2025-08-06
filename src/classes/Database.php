@@ -2,6 +2,8 @@
 
 namespace Cronbeat;
 
+use Cronbeat\MigrationHelper;
+
 class Database {
     private string $dbPath;
     private string $dbDir;
@@ -30,7 +32,6 @@ class Database {
         }
 
         $this->connect();
-        $this->createTables();
 
         Logger::info("Database created successfully");
         return true;
@@ -65,32 +66,7 @@ class Database {
         }
     }
 
-    private function createTables(): void {
-        Logger::debug("Creating database tables");
 
-        $sql = "CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE,
-            password TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )";
-
-        if ($this->pdo === null) {
-            $this->connect();
-        }
-
-        try {
-            if ($this->pdo === null) {
-                throw new \RuntimeException("Failed to connect to database");
-            }
-
-            $this->pdo->exec($sql);
-            Logger::info("Database tables created successfully");
-        } catch (\PDOException $e) {
-            Logger::error("Failed to create database tables", ['error' => $e->getMessage()]);
-            throw $e;
-        }
-    }
 
     public function createUser(string $username, string $passwordHash): bool {
         Logger::info("Creating new user", ['username' => $username]);
@@ -189,5 +165,143 @@ class Database {
 
     public function getDbPath(): string {
         return $this->dbPath;
+    }
+
+    private function migrationsTableExists(): bool {
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        $tableExists = $this->pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='migrations'");
+        return $tableExists !== false && $tableExists->fetch() !== false;
+    }
+
+    public function getDatabaseVersion(): int {
+        Logger::debug("Getting database version");
+
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        try {
+            if (!$this->migrationsTableExists()) {
+                Logger::debug("Migrations table does not exist, returning version 0");
+                return 0;
+            }
+
+            $stmt = $this->pdo->query("SELECT MAX(version) FROM migrations");
+            if ($stmt === false) {
+                Logger::error("Failed to query migrations table");
+                return 0;
+            }
+            $version = $stmt->fetchColumn();
+
+            if ($version === false) {
+                Logger::debug("No migrations found, returning version 0");
+                return 0;
+            }
+
+            Logger::debug("Current database version", ['version' => $version]);
+            return (int) $version;
+        } catch (\PDOException $e) {
+            Logger::error("Error getting database version", ['error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    public function setDatabaseVersion(int $version, string $name = 'Initial setup'): bool {
+        Logger::info("Setting database version", ['version' => $version, 'name' => $name]);
+
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        try {
+            $stmt = $this->pdo->prepare("INSERT INTO migrations (version, name) VALUES (?, ?)");
+            $result = $stmt->execute([$version, $name]);
+
+            if ($result) {
+                Logger::info("Database version set successfully", ['version' => $version]);
+            } else {
+                Logger::warning("Failed to set database version", ['version' => $version]);
+            }
+
+            return $result;
+        } catch (\PDOException $e) {
+            Logger::error("Error setting database version", [
+                'version' => $version,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    public function needsMigration(int $expectedVersion): bool {
+        $currentVersion = $this->getDatabaseVersion();
+        $needsMigration = $currentVersion < $expectedVersion;
+
+        Logger::debug("Checking if database needs migration", [
+            'current_version' => $currentVersion,
+            'expected_version' => $expectedVersion,
+            'needs_migration' => $needsMigration
+        ]);
+
+        return $needsMigration;
+    }
+
+    /** @param \Cronbeat\Migration|int $migration */
+    public function runMigration($migration): bool {
+        if (is_int($migration)) {
+            $migrationVersion = $migration;
+            $migration = MigrationHelper::loadMigration($migrationVersion);
+
+            if ($migration === null) {
+                throw new \RuntimeException("Migration not found for version {$migrationVersion}");
+            }
+        }
+
+        $version = $migration->getVersion();
+        $name = $migration->getName();
+
+        if (!$this->needsMigration($version)) {
+            Logger::info("Migration already run, skipping", ['version' => $version, 'name' => $name]);
+            return true;
+        }
+
+        Logger::info("Running migration", ['version' => $version, 'name' => $name]);
+
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        try {
+            $migration->up($this->pdo);
+            $this->setDatabaseVersion($version, $name);
+
+            Logger::info("Migration completed successfully", ['version' => $version]);
+            return true;
+        } catch (\Exception $e) {
+            Logger::error("Error running migration", [
+                'version' => $version,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
     }
 }
