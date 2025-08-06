@@ -304,4 +304,157 @@ class Database {
             throw $e;
         }
     }
+
+    /**
+     * Create a new monitor
+     * 
+     * @param string $name The name of the monitor
+     * @param string $username The username of the user who owns the monitor
+     * @return string|false The UUID of the created monitor, or false if creation failed
+     */
+    public function createMonitor(string $name, string $username): string|false {
+        Logger::info("Creating new monitor", ['name' => $name, 'username' => $username]);
+
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        try {
+            // Get user ID
+            $stmt = $this->pdo->prepare("SELECT id FROM users WHERE username = ?");
+            $stmt->execute([$username]);
+            $userId = $stmt->fetchColumn();
+
+            if ($userId === false) {
+                Logger::error("User not found", ['username' => $username]);
+                return false;
+            }
+
+            // Generate UUID
+            $uuid = $this->generateUUID();
+
+            // Insert monitor
+            $stmt = $this->pdo->prepare("INSERT INTO monitors (uuid, name, user_id) VALUES (?, ?, ?)");
+            $result = $stmt->execute([$uuid, $name, $userId]);
+
+            if ($result) {
+                Logger::info("Monitor created successfully", ['name' => $name, 'uuid' => $uuid]);
+                return $uuid;
+            } else {
+                Logger::warning("Failed to create monitor", ['name' => $name]);
+                return false;
+            }
+        } catch (\PDOException $e) {
+            Logger::error("Error creating monitor", [
+                'name' => $name,
+                'username' => $username,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Get all monitors for a user
+     * 
+     * @param string $username The username of the user
+     * @return array An array of monitors, each with uuid and name
+     */
+    public function getMonitors(string $username): array {
+        Logger::info("Getting monitors for user", ['username' => $username]);
+
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT m.uuid, m.name 
+                FROM monitors m
+                JOIN users u ON m.user_id = u.id
+                WHERE u.username = ?
+                ORDER BY m.name ASC
+            ");
+            $stmt->execute([$username]);
+            $monitors = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            Logger::info("Found monitors for user", [
+                'username' => $username,
+                'count' => count($monitors)
+            ]);
+
+            return $monitors;
+        } catch (\PDOException $e) {
+            Logger::error("Error getting monitors", [
+                'username' => $username,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Delete a monitor
+     * 
+     * @param string $uuid The UUID of the monitor to delete
+     * @param string $username The username of the user who owns the monitor
+     * @return bool True if the monitor was deleted, false otherwise
+     */
+    public function deleteMonitor(string $uuid, string $username): bool {
+        Logger::info("Deleting monitor", ['uuid' => $uuid, 'username' => $username]);
+
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        try {
+            $stmt = $this->pdo->prepare("
+                DELETE FROM monitors 
+                WHERE uuid = ? AND user_id = (
+                    SELECT id FROM users WHERE username = ?
+                )
+            ");
+            $result = $stmt->execute([$uuid, $username]);
+
+            if ($result && $stmt->rowCount() > 0) {
+                Logger::info("Monitor deleted successfully", ['uuid' => $uuid]);
+                return true;
+            } else {
+                Logger::warning("Failed to delete monitor", ['uuid' => $uuid]);
+                return false;
+            }
+        } catch (\PDOException $e) {
+            Logger::error("Error deleting monitor", [
+                'uuid' => $uuid,
+                'username' => $username,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Generate a UUID v4
+     * 
+     * @return string The generated UUID
+     */
+    private function generateUUID(): string {
+        $data = random_bytes(16);
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+        
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
 }

@@ -19,9 +19,32 @@ class LoginController extends BaseController {
                 return $this->showLoginForm();
             case 'process':
                 return $this->processLogin();
+            case 'logout':
+                return $this->logout();
             default:
                 return $this->showLoginForm();
         }
+    }
+    
+    public function logout(): string {
+        Logger::info("User logging out");
+        
+        // Start session if not already started
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        // Clear session variables
+        $_SESSION = [];
+        
+        // Destroy the session
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
+        
+        // Redirect to login page
+        header('Location: /login');
+        exit;
     }
 
     public function showLoginForm(): string {
@@ -40,7 +63,14 @@ class LoginController extends BaseController {
                 $error = 'Username and password are required';
             } else {
                 if ($this->database->validateUser($username, $passwordHash)) {
-                    $error = "Login successful for $username";
+                    // Start session and store user information
+                    session_start();
+                    $_SESSION['user'] = $username;
+                    $_SESSION['logged_in'] = true;
+                    
+                    // Redirect to dashboard
+                    header('Location: /dashboard');
+                    exit;
                 } else {
                     $error = 'Invalid username or password';
                 }

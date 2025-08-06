@@ -1,7 +1,7 @@
 <?php
 
 const APP_DIR = __DIR__;
-const DB_VERSION = 1; // Current expected database version
+const DB_VERSION = 2; // Current expected database version
 
 require_once APP_DIR . '/classes/UrlHelper.php';
 require_once APP_DIR . '/classes/Database.php';
@@ -15,10 +15,13 @@ require_once APP_DIR . '/views/migrate.view.php';
 require_once APP_DIR . '/controllers/SetupController.php';
 require_once APP_DIR . '/controllers/LoginController.php';
 require_once APP_DIR . '/controllers/MigrateController.php';
+require_once APP_DIR . '/controllers/DashboardController.php';
+require_once APP_DIR . '/views/dashboard.view.php';
 
 use Cronbeat\Controllers\LoginController;
 use Cronbeat\Controllers\MigrateController;
 use Cronbeat\Controllers\SetupController;
+use Cronbeat\Controllers\DashboardController;
 use Cronbeat\Database;
 use Cronbeat\Logger;
 use Cronbeat\UrlHelper;
@@ -51,6 +54,9 @@ switch ($controllerName) {
         break;
     case 'migrate':
         $controller = new MigrateController($database);
+        break;
+    case 'dashboard':
+        $controller = new DashboardController($database);
         break;
     case 'login':
     default:
