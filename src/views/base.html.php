@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <div class="container">
+    <div class="<?= $containerClass ?>">
         <?= $content ?>
     </div>
 

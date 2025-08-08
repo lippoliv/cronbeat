@@ -8,6 +8,8 @@ class BaseView {
     protected string $title   = 'CronBeat';
 
     protected string $content = '';
+    
+    protected string $containerClass = 'container';
 
 
     public function setTitle(string $title): self {
@@ -22,6 +24,13 @@ class BaseView {
 
         return $this;
     }
+    
+    
+    public function setContainerClass(string $containerClass): self {
+        $this->containerClass = $containerClass;
+        
+        return $this;
+    }
 
 
     public function render(): string {
@@ -29,6 +38,8 @@ class BaseView {
         $title   = $this->title;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $content = $this->content;
+        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
+        $containerClass = $this->containerClass;
 
         ob_start();
 

@@ -130,7 +130,14 @@ class Database {
         }
     }
 
-    public function validateUser(string $username, string $passwordHash): bool {
+    /**
+     * Validate user credentials and return user ID if valid
+     * 
+     * @param string $username The username
+     * @param string $passwordHash The password hash
+     * @return int|false The user ID if valid, false otherwise
+     */
+    public function validateUser(string $username, string $passwordHash): int|false {
         Logger::info("Validating user credentials", ['username' => $username]);
 
         if ($this->pdo === null) {
@@ -142,18 +149,17 @@ class Database {
         }
 
         try {
-            $stmt = $this->pdo->prepare("SELECT password FROM users WHERE username = ?");
+            $stmt = $this->pdo->prepare("SELECT id, password FROM users WHERE username = ?");
             $stmt->execute([$username]);
-            $storedHash = $stmt->fetchColumn();
-            $isValid = $storedHash !== false && $storedHash === $passwordHash;
-
-            if ($isValid) {
-                Logger::info("User authentication successful", ['username' => $username]);
-            } else {
+            $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+            
+            if ($user === false || $user['password'] !== $passwordHash) {
                 Logger::warning("User authentication failed", ['username' => $username]);
+                return false;
             }
-
-            return $isValid;
+            
+            Logger::info("User authentication successful", ['username' => $username, 'user_id' => $user['id']]);
+            return (int)$user['id'];
         } catch (\PDOException $e) {
             Logger::error("Error validating user", [
                 'username' => $username,
@@ -309,11 +315,11 @@ class Database {
      * Create a new monitor
      * 
      * @param string $name The name of the monitor
-     * @param string $username The username of the user who owns the monitor
+     * @param int $userId The ID of the user who owns the monitor
      * @return string|false The UUID of the created monitor, or false if creation failed
      */
-    public function createMonitor(string $name, string $username): string|false {
-        Logger::info("Creating new monitor", ['name' => $name, 'username' => $username]);
+    public function createMonitor(string $name, int $userId): string|false {
+        Logger::info("Creating new monitor", ['name' => $name, 'user_id' => $userId]);
 
         if ($this->pdo === null) {
             $this->connect();
@@ -324,16 +330,6 @@ class Database {
         }
 
         try {
-            // Get user ID
-            $stmt = $this->pdo->prepare("SELECT id FROM users WHERE username = ?");
-            $stmt->execute([$username]);
-            $userId = $stmt->fetchColumn();
-
-            if ($userId === false) {
-                Logger::error("User not found", ['username' => $username]);
-                return false;
-            }
-
             // Generate UUID
             $uuid = $this->generateUUID();
 
@@ -351,7 +347,7 @@ class Database {
         } catch (\PDOException $e) {
             Logger::error("Error creating monitor", [
                 'name' => $name,
-                'username' => $username,
+                'user_id' => $userId,
                 'error' => $e->getMessage()
             ]);
             throw $e;
@@ -361,11 +357,11 @@ class Database {
     /**
      * Get all monitors for a user
      * 
-     * @param string $username The username of the user
+     * @param int $userId The ID of the user
      * @return array An array of monitors, each with uuid and name
      */
-    public function getMonitors(string $username): array {
-        Logger::info("Getting monitors for user", ['username' => $username]);
+    public function getMonitors(int $userId): array {
+        Logger::info("Getting monitors for user", ['user_id' => $userId]);
 
         if ($this->pdo === null) {
             $this->connect();
@@ -377,24 +373,23 @@ class Database {
 
         try {
             $stmt = $this->pdo->prepare("
-                SELECT m.uuid, m.name 
-                FROM monitors m
-                JOIN users u ON m.user_id = u.id
-                WHERE u.username = ?
-                ORDER BY m.name ASC
+                SELECT uuid, name 
+                FROM monitors
+                WHERE user_id = ?
+                ORDER BY name ASC
             ");
-            $stmt->execute([$username]);
+            $stmt->execute([$userId]);
             $monitors = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             Logger::info("Found monitors for user", [
-                'username' => $username,
+                'user_id' => $userId,
                 'count' => count($monitors)
             ]);
 
             return $monitors;
         } catch (\PDOException $e) {
             Logger::error("Error getting monitors", [
-                'username' => $username,
+                'user_id' => $userId,
                 'error' => $e->getMessage()
             ]);
             throw $e;
@@ -405,11 +400,11 @@ class Database {
      * Delete a monitor
      * 
      * @param string $uuid The UUID of the monitor to delete
-     * @param string $username The username of the user who owns the monitor
+     * @param int $userId The ID of the user who owns the monitor
      * @return bool True if the monitor was deleted, false otherwise
      */
-    public function deleteMonitor(string $uuid, string $username): bool {
-        Logger::info("Deleting monitor", ['uuid' => $uuid, 'username' => $username]);
+    public function deleteMonitor(string $uuid, int $userId): bool {
+        Logger::info("Deleting monitor", ['uuid' => $uuid, 'user_id' => $userId]);
 
         if ($this->pdo === null) {
             $this->connect();
@@ -420,13 +415,8 @@ class Database {
         }
 
         try {
-            $stmt = $this->pdo->prepare("
-                DELETE FROM monitors 
-                WHERE uuid = ? AND user_id = (
-                    SELECT id FROM users WHERE username = ?
-                )
-            ");
-            $result = $stmt->execute([$uuid, $username]);
+            $stmt = $this->pdo->prepare("DELETE FROM monitors WHERE uuid = ? AND user_id = ?");
+            $result = $stmt->execute([$uuid, $userId]);
 
             if ($result && $stmt->rowCount() > 0) {
                 Logger::info("Monitor deleted successfully", ['uuid' => $uuid]);
@@ -438,7 +428,7 @@ class Database {
         } catch (\PDOException $e) {
             Logger::error("Error deleting monitor", [
                 'uuid' => $uuid,
-                'username' => $username,
+                'user_id' => $userId,
                 'error' => $e->getMessage()
             ]);
             throw $e;
@@ -456,5 +446,43 @@ class Database {
         $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
         
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
+    
+    /**
+     * Get username by user ID
+     * 
+     * @param int $userId The user ID
+     * @return string|false The username if found, false otherwise
+     */
+    public function getUsernameById(int $userId): string|false {
+        Logger::debug("Getting username for user ID", ['user_id' => $userId]);
+
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        try {
+            $stmt = $this->pdo->prepare("SELECT username FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $username = $stmt->fetchColumn();
+            
+            if ($username === false) {
+                Logger::warning("User not found", ['user_id' => $userId]);
+            } else {
+                Logger::debug("Found username", ['user_id' => $userId, 'username' => $username]);
+            }
+            
+            return $username;
+        } catch (\PDOException $e) {
+            Logger::error("Error getting username", [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
     }
 }

@@ -39,10 +39,11 @@ class LoginController extends BaseController {
             if ($username === '' || $passwordHash === '') {
                 $error = 'Username and password are required';
             } else {
-                if ($this->database->validateUser($username, $passwordHash)) {
+                $userId = $this->database->validateUser($username, $passwordHash);
+                if ($userId !== false) {
                     // Start session and store user information
                     session_start();
-                    $_SESSION['user'] = $username;
+                    $_SESSION['user_id'] = $userId;
                     $_SESSION['logged_in'] = true;
                     
                     // Redirect to dashboard

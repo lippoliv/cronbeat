@@ -10,6 +10,7 @@ class DashboardView extends BaseView {
 
     public function __construct() {
         $this->setTitle('CronBeat Dashboard');
+        $this->setContainerClass('dashboard-container');
     }
 
     public function setError(?string $error): self {

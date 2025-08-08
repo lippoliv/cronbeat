@@ -4,12 +4,13 @@ namespace Cronbeat\Controllers;
 
 use Cronbeat\Logger;
 use Cronbeat\Views\DashboardView;
+use Cronbeat\Views\MonitorFormView;
 
 class DashboardController extends BaseController {
     public function doRouting(): string {
         // Check if user is logged in
         session_start();
-        if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+        if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || !isset($_SESSION['user_id'])) {
             Logger::warning("Unauthorized access attempt to dashboard");
             header('Location: /login');
             exit;
@@ -22,6 +23,8 @@ class DashboardController extends BaseController {
         switch ($action) {
             case 'index':
                 return $this->showDashboard();
+            case 'new-monitor':
+                return $this->showMonitorForm();
             case 'add':
                 return $this->addMonitor();
             case 'delete':
@@ -33,8 +36,11 @@ class DashboardController extends BaseController {
     }
 
     public function showDashboard(): string {
-        $username = $_SESSION['user'];
-        $monitors = $this->database->getMonitors($username);
+        $userId = $_SESSION['user_id'];
+        $monitors = $this->database->getMonitors($userId);
+        
+        // Get username for display
+        $username = $this->database->getUsernameById($userId);
         
         $view = new DashboardView();
         $view->setUsername($username);
@@ -53,8 +59,8 @@ class DashboardController extends BaseController {
             if ($name === '') {
                 $error = 'Monitor name is required';
             } else {
-                $username = $_SESSION['user'];
-                $result = $this->database->createMonitor($name, $username);
+                $userId = $_SESSION['user_id'];
+                $result = $this->database->createMonitor($name, $userId);
                 
                 if ($result !== false) {
                     $success = "Monitor '$name' created successfully";
@@ -64,8 +70,11 @@ class DashboardController extends BaseController {
             }
         }
 
-        $username = $_SESSION['user'];
-        $monitors = $this->database->getMonitors($username);
+        $userId = $_SESSION['user_id'];
+        $monitors = $this->database->getMonitors($userId);
+        
+        // Get username for display
+        $username = $this->database->getUsernameById($userId);
         
         $view = new DashboardView();
         $view->setUsername($username);
@@ -82,6 +91,11 @@ class DashboardController extends BaseController {
         return $view->render();
     }
 
+    public function showMonitorForm(): string {
+        $view = new MonitorFormView();
+        return $view->render();
+    }
+
     public function deleteMonitor(string $uuid): string {
         $error = null;
         $success = null;
@@ -89,8 +103,8 @@ class DashboardController extends BaseController {
         if ($uuid === '') {
             $error = 'Monitor UUID is required';
         } else {
-            $username = $_SESSION['user'];
-            $result = $this->database->deleteMonitor($uuid, $username);
+            $userId = $_SESSION['user_id'];
+            $result = $this->database->deleteMonitor($uuid, $userId);
             
             if ($result) {
                 $success = "Monitor deleted successfully";
@@ -99,8 +113,11 @@ class DashboardController extends BaseController {
             }
         }
 
-        $username = $_SESSION['user'];
-        $monitors = $this->database->getMonitors($username);
+        $userId = $_SESSION['user_id'];
+        $monitors = $this->database->getMonitors($userId);
+        
+        // Get username for display
+        $username = $this->database->getUsernameById($userId);
         
         $view = new DashboardView();
         $view->setUsername($username);

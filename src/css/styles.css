@@ -5,18 +5,24 @@ body {
     margin: 0;
     padding: 0;
     background-color: #f5f5f5;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
 }
 .container {
     width: 100%;
     max-width: 400px;
     padding: 2rem;
+    margin: 2rem auto;
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.dashboard-container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 2rem;
+    margin: 0 auto;
+    background-color: white;
+    min-height: 100vh;
 }
 h1 {
     margin-top: 0;
@@ -73,16 +79,25 @@ button:hover {
     align-items: center;
     margin-bottom: 2rem;
     flex-wrap: wrap;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.dashboard-header h1 {
+    color: #3498db;
+    margin: 0;
+    text-align: left;
 }
 
 .user-info {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
 .user-info p {
     margin: 0;
+    font-weight: 500;
 }
 
 .logout-button {
@@ -92,6 +107,7 @@ button:hover {
     padding: 0.5rem 1rem;
     border-radius: 4px;
     font-size: 0.9rem;
+    transition: background-color 0.3s;
 }
 
 .logout-button:hover {
@@ -110,9 +126,19 @@ button:hover {
     flex-wrap: wrap;
 }
 
-.add-monitor-form {
-    display: flex;
-    gap: 0.5rem;
+.add-monitor-button {
+    display: inline-block;
+    background-color: #2ecc71;
+    color: white;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.add-monitor-button:hover {
+    background-color: #27ae60;
 }
 
 .add-button {
@@ -124,36 +150,70 @@ button:hover {
     background-color: #27ae60;
 }
 
+.cancel-button {
+    display: inline-block;
+    background-color: #95a5a6;
+    color: white;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.cancel-button:hover {
+    background-color: #7f8c8d;
+}
+
 .no-monitors {
     color: #7f8c8d;
     font-style: italic;
 }
 
-.monitors-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+.monitors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
 }
 
-.monitor-item {
+.monitor-tile {
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
+    padding: 1.5rem;
     background-color: #f9f9f9;
-    border-radius: 4px;
-    border-left: 4px solid #3498db;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.monitor-tile:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.monitor-info {
+    margin-bottom: 1.5rem;
 }
 
 .monitor-info h3 {
     margin: 0 0 0.5rem 0;
     color: #2c3e50;
+    font-size: 1.2rem;
 }
 
 .monitor-uuid {
     margin: 0;
     font-size: 0.8rem;
     color: #7f8c8d;
+    word-break: break-all;
+}
+
+.monitor-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: auto;
 }
 
 .delete-button {
@@ -163,6 +223,7 @@ button:hover {
     padding: 0.5rem 1rem;
     border-radius: 4px;
     font-size: 0.9rem;
+    transition: background-color 0.3s;
 }
 
 .delete-button:hover {
