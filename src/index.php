@@ -19,6 +19,7 @@ require_once APP_DIR . '/controllers/LogoutController.php';
 require_once APP_DIR . '/controllers/MigrateController.php';
 require_once APP_DIR . '/controllers/DashboardController.php';
 require_once APP_DIR . '/views/dashboard.view.php';
+require_once APP_DIR . '/views/monitor_form.view.php';
 
 use Cronbeat\Controllers\LoginController;
 use Cronbeat\Controllers\LogoutController;
