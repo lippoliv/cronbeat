@@ -8,7 +8,7 @@ class BaseView {
     protected string $title   = 'CronBeat';
 
     protected string $content = '';
-    
+
     protected string $containerClass = 'container';
 
 
@@ -24,11 +24,11 @@ class BaseView {
 
         return $this;
     }
-    
-    
+
+
     public function setContainerClass(string $containerClass): self {
         $this->containerClass = $containerClass;
-        
+
         return $this;
     }
 

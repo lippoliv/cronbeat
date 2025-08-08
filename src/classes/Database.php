@@ -132,7 +132,7 @@ class Database {
 
     /**
      * Validate user credentials and return user ID if valid
-     * 
+     *
      * @param string $username The username
      * @param string $passwordHash The password hash
      * @return int|false The user ID if valid, false otherwise
@@ -152,12 +152,12 @@ class Database {
             $stmt = $this->pdo->prepare("SELECT id, password FROM users WHERE username = ?");
             $stmt->execute([$username]);
             $user = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
-            if ($user === false || $user['password'] !== $passwordHash) {
+
+            if ($user === false || !is_array($user) || $user['password'] !== $passwordHash) {
                 Logger::warning("User authentication failed", ['username' => $username]);
                 return false;
             }
-            
+
             Logger::info("User authentication successful", ['username' => $username, 'user_id' => $user['id']]);
             return (int)$user['id'];
         } catch (\PDOException $e) {
@@ -313,7 +313,7 @@ class Database {
 
     /**
      * Create a new monitor
-     * 
+     *
      * @param string $name The name of the monitor
      * @param int $userId The ID of the user who owns the monitor
      * @return string|false The UUID of the created monitor, or false if creation failed
@@ -356,9 +356,9 @@ class Database {
 
     /**
      * Get all monitors for a user
-     * 
+     *
      * @param int $userId The ID of the user
-     * @return array An array of monitors, each with uuid and name
+     * @return array<array{uuid: string, name: string}> An array of monitors, each with uuid and name
      */
     public function getMonitors(int $userId): array {
         Logger::info("Getting monitors for user", ['user_id' => $userId]);
@@ -398,7 +398,7 @@ class Database {
 
     /**
      * Delete a monitor
-     * 
+     *
      * @param string $uuid The UUID of the monitor to delete
      * @param int $userId The ID of the user who owns the monitor
      * @return bool True if the monitor was deleted, false otherwise
@@ -437,20 +437,20 @@ class Database {
 
     /**
      * Generate a UUID v4
-     * 
+     *
      * @return string The generated UUID
      */
     private function generateUUID(): string {
         $data = random_bytes(16);
         $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
         $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
-        
+
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
-    
+
     /**
      * Get username by user ID
-     * 
+     *
      * @param int $userId The user ID
      * @return string|false The username if found, false otherwise
      */
@@ -469,14 +469,15 @@ class Database {
             $stmt = $this->pdo->prepare("SELECT username FROM users WHERE id = ?");
             $stmt->execute([$userId]);
             $username = $stmt->fetchColumn();
-            
-            if ($username === false) {
+
+            if ($username === false || $username === null) {
                 Logger::warning("User not found", ['user_id' => $userId]);
-            } else {
-                Logger::debug("Found username", ['user_id' => $userId, 'username' => $username]);
+                return false;
             }
-            
-            return $username;
+
+            $usernameStr = (string)$username;
+            Logger::debug("Found username", ['user_id' => $userId, 'username' => $usernameStr]);
+            return $usernameStr;
         } catch (\PDOException $e) {
             Logger::error("Error getting username", [
                 'user_id' => $userId,

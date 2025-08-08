@@ -43,7 +43,7 @@ class LoginController extends BaseController {
                 if ($userId !== false) {
                     // Store user information in session
                     $_SESSION['user_id'] = $userId;
-                    
+
                     // Redirect to dashboard
                     header('Location: /dashboard');
                     exit;

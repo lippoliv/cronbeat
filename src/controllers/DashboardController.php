@@ -42,7 +42,7 @@ class DashboardController extends BaseController {
         $username = $this->database->getUsername($userId);
 
         $view = new DashboardView();
-        $view->setUsername($username);
+        $view->setUsername($username !== false ? $username : 'Unknown');
         $view->setMonitors($monitors);
 
         return $view->render();
@@ -108,7 +108,7 @@ class DashboardController extends BaseController {
         $username = $this->database->getUsername($userId);
 
         $view = new DashboardView();
-        $view->setUsername($username);
+        $view->setUsername($username !== false ? $username : 'Unknown');
         $view->setMonitors($monitors);
 
         if ($error !== null) {

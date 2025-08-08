@@ -6,7 +6,7 @@
 <div class="monitor-form-container">
     <h2>Add New Monitor</h2>
 
-    <?php if (isset($error) && $error !== null) : ?>
+    <?php if ($error !== null) : ?>
     <div class='error'><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 

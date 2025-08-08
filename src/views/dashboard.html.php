@@ -14,11 +14,11 @@
     </div>
 </div>
 
-<?php if (isset($error) && $error !== null) : ?>
+<?php if ($error !== null) : ?>
 <div class='error'><?= htmlspecialchars($error) ?></div>
 <?php endif; ?>
 
-<?php if (isset($success) && $success !== null) : ?>
+<?php if ($success !== null) : ?>
 <div class='success'><?= htmlspecialchars($success) ?></div>
 <?php endif; ?>
 
@@ -28,7 +28,7 @@
         <a href="/dashboard/new-monitor" class="add-monitor-button">Add New Monitor</a>
     </div>
 
-    <?php if (empty($monitors)) : ?>
+    <?php if (count($monitors) === 0) : ?>
     <p class="no-monitors">You don't have any monitors yet. Add one using the button above.</p>
     <?php else : ?>
     <div class="monitors-grid">
@@ -39,8 +39,8 @@
                 <p class="monitor-uuid">UUID: <?= htmlspecialchars($monitor['uuid']) ?></p>
             </div>
             <div class="monitor-actions">
-                <a href="/dashboard/delete/<?= htmlspecialchars($monitor['uuid']) ?>" 
-                   class="delete-button" 
+                <a href="/dashboard/delete/<?= htmlspecialchars($monitor['uuid']) ?>"
+                   class="delete-button"
                    onclick="return confirm('Are you sure you want to delete this monitor?')">
                     Delete
                 </a>
