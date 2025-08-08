@@ -6,17 +6,14 @@ use Cronbeat\Logger;
 
 class LogoutController extends BaseController {
     public function doRouting(): string {
-        Logger::info("Processing logout request");
+        $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        Logger::info("Processing logout request", $userId ? ['user_id' => $userId] : []);
         return $this->logout();
     }
     
     public function logout(): string {
-        Logger::info("User logging out");
-        
-        // Start session if not already started
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        Logger::info("User logging out", $userId ? ['user_id' => $userId] : []);
         
         // Clear session variables
         $_SESSION = [];

@@ -454,7 +454,7 @@ class Database {
      * @param int $userId The user ID
      * @return string|false The username if found, false otherwise
      */
-    public function getUsernameById(int $userId): string|false {
+    public function getUsername(int $userId): string|false {
         Logger::debug("Getting username for user ID", ['user_id' => $userId]);
 
         if ($this->pdo === null) {

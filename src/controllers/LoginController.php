@@ -41,10 +41,8 @@ class LoginController extends BaseController {
             } else {
                 $userId = $this->database->validateUser($username, $passwordHash);
                 if ($userId !== false) {
-                    // Start session and store user information
-                    session_start();
+                    // Store user information in session
                     $_SESSION['user_id'] = $userId;
-                    $_SESSION['logged_in'] = true;
                     
                     // Redirect to dashboard
                     header('Location: /dashboard');

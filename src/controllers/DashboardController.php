@@ -9,8 +9,7 @@ use Cronbeat\Views\MonitorFormView;
 class DashboardController extends BaseController {
     public function doRouting(): string {
         // Check if user is logged in
-        session_start();
-        if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || !isset($_SESSION['user_id'])) {
+        if (!isset($_SESSION['user_id'])) {
             Logger::warning("Unauthorized access attempt to dashboard");
             header('Location: /login');
             exit;
@@ -40,7 +39,7 @@ class DashboardController extends BaseController {
         $monitors = $this->database->getMonitors($userId);
         
         // Get username for display
-        $username = $this->database->getUsernameById($userId);
+        $username = $this->database->getUsername($userId);
         
         $view = new DashboardView();
         $view->setUsername($username);
@@ -74,7 +73,7 @@ class DashboardController extends BaseController {
         $monitors = $this->database->getMonitors($userId);
         
         // Get username for display
-        $username = $this->database->getUsernameById($userId);
+        $username = $this->database->getUsername($userId);
         
         $view = new DashboardView();
         $view->setUsername($username);
@@ -117,7 +116,7 @@ class DashboardController extends BaseController {
         $monitors = $this->database->getMonitors($userId);
         
         // Get username for display
-        $username = $this->database->getUsernameById($userId);
+        $username = $this->database->getUsername($userId);
         
         $view = new DashboardView();
         $view->setUsername($username);
