@@ -4,25 +4,26 @@ namespace Cronbeat\Views;
 
 class MonitorFormView extends BaseView {
     private ?string $error = null;
-    private ?string $success = null;
 
     public function __construct() {
         $this->setTitle('Add Monitor - CronBeat');
-        $this->setTemplate('monitor_form.html.php');
     }
 
     public function setError(?string $error): void {
         $this->error = $error;
     }
 
-    public function setSuccess(?string $success): void {
-        $this->success = $success;
-    }
+    public function render(): string {
+        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
+        $error = $this->error;
 
-    protected function getTemplateVars(): array {
-        return [
-            'error' => $this->error,
-            'success' => $this->success
-        ];
+        ob_start();
+
+        include(defined('APP_DIR') ? APP_DIR . '/views' : __DIR__) . '/monitor_form.html.php';
+
+        $result = ob_get_clean();
+        $this->setContent($result !== false ? $result : '');
+
+        return parent::render();
     }
 }

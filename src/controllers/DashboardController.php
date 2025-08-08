@@ -37,56 +37,45 @@ class DashboardController extends BaseController {
     public function showDashboard(): string {
         $userId = $_SESSION['user_id'];
         $monitors = $this->database->getMonitors($userId);
-        
+
         // Get username for display
         $username = $this->database->getUsername($userId);
-        
+
         $view = new DashboardView();
         $view->setUsername($username);
         $view->setMonitors($monitors);
-        
+
         return $view->render();
     }
 
     public function addMonitor(): string {
-        $error = null;
-        $success = null;
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'])) {
             $name = trim($_POST['name']);
-            
+
             if ($name === '') {
-                $error = 'Monitor name is required';
+                // Show error on monitor form
+                $view = new MonitorFormView();
+                $view->setError('Monitor name is required');
+                return $view->render();
             } else {
                 $userId = $_SESSION['user_id'];
                 $result = $this->database->createMonitor($name, $userId);
-                
+
                 if ($result !== false) {
-                    $success = "Monitor '$name' created successfully";
+                    // Redirect to dashboard on success
+                    header('Location: /dashboard');
+                    exit;
                 } else {
-                    $error = "Failed to create monitor";
+                    // Show error on monitor form
+                    $view = new MonitorFormView();
+                    $view->setError('Failed to create monitor');
+                    return $view->render();
                 }
             }
         }
 
-        $userId = $_SESSION['user_id'];
-        $monitors = $this->database->getMonitors($userId);
-        
-        // Get username for display
-        $username = $this->database->getUsername($userId);
-        
-        $view = new DashboardView();
-        $view->setUsername($username);
-        $view->setMonitors($monitors);
-        
-        if ($error !== null) {
-            $view->setError($error);
-        }
-        
-        if ($success !== null) {
-            $view->setSuccess($success);
-        }
-        
+        // If not POST request, show the form
+        $view = new MonitorFormView();
         return $view->render();
     }
 
@@ -104,7 +93,7 @@ class DashboardController extends BaseController {
         } else {
             $userId = $_SESSION['user_id'];
             $result = $this->database->deleteMonitor($uuid, $userId);
-            
+
             if ($result) {
                 $success = "Monitor deleted successfully";
             } else {
@@ -114,22 +103,22 @@ class DashboardController extends BaseController {
 
         $userId = $_SESSION['user_id'];
         $monitors = $this->database->getMonitors($userId);
-        
+
         // Get username for display
         $username = $this->database->getUsername($userId);
-        
+
         $view = new DashboardView();
         $view->setUsername($username);
         $view->setMonitors($monitors);
-        
+
         if ($error !== null) {
             $view->setError($error);
         }
-        
+
         if ($success !== null) {
             $view->setSuccess($success);
         }
-        
+
         return $view->render();
     }
 }
