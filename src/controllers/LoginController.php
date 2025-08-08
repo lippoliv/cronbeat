@@ -19,32 +19,9 @@ class LoginController extends BaseController {
                 return $this->showLoginForm();
             case 'process':
                 return $this->processLogin();
-            case 'logout':
-                return $this->logout();
             default:
                 return $this->showLoginForm();
         }
-    }
-    
-    public function logout(): string {
-        Logger::info("User logging out");
-        
-        // Start session if not already started
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        
-        // Clear session variables
-        $_SESSION = [];
-        
-        // Destroy the session
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_destroy();
-        }
-        
-        // Redirect to login page
-        header('Location: /login');
-        exit;
     }
 
     public function showLoginForm(): string {

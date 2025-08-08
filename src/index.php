@@ -7,6 +7,7 @@ require_once APP_DIR . '/classes/UrlHelper.php';
 require_once APP_DIR . '/classes/Database.php';
 require_once APP_DIR . '/classes/Logger.php';
 require_once APP_DIR . '/classes/Migration.php';
+require_once APP_DIR . '/classes/MigrationHelper.php';
 require_once APP_DIR . '/controllers/BaseController.php';
 require_once APP_DIR . '/views/base.view.php';
 require_once APP_DIR . '/views/setup.view.php';
@@ -14,11 +15,13 @@ require_once APP_DIR . '/views/login.view.php';
 require_once APP_DIR . '/views/migrate.view.php';
 require_once APP_DIR . '/controllers/SetupController.php';
 require_once APP_DIR . '/controllers/LoginController.php';
+require_once APP_DIR . '/controllers/LogoutController.php';
 require_once APP_DIR . '/controllers/MigrateController.php';
 require_once APP_DIR . '/controllers/DashboardController.php';
 require_once APP_DIR . '/views/dashboard.view.php';
 
 use Cronbeat\Controllers\LoginController;
+use Cronbeat\Controllers\LogoutController;
 use Cronbeat\Controllers\MigrateController;
 use Cronbeat\Controllers\SetupController;
 use Cronbeat\Controllers\DashboardController;
@@ -57,6 +60,9 @@ switch ($controllerName) {
         break;
     case 'dashboard':
         $controller = new DashboardController($database);
+        break;
+    case 'logout':
+        $controller = new LogoutController($database);
         break;
     case 'login':
     default:
