@@ -7,7 +7,6 @@ class MonitorFormView extends BaseView {
     private ?string $success = null;
 
     public function __construct() {
-        parent::__construct();
         $this->setTitle('Add Monitor - CronBeat');
         $this->setTemplate('monitor_form.html.php');
     }
