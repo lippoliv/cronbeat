@@ -24,10 +24,11 @@ class Migration0002 extends BaseMigration {
         $result = $pdo->exec("CREATE TABLE IF NOT EXISTS monitors (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             uuid TEXT NOT NULL UNIQUE,
-            name TEXT NOT NULL UNIQUE,
+            name TEXT NOT NULL,
             user_id INTEGER NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            UNIQUE(name, user_id)
         )");
 
         if ($result === false) {
