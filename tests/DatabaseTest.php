@@ -119,4 +119,182 @@ class DatabaseTest extends DatabaseTestCase {
         // Then
         Assert::assertFalse($nonExistentResult);
     }
+
+    // Monitor-related tests
+
+    public function testCreateMonitorReturnsUuid(): void {
+        // Given
+        // Database and migrations are already set up in setUp()
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        $monitorName = 'Test Monitor';
+
+        // When
+        $uuid = $this->getDatabase()->createMonitor($monitorName, $userId);
+
+        // Then
+        Assert::assertIsString($uuid);
+        Assert::assertNotEmpty($uuid);
+    }
+
+    public function testGetMonitorsReturnsEmptyArrayWhenNoMonitors(): void {
+        // Given
+        // Database and migrations are already set up in setUp()
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+
+        // When
+        $monitors = $this->getDatabase()->getMonitors($userId);
+
+        // Then
+        Assert::assertIsArray($monitors);
+        Assert::assertEmpty($monitors);
+    }
+
+    public function testGetMonitorsReturnsMonitorsForUser(): void {
+        // Given
+        // Database and migrations are already set up in setUp()
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        $monitorName = 'Test Monitor';
+        $uuid = $this->getDatabase()->createMonitor($monitorName, $userId);
+
+        // When
+        $monitors = $this->getDatabase()->getMonitors($userId);
+
+        // Then
+        Assert::assertIsArray($monitors);
+        Assert::assertCount(1, $monitors);
+        Assert::assertEquals($uuid, $monitors[0]['uuid']);
+        Assert::assertEquals($monitorName, $monitors[0]['name']);
+    }
+
+    public function testGetMonitorsReturnsMultipleMonitorsOrderedByName(): void {
+        // Given
+        // Database and migrations are already set up in setUp()
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        
+        // Create monitors in non-alphabetical order
+        $monitorName2 = 'B Test Monitor';
+        $monitorName1 = 'A Test Monitor';
+        $monitorName3 = 'C Test Monitor';
+        
+        $uuid2 = $this->getDatabase()->createMonitor($monitorName2, $userId);
+        $uuid1 = $this->getDatabase()->createMonitor($monitorName1, $userId);
+        $uuid3 = $this->getDatabase()->createMonitor($monitorName3, $userId);
+
+        // When
+        $monitors = $this->getDatabase()->getMonitors($userId);
+
+        // Then
+        Assert::assertIsArray($monitors);
+        Assert::assertCount(3, $monitors);
+        
+        // Check that monitors are ordered by name
+        Assert::assertEquals($monitorName1, $monitors[0]['name']);
+        Assert::assertEquals($monitorName2, $monitors[1]['name']);
+        Assert::assertEquals($monitorName3, $monitors[2]['name']);
+    }
+
+    public function testDeleteMonitorReturnsTrueWhenMonitorExists(): void {
+        // Given
+        // Database and migrations are already set up in setUp()
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        $monitorName = 'Test Monitor';
+        $uuid = $this->getDatabase()->createMonitor($monitorName, $userId);
+
+        // When
+        $result = $this->getDatabase()->deleteMonitor($uuid, $userId);
+
+        // Then
+        Assert::assertTrue($result);
+        
+        // Verify monitor is deleted
+        $monitors = $this->getDatabase()->getMonitors($userId);
+        Assert::assertEmpty($monitors);
+    }
+
+    public function testDeleteMonitorReturnsFalseWhenMonitorDoesNotExist(): void {
+        // Given
+        // Database and migrations are already set up in setUp()
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        $nonExistentUuid = '12345678-1234-1234-1234-123456789012';
+
+        // When
+        $result = $this->getDatabase()->deleteMonitor($nonExistentUuid, $userId);
+
+        // Then
+        Assert::assertFalse($result);
+    }
+
+    public function testDeleteMonitorReturnsFalseWhenMonitorBelongsToAnotherUser(): void {
+        // Given
+        // Database and migrations are already set up in setUp()
+        // Create first user and monitor
+        $username1 = 'testuser1';
+        $passwordHash1 = hash('sha256', 'password1');
+        $this->getDatabase()->createUser($username1, $passwordHash1);
+        $userId1 = $this->getDatabase()->validateUser($username1, $passwordHash1);
+        $monitorName = 'Test Monitor';
+        $uuid = $this->getDatabase()->createMonitor($monitorName, $userId1);
+        
+        // Create second user
+        $username2 = 'testuser2';
+        $passwordHash2 = hash('sha256', 'password2');
+        $this->getDatabase()->createUser($username2, $passwordHash2);
+        $userId2 = $this->getDatabase()->validateUser($username2, $passwordHash2);
+
+        // When
+        // Try to delete first user's monitor with second user's ID
+        $result = $this->getDatabase()->deleteMonitor($uuid, $userId2);
+
+        // Then
+        Assert::assertFalse($result);
+        
+        // Verify monitor still exists for first user
+        $monitors = $this->getDatabase()->getMonitors($userId1);
+        Assert::assertCount(1, $monitors);
+    }
+
+    public function testGetUsernameReturnsUsernameWhenUserExists(): void {
+        // Given
+        // Database and migrations are already set up in setUp()
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+
+        // When
+        $result = $this->getDatabase()->getUsername($userId);
+
+        // Then
+        Assert::assertEquals($username, $result);
+    }
+
+    public function testGetUsernameReturnsFalseWhenUserDoesNotExist(): void {
+        // Given
+        // Database and migrations are already set up in setUp()
+        $nonExistentUserId = 9999;
+
+        // When
+        $result = $this->getDatabase()->getUsername($nonExistentUserId);
+
+        // Then
+        Assert::assertFalse($result);
+    }
 }
