@@ -39,8 +39,12 @@ class LoginController extends BaseController {
             if ($username === '' || $passwordHash === '') {
                 $error = 'Username and password are required';
             } else {
-                if ($this->database->validateUser($username, $passwordHash)) {
-                    $error = "Login successful for $username";
+                $userId = $this->database->validateUser($username, $passwordHash);
+                if ($userId !== false) {
+                    $_SESSION['user_id'] = $userId;
+
+                    header('Location: /dashboard');
+                    exit;
                 } else {
                     $error = 'Invalid username or password';
                 }

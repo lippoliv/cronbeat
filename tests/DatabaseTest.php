@@ -89,7 +89,8 @@ class DatabaseTest extends DatabaseTestCase {
         $validResult = $this->getDatabase()->validateUser($username, $passwordHash);
 
         // Then
-        Assert::assertTrue($validResult);
+        Assert::assertIsInt($validResult);
+        Assert::assertGreaterThan(0, $validResult);
     }
 
     public function testValidateUserWithIncorrectPassword(): void {
