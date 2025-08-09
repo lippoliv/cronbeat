@@ -130,13 +130,6 @@ class Database {
         }
     }
 
-    /**
-     * Validate user credentials and return user ID if valid
-     *
-     * @param string $username The username
-     * @param string $passwordHash The password hash
-     * @return int|false The user ID if valid, false otherwise
-     */
     public function validateUser(string $username, string $passwordHash): int|false {
         Logger::info("Validating user credentials", ['username' => $username]);
 
@@ -311,13 +304,6 @@ class Database {
         }
     }
 
-    /**
-     * Create a new monitor
-     *
-     * @param string $name The name of the monitor
-     * @param int $userId The ID of the user who owns the monitor
-     * @return string|false The UUID of the created monitor, or false if creation failed
-     */
     public function createMonitor(string $name, int $userId): string|false {
         Logger::info("Creating new monitor", ['name' => $name, 'user_id' => $userId]);
 
@@ -330,10 +316,8 @@ class Database {
         }
 
         try {
-            // Generate UUID
             $uuid = $this->generateUUID();
 
-            // Insert monitor
             $stmt = $this->pdo->prepare("INSERT INTO monitors (uuid, name, user_id) VALUES (?, ?, ?)");
             $result = $stmt->execute([$uuid, $name, $userId]);
 
@@ -354,12 +338,7 @@ class Database {
         }
     }
 
-    /**
-     * Get all monitors for a user
-     *
-     * @param int $userId The ID of the user
-     * @return array<array{uuid: string, name: string}> An array of monitors, each with uuid and name
-     */
+    /** @return array<array{uuid: string, name: string}> */
     public function getMonitors(int $userId): array {
         Logger::info("Getting monitors for user", ['user_id' => $userId]);
 
@@ -396,13 +375,6 @@ class Database {
         }
     }
 
-    /**
-     * Delete a monitor
-     *
-     * @param string $uuid The UUID of the monitor to delete
-     * @param int $userId The ID of the user who owns the monitor
-     * @return bool True if the monitor was deleted, false otherwise
-     */
     public function deleteMonitor(string $uuid, int $userId): bool {
         Logger::info("Deleting monitor", ['uuid' => $uuid, 'user_id' => $userId]);
 
@@ -435,11 +407,6 @@ class Database {
         }
     }
 
-    /**
-     * Generate a UUID v4
-     *
-     * @return string The generated UUID
-     */
     private function generateUUID(): string {
         $data = random_bytes(16);
         $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
@@ -448,12 +415,6 @@ class Database {
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
-    /**
-     * Get username by user ID
-     *
-     * @param int $userId The user ID
-     * @return string|false The username if found, false otherwise
-     */
     public function getUsername(int $userId): string|false {
         Logger::debug("Getting username for user ID", ['user_id' => $userId]);
 

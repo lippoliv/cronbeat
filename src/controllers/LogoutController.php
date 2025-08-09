@@ -15,15 +15,12 @@ class LogoutController extends BaseController {
         $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
         Logger::info("User logging out", $userId ? ['user_id' => $userId] : []);
 
-        // Clear session variables
         $_SESSION = [];
 
-        // Destroy the session
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_destroy();
         }
 
-        // Redirect to login page
         header('Location: /login');
         exit;
     }

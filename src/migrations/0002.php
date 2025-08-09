@@ -34,14 +34,12 @@ class Migration0002 extends BaseMigration {
             throw new \Exception("Failed to create monitors table: " . implode(", ", $pdo->errorInfo()));
         }
 
-        // Create index on name for sorting
         $result = $pdo->exec("CREATE INDEX IF NOT EXISTS idx_monitors_name ON monitors (name)");
 
         if ($result === false) {
             throw new \Exception("Failed to create index on monitors table: " . implode(", ", $pdo->errorInfo()));
         }
 
-        // Create index on user_id for filtering
         $result = $pdo->exec("CREATE INDEX IF NOT EXISTS idx_monitors_user_id ON monitors (user_id)");
 
         if ($result === false) {

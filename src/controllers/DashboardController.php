@@ -8,7 +8,6 @@ use Cronbeat\Views\MonitorFormView;
 
 class DashboardController extends BaseController {
     public function doRouting(): string {
-        // Check if user is logged in
         if (!isset($_SESSION['user_id'])) {
             Logger::warning("Unauthorized access attempt to dashboard");
             header('Location: /login');
@@ -38,7 +37,6 @@ class DashboardController extends BaseController {
         $userId = $_SESSION['user_id'];
         $monitors = $this->database->getMonitors($userId);
 
-        // Get username for display
         $username = $this->database->getUsername($userId);
 
         $view = new DashboardView();
@@ -53,7 +51,6 @@ class DashboardController extends BaseController {
             $name = trim($_POST['name']);
 
             if ($name === '') {
-                // Show error on monitor form
                 $view = new MonitorFormView();
                 $view->setError('Monitor name is required');
                 return $view->render();
@@ -62,11 +59,9 @@ class DashboardController extends BaseController {
                 $result = $this->database->createMonitor($name, $userId);
 
                 if ($result !== false) {
-                    // Redirect to dashboard on success
                     header('Location: /dashboard');
                     exit;
                 } else {
-                    // Show error on monitor form
                     $view = new MonitorFormView();
                     $view->setError('Failed to create monitor');
                     return $view->render();
@@ -74,7 +69,6 @@ class DashboardController extends BaseController {
             }
         }
 
-        // If not POST request, show the form
         $view = new MonitorFormView();
         return $view->render();
     }
@@ -104,7 +98,6 @@ class DashboardController extends BaseController {
         $userId = $_SESSION['user_id'];
         $monitors = $this->database->getMonitors($userId);
 
-        // Get username for display
         $username = $this->database->getUsername($userId);
 
         $view = new DashboardView();
