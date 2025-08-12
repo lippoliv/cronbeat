@@ -48,18 +48,43 @@ class DashboardControllerTest extends DatabaseTestCase {
         // Given
         $_SESSION = []; // Clear session to simulate unauthenticated user
         
-        // When
-        try {
-            $this->controller->doRouting();
-        } catch (RedirectException $e) {
-            // Then - Verify the exception contains the correct headers
-            $headers = $e->getHeaders();
-            $this->assertArrayHasKey('Location', $headers);
-            $this->assertEquals('/login', $headers['Location']);
-            return;
-        }
+        // Set up exception expectation
+        $this->expectException(RedirectException::class);
         
-        $this->fail('Expected RedirectException was not thrown');
+        // When
+        $this->controller->doRouting();
+        
+        // Then - This code won't be executed due to the exception
+    }
+    
+    public function testDoRoutingRedirectsToLoginWithCorrectHeadersLocation(): void {
+        // Given
+        $_SESSION = []; // Clear session to simulate unauthenticated user
+        
+        // When & Then
+        $exception = $this->captureException(function() {
+            $this->controller->doRouting();
+        });
+        
+        $this->assertInstanceOf(RedirectException::class, $exception);
+        $headers = $exception->getHeaders();
+        $this->assertArrayHasKey('Location', $headers);
+        $this->assertEquals('/login', $headers['Location']);
+    }
+    
+    /**
+     * Helper method to capture an exception thrown by a callback
+     *
+     * @param callable $callback The callback that should throw an exception
+     * @return \Throwable|null The thrown exception or null if no exception was thrown
+     */
+    private function captureException(callable $callback): ?\Throwable {
+        try {
+            $callback();
+            return null;
+        } catch (\Throwable $e) {
+            return $e;
+        }
     }
 
     public function testShowDashboardDisplaysUserMonitors(): void {
@@ -108,23 +133,23 @@ class DashboardControllerTest extends DatabaseTestCase {
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_POST['name'] = 'New Test Monitor';
         
-        // When
-        try {
+        // When & Then
+        $exception = $this->captureException(function() {
             $this->controller->addMonitor();
-        } catch (RedirectException $e) {
-            // Then - Verify the monitor was created before the exception was thrown
-            $monitors = $this->getDatabase()->getMonitors($this->userId);
-            Assert::assertCount(1, $monitors);
-            Assert::assertEquals('New Test Monitor', $monitors[0]['name']);
-
-            // Verify the exception contains the correct headers
-            $headers = $e->getHeaders();
-            $this->assertArrayHasKey('Location', $headers);
-            $this->assertEquals('/dashboard', $headers['Location']);
-            return;
-        }
+        });
         
-        $this->fail('Expected RedirectException was not thrown');
+        // Verify the exception was thrown and is of the correct type
+        $this->assertInstanceOf(RedirectException::class, $exception);
+        
+        // Verify the monitor was created before the exception was thrown
+        $monitors = $this->getDatabase()->getMonitors($this->userId);
+        Assert::assertCount(1, $monitors);
+        Assert::assertEquals('New Test Monitor', $monitors[0]['name']);
+
+        // Verify the exception contains the correct headers
+        $headers = $exception->getHeaders();
+        $this->assertArrayHasKey('Location', $headers);
+        $this->assertEquals('/dashboard', $headers['Location']);
     }
 
     public function testAddMonitorShowsErrorWhenNameIsEmpty(): void {
