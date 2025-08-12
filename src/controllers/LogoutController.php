@@ -3,6 +3,7 @@
 namespace Cronbeat\Controllers;
 
 use Cronbeat\Logger;
+use Cronbeat\RedirectException;
 
 class LogoutController extends BaseController {
     public function doRouting(): string {
@@ -21,7 +22,6 @@ class LogoutController extends BaseController {
             session_destroy();
         }
 
-        header('Location: /login');
-        exit;
+        throw new RedirectException(['Location' => '/login']);
     }
 }

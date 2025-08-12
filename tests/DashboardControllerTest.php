@@ -5,6 +5,7 @@ namespace Cronbeat\Tests;
 use PHPUnit\Framework\Assert;
 use Cronbeat\Controllers\DashboardController;
 use Cronbeat\Database;
+use Cronbeat\RedirectException;
 use Cronbeat\Views\DashboardView;
 use Cronbeat\Views\MonitorFormView;
 
@@ -40,12 +41,15 @@ class DashboardControllerTest extends DatabaseTestCase {
         $_SESSION = []; // Clear session to simulate unauthenticated user
         
         // When/Then
-        // We need to test that header() is called with 'Location: /login'
-        // Since we can't test header() directly, we'll use output buffering and expectException
-        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
-        
-        // This will throw a warning because headers have already been sent
-        $this->controller->doRouting();
+        try {
+            $this->controller->doRouting();
+            $this->fail('Expected RedirectException was not thrown');
+        } catch (RedirectException $e) {
+            // Verify the exception contains the correct headers
+            $headers = $e->getHeaders();
+            $this->assertArrayHasKey('Location', $headers);
+            $this->assertEquals('/login', $headers['Location']);
+        }
     }
 
     public function testShowDashboardDisplaysUserMonitors(): void {
@@ -85,17 +89,20 @@ class DashboardControllerTest extends DatabaseTestCase {
         $_POST['name'] = 'New Test Monitor';
         
         // When/Then
-        // This will call header() which we can't test directly
-        // So we'll use output buffering and expectException
-        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
-        
-        // This will throw a warning because headers have already been sent
-        $this->controller->addMonitor();
-        
-        // Verify that the monitor was created
-        $monitors = $this->getDatabase()->getMonitors($this->userId);
-        Assert::assertCount(1, $monitors);
-        Assert::assertEquals('New Test Monitor', $monitors[0]['name']);
+        try {
+            $this->controller->addMonitor();
+            $this->fail('Expected RedirectException was not thrown');
+        } catch (RedirectException $e) {
+            // Verify the monitor was created before the exception was thrown
+            $monitors = $this->getDatabase()->getMonitors($this->userId);
+            Assert::assertCount(1, $monitors);
+            Assert::assertEquals('New Test Monitor', $monitors[0]['name']);
+            
+            // Verify the exception contains the correct headers
+            $headers = $e->getHeaders();
+            $this->assertArrayHasKey('Location', $headers);
+            $this->assertEquals('/dashboard', $headers['Location']);
+        }
     }
 
     public function testAddMonitorShowsErrorWhenNameIsEmpty(): void {

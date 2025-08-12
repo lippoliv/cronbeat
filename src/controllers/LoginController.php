@@ -2,6 +2,7 @@
 
 namespace Cronbeat\Controllers;
 
+use Cronbeat\RedirectException;
 use Cronbeat\Views\LoginView;
 
 class LoginController extends BaseController {
@@ -43,8 +44,7 @@ class LoginController extends BaseController {
                 if ($userId !== false) {
                     $_SESSION['user_id'] = $userId;
 
-                    header('Location: /dashboard');
-                    exit;
+                    throw new RedirectException(['Location' => '/dashboard']);
                 } else {
                     $error = 'Invalid username or password';
                 }
