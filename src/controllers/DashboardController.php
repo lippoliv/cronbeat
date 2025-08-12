@@ -3,6 +3,7 @@
 namespace Cronbeat\Controllers;
 
 use Cronbeat\Logger;
+use Cronbeat\RedirectException;
 use Cronbeat\Views\DashboardView;
 use Cronbeat\Views\MonitorFormView;
 
@@ -10,8 +11,7 @@ class DashboardController extends BaseController {
     public function doRouting(): string {
         if (!isset($_SESSION['user_id'])) {
             Logger::warning("Unauthorized access attempt to dashboard");
-            header('Location: /login');
-            exit;
+            throw new RedirectException(['Location' => '/login']);
         }
 
         $path = $this->parsePathWithoutController();
@@ -59,8 +59,7 @@ class DashboardController extends BaseController {
                 $result = $this->database->createMonitor($name, $userId);
 
                 if ($result !== false) {
-                    header('Location: /dashboard');
-                    exit;
+                    throw new RedirectException(['Location' => '/dashboard']);
                 } else {
                     $view = new MonitorFormView();
                     $view->setError('Failed to create monitor');

@@ -5,6 +5,7 @@ namespace Cronbeat\Tests;
 use PHPUnit\Framework\Assert;
 use Cronbeat\Controllers\LogoutController;
 use Cronbeat\Database;
+use Cronbeat\RedirectException;
 
 class LogoutControllerTest extends DatabaseTestCase {
     private ?LogoutController $controller = null;
@@ -38,12 +39,15 @@ class LogoutControllerTest extends DatabaseTestCase {
         // Session is already set up with user_id
         
         // When/Then
-        // This will call header() which we can't test directly
-        // So we'll use expectException
-        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
-        
-        // This will throw a warning because headers have already been sent
-        $this->controller->doRouting();
+        try {
+            $this->controller->doRouting();
+            $this->fail('Expected RedirectException was not thrown');
+        } catch (RedirectException $e) {
+            // Verify the exception contains the correct headers
+            $headers = $e->getHeaders();
+            $this->assertArrayHasKey('Location', $headers);
+            $this->assertEquals('/login', $headers['Location']);
+        }
     }
 
     public function testLogoutClearsSession(): void {
@@ -52,15 +56,18 @@ class LogoutControllerTest extends DatabaseTestCase {
         Assert::assertArrayHasKey('user_id', $_SESSION);
         
         // When/Then
-        // This will call header() which we can't test directly
-        // So we'll use expectException
-        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
-        
-        // This will throw a warning because headers have already been sent
-        $this->controller->logout();
-        
-        // We can't test that $_SESSION is empty because the code exits after header()
-        // But we can test that session_destroy() is called, which will clear the session
+        try {
+            $this->controller->logout();
+            $this->fail('Expected RedirectException was not thrown');
+        } catch (RedirectException $e) {
+            // Verify the session is cleared before the exception is thrown
+            $this->assertEmpty($_SESSION);
+            
+            // Verify the exception contains the correct headers
+            $headers = $e->getHeaders();
+            $this->assertArrayHasKey('Location', $headers);
+            $this->assertEquals('/login', $headers['Location']);
+        }
     }
 
     public function testLogoutHandlesEmptySession(): void {
@@ -68,14 +75,17 @@ class LogoutControllerTest extends DatabaseTestCase {
         $_SESSION = []; // Clear session
         
         // When/Then
-        // This will call header() which we can't test directly
-        // So we'll use expectException
-        $this->expectException(\PHPUnit\Framework\Error\Warning::class);
-        
-        // This will throw a warning because headers have already been sent
-        $this->controller->logout();
-        
-        // We can't test that $_SESSION is empty because the code exits after header()
-        // But we can test that session_destroy() is called, which will clear the session
+        try {
+            $this->controller->logout();
+            $this->fail('Expected RedirectException was not thrown');
+        } catch (RedirectException $e) {
+            // Verify the session is still empty
+            $this->assertEmpty($_SESSION);
+            
+            // Verify the exception contains the correct headers
+            $headers = $e->getHeaders();
+            $this->assertArrayHasKey('Location', $headers);
+            $this->assertEquals('/login', $headers['Location']);
+        }
     }
 }
