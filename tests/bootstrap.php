@@ -13,5 +13,8 @@ require_once APP_DIR . '/classes/MigrationHelper.php';
 require_once APP_DIR . '/controllers/BaseController.php';
 require_once APP_DIR . '/views/base.view.php';
 require_once APP_DIR . '/views/setup.view.php';
+require_once APP_DIR . '/views/monitor_form.view.php';
+require_once APP_DIR . '/views/dashboard.view.php';
 require_once APP_DIR . '/controllers/SetupController.php';
+require_once APP_DIR . '/controllers/DashboardController.php';
 require_once __DIR__ . '/DatabaseTestCase.php';

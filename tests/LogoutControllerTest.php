@@ -15,17 +15,14 @@ class LogoutControllerTest extends DatabaseTestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        
-        // Create a test user
+
         $this->passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($this->username, $this->passwordHash);
         $this->userId = $this->getDatabase()->validateUser($this->username, $this->passwordHash);
-        
-        // Set up session
+
         $_SESSION = [];
         $_SESSION['user_id'] = $this->userId;
-        
-        // Create controller
+
         $this->controller = new LogoutController($this->getDatabase());
     }
 
@@ -36,14 +33,13 @@ class LogoutControllerTest extends DatabaseTestCase {
 
     public function testDoRoutingCallsLogout(): void {
         // Given
-        // Session is already set up with user_id
-        
+
         // When/Then
         try {
             $this->controller->doRouting();
             $this->fail('Expected RedirectException was not thrown');
         } catch (RedirectException $e) {
-            // Verify the exception contains the correct headers
+// Verify the exception contains the correct headers
             $headers = $e->getHeaders();
             $this->assertArrayHasKey('Location', $headers);
             $this->assertEquals('/login', $headers['Location']);
@@ -52,28 +48,28 @@ class LogoutControllerTest extends DatabaseTestCase {
 
     public function testLogoutClearsSession(): void {
         // Given
-        // Session is already set up with user_id
         Assert::assertArrayHasKey('user_id', $_SESSION);
-        
+
         // When/Then
         try {
             $this->controller->logout();
             $this->fail('Expected RedirectException was not thrown');
-        } catch (RedirectException $e) {
+} catch (RedirectException $e) {
             // Verify the session is cleared before the exception is thrown
             $this->assertEmpty($_SESSION);
-            
-            // Verify the exception contains the correct headers
+
+        // Verify the exception contains the correct headers
             $headers = $e->getHeaders();
             $this->assertArrayHasKey('Location', $headers);
             $this->assertEquals('/login', $headers['Location']);
         }
     }
 
+
     public function testLogoutHandlesEmptySession(): void {
         // Given
-        $_SESSION = []; // Clear session
-        
+        $_SESSION = [];
+
         // When/Then
         try {
             $this->controller->logout();
@@ -81,11 +77,17 @@ class LogoutControllerTest extends DatabaseTestCase {
         } catch (RedirectException $e) {
             // Verify the session is still empty
             $this->assertEmpty($_SESSION);
-            
+
             // Verify the exception contains the correct headers
             $headers = $e->getHeaders();
-            $this->assertArrayHasKey('Location', $headers);
-            $this->assertEquals('/login', $headers['Location']);
+            $this->assertArrayHasKey(
+                'Location',
+                $headers
+            );
+            $this->assertEquals(
+                '/login',
+                $headers['Location']
+            );
         }
     }
 }
