@@ -132,22 +132,23 @@ class DashboardControllerTest extends DatabaseTestCase {
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_POST['name'] = 'New Test Monitor';
         
-        try {
+        // When & Then
+        $exception = $this->captureException(function() {
             $this->controller->addMonitor();
-        } catch (RedirectException $exception) {
-            // Verify the monitor was created before the exception was thrown
-            $monitors = $this->getDatabase()->getMonitors($this->userId);
-            Assert::assertCount(1, $monitors);
-            Assert::assertEquals('New Test Monitor', $monitors[0]['name']);
-
-            // Verify the exception contains the correct headers
-            $headers = $exception->getHeaders();
-            $this->assertArrayHasKey('Location', $headers);
-            $this->assertEquals('/dashboard', $headers['Location']);
-            return;
-        }
+        });
         
-        $this->fail('RedirectException was not thrown');
+        // Verify the exception was thrown and is of the correct type
+        $this->assertInstanceOf(RedirectException::class, $exception);
+        
+        // Verify the monitor was created before the exception was thrown
+        $monitors = $this->getDatabase()->getMonitors($this->userId);
+        Assert::assertCount(1, $monitors);
+        Assert::assertEquals('New Test Monitor', $monitors[0]['name']);
+
+        // Verify the exception contains the correct headers
+        $headers = $exception->getHeaders();
+        $this->assertArrayHasKey('Location', $headers);
+        $this->assertEquals('/dashboard', $headers['Location']);
     }
 
     public function testAddMonitorShowsErrorWhenNameIsEmpty(): void {
