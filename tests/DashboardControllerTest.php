@@ -129,21 +129,39 @@ class DashboardControllerTest extends DatabaseTestCase {
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_POST['name'] = 'New Test Monitor';
         
+        // When & Then
+        $this->expectException(RedirectException::class);
+        $this->expectExceptionMessage('Redirecting to /dashboard');
+        $this->controller->addMonitor();
+    }
+    
+    public function testAddMonitorCreatesMonitorWithCorrectData(): void {
+        // Given
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['name'] = 'New Test Monitor';
+        
+        // When
+        // Create the monitor but catch the exception to continue with assertions
+        $exception = null;
         try {
-            // When
             $this->controller->addMonitor();
-        } catch (RedirectException $exception) {
-            // Then
-            // Verify the monitor was created
-            $monitors = $this->getDatabase()->getMonitors($this->userId);
-            Assert::assertCount(1, $monitors);
-            Assert::assertEquals('New Test Monitor', $monitors[0]['name']);
-
-            // Verify the exception contains the correct headers
-            $headers = $exception->getHeaders();
-            $this->assertArrayHasKey('Location', $headers);
-            $this->assertEquals('/dashboard', $headers['Location']);
+        } catch (RedirectException $e) {
+            $exception = $e;
         }
+        
+        // Then
+        // Verify the monitor was created
+        $monitors = $this->getDatabase()->getMonitors($this->userId);
+        Assert::assertCount(1, $monitors);
+        Assert::assertEquals('New Test Monitor', $monitors[0]['name']);
+        
+        // Verify we got the expected exception
+        $this->assertInstanceOf(RedirectException::class, $exception);
+        
+        // Verify the exception contains the correct headers
+        $headers = $exception->getHeaders();
+        $this->assertArrayHasKey('Location', $headers);
+        $this->assertEquals('/dashboard', $headers['Location']);
     }
 
     public function testAddMonitorShowsErrorWhenNameIsEmpty(): void {
