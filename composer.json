@@ -15,7 +15,9 @@
     },
     "autoload": {
         "psr-4": {
-            "Cronbeat\\": "src/classes/"
+            "Cronbeat\\": "src/classes/",
+            "Cronbeat\\Controllers\\": "src/controllers/",
+            "Cronbeat\\Views\\": "src/views/"
         }
     },
     "autoload-dev": {
