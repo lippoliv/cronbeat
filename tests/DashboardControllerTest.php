@@ -62,20 +62,6 @@ class DashboardControllerTest extends DatabaseTestCase {
         $this->controller->doRouting();
     }
     
-    /**
-     * Helper method to capture an exception thrown by a callback
-     *
-     * @param callable $callback The callback that should throw an exception
-     * @return \Throwable|null The thrown exception or null if no exception was thrown
-     */
-    private function captureException(callable $callback): ?\Throwable {
-        try {
-            $callback();
-            return null;
-        } catch (\Throwable $e) {
-            return $e;
-        }
-    }
 
     public function testShowDashboardDisplaysUserMonitors(): void {
         // Given
@@ -133,22 +119,31 @@ class DashboardControllerTest extends DatabaseTestCase {
         $_POST['name'] = 'New Test Monitor';
         
         // When & Then
-        $exception = $this->captureException(function() {
+        $this->expectException(RedirectException::class);
+        $this->expectExceptionMessage('Redirecting to /dashboard');
+        $this->controller->addMonitor();
+    }
+    
+    public function testAddMonitorCreatesMonitorWithCorrectDataAndRedirectsToCorrectLocation(): void {
+        // Given
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['name'] = 'New Test Monitor';
+        
+        try {
+            // When
             $this->controller->addMonitor();
-        });
-        
-        // Verify the exception was thrown and is of the correct type
-        $this->assertInstanceOf(RedirectException::class, $exception);
-        
-        // Verify the monitor was created before the exception was thrown
-        $monitors = $this->getDatabase()->getMonitors($this->userId);
-        Assert::assertCount(1, $monitors);
-        Assert::assertEquals('New Test Monitor', $monitors[0]['name']);
+        } catch (RedirectException $exception) {
+            // Then
+            // Verify the monitor was created
+            $monitors = $this->getDatabase()->getMonitors($this->userId);
+            Assert::assertCount(1, $monitors);
+            Assert::assertEquals('New Test Monitor', $monitors[0]['name']);
 
-        // Verify the exception contains the correct headers
-        $headers = $exception->getHeaders();
-        $this->assertArrayHasKey('Location', $headers);
-        $this->assertEquals('/dashboard', $headers['Location']);
+            // Verify the exception contains the correct headers
+            $headers = $exception->getHeaders();
+            $this->assertArrayHasKey('Location', $headers);
+            $this->assertEquals('/dashboard', $headers['Location']);
+        }
     }
 
     public function testAddMonitorShowsErrorWhenNameIsEmpty(): void {
