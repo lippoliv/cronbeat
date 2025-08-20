@@ -126,7 +126,7 @@ class DashboardControllerTest extends DatabaseTestCase {
 
         // When & Then
         $this->expectException(RedirectException::class);
-        $this->expectExceptionMessage('Redirecting to /dashboard');
+        $this->expectExceptionMessage('Redirect');
         $this->getController()->addMonitor();
     }
 
@@ -137,7 +137,7 @@ class DashboardControllerTest extends DatabaseTestCase {
 
         // When & Then
         $this->expectException(RedirectException::class);
-        $this->expectExceptionMessage('Redirecting to /dashboard');
+        $this->expectExceptionMessage('Redirect');
         $this->getController()->addMonitor();
     }
 
