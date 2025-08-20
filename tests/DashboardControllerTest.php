@@ -2,25 +2,26 @@
 
 namespace Cronbeat\Tests;
 
-use PHPUnit\Framework\Assert;
 use Cronbeat\Controllers\DashboardController;
-use Cronbeat\Database;
 use Cronbeat\RedirectException;
-use Cronbeat\Views\DashboardView;
-use Cronbeat\Views\MonitorFormView;
+use PHPUnit\Framework\Assert;
 
 class DashboardControllerTest extends DatabaseTestCase {
     private ?DashboardController $controller = null;
-    private int $userId;
+    private int $userId = 0;
     private string $username = 'testuser';
-    private string $passwordHash;
+    private string $passwordHash = '';
 
     protected function setUp(): void {
         parent::setUp();
 
         $this->passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($this->username, $this->passwordHash);
-        $this->userId = $this->getDatabase()->validateUser($this->username, $this->passwordHash);
+        $userId = $this->getDatabase()->validateUser($this->username, $this->passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+        $this->userId = $userId;
 
         $_SESSION = [];
         $_SESSION['user_id'] = $this->userId;
@@ -33,35 +34,40 @@ class DashboardControllerTest extends DatabaseTestCase {
         parent::tearDown();
     }
 
+    private function getController(): DashboardController {
+        Assert::assertNotNull($this->controller, 'Controller should be initialized in setUp()');
+        return $this->controller;
+    }
+
     public function testDoRoutingRedirectsToLoginWhenNotAuthenticated(): void {
         // Given
         $_SESSION = []; // Clear session to simulate unauthenticated user
 
         // Set up exception expectation
         $this->expectException(RedirectException::class);
-        
+
         // When
-        $this->controller->doRouting();
+        $this->getController()->doRouting();
     }
-    
+
     public function testDoRoutingRedirectsToLoginWithCorrectHeaders(): void {
         // Given
         $_SESSION = []; // Clear session to simulate unauthenticated user
-        
+
         // When & Then
         $this->expectException(RedirectException::class);
-        $this->controller->doRouting();
+        $this->getController()->doRouting();
     }
-    
+
     public function testDoRoutingRedirectsToLoginWithCorrectHeadersLocation(): void {
         // Given
         $_SESSION = []; // Clear session to simulate unauthenticated user
-        
+
         // When & Then
         $this->expectException(RedirectException::class);
-        $this->controller->doRouting();
+        $this->getController()->doRouting();
     }
-    
+
 
     public function testShowDashboardDisplaysUserMonitors(): void {
         // Given
@@ -71,7 +77,7 @@ class DashboardControllerTest extends DatabaseTestCase {
         $this->getDatabase()->createMonitor($monitorName2, $this->userId);
 
         // When
-        $output = $this->controller->showDashboard();
+        $output = $this->getController()->showDashboard();
 
         // Then
         Assert::assertStringContainsString($monitorName1, $output);
@@ -83,7 +89,7 @@ class DashboardControllerTest extends DatabaseTestCase {
         // Given
 
         // When
-        $output = $this->controller->showMonitorForm();
+        $output = $this->getController()->showMonitorForm();
 
         // Then
         Assert::assertStringContainsString('<form', $output);
@@ -97,71 +103,71 @@ class DashboardControllerTest extends DatabaseTestCase {
 
         // When & Then
         $this->expectException(RedirectException::class);
-        $this->controller->addMonitor();
+        $this->getController()->addMonitor();
     }
-    
+
     public function testAddMonitorCreatesNewMonitorAndVerifyData(): void {
         // Given
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_POST['name'] = 'New Test Monitor';
-        
+
         // When & Then
         $this->expectException(RedirectException::class);
-        $this->controller->addMonitor();
-        
+        $this->getController()->addMonitor();
+
         // Note: The following assertions would normally be executed after the exception is thrown,
         // but since expectException causes the test to exit, we need to verify these in a separate test.
     }
-    
+
     public function testAddMonitorCreatesNewMonitorWithCorrectData(): void {
         // Given
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_POST['name'] = 'New Test Monitor';
-        
+
         // When & Then
         $this->expectException(RedirectException::class);
         $this->expectExceptionMessage('Redirecting to /dashboard');
-        $this->controller->addMonitor();
+        $this->getController()->addMonitor();
     }
-    
+
     public function testAddMonitorCreatesMonitorWithCorrectDataAndRedirectsToCorrectLocation(): void {
         // Given
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_POST['name'] = 'New Test Monitor';
-        
+
         // When & Then
         $this->expectException(RedirectException::class);
         $this->expectExceptionMessage('Redirecting to /dashboard');
-        $this->controller->addMonitor();
+        $this->getController()->addMonitor();
     }
-    
+
     public function testAddMonitorCreatesMonitorWithCorrectData(): void {
         // Given
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_POST['name'] = 'New Test Monitor';
-        
+
         // When
         // Create the monitor but catch the exception to continue with assertions
         $exception = null;
         try {
-            $this->controller->addMonitor();
+            $this->getController()->addMonitor();
         } catch (RedirectException $e) {
             $exception = $e;
         }
-        
+
         // Then
         // Verify the monitor was created
         $monitors = $this->getDatabase()->getMonitors($this->userId);
         Assert::assertCount(1, $monitors);
         Assert::assertEquals('New Test Monitor', $monitors[0]['name']);
-        
+
         // Verify we got the expected exception
-        $this->assertInstanceOf(RedirectException::class, $exception);
-        
+        Assert::assertInstanceOf(RedirectException::class, $exception);
+
         // Verify the exception contains the correct headers
         $headers = $exception->getHeaders();
-        $this->assertArrayHasKey('Location', $headers);
-        $this->assertEquals('/dashboard', $headers['Location']);
+        Assert::assertArrayHasKey('Location', $headers);
+        Assert::assertEquals('/dashboard', $headers['Location']);
     }
 
     public function testAddMonitorShowsErrorWhenNameIsEmpty(): void {
@@ -170,7 +176,7 @@ class DashboardControllerTest extends DatabaseTestCase {
         $_POST['name'] = '';
 
         // When
-        $output = $this->controller->addMonitor();
+        $output = $this->getController()->addMonitor();
 
         // Then
         Assert::assertStringContainsString('Monitor name is required', $output);
@@ -180,9 +186,12 @@ class DashboardControllerTest extends DatabaseTestCase {
         // Given
         $monitorName = 'Test Monitor';
         $uuid = $this->getDatabase()->createMonitor($monitorName, $this->userId);
+        if ($uuid === false) {
+            Assert::fail('Failed to create monitor for test');
+        }
 
         // When
-        $output = $this->controller->deleteMonitor($uuid);
+        $output = $this->getController()->deleteMonitor($uuid);
 
         // Then
         Assert::assertStringContainsString('Monitor deleted successfully', $output);
@@ -195,7 +204,7 @@ class DashboardControllerTest extends DatabaseTestCase {
         // Given
 
         // When
-        $output = $this->controller->deleteMonitor('');
+        $output = $this->getController()->deleteMonitor('');
 
         // Then
         Assert::assertStringContainsString('Monitor UUID is required', $output);
@@ -206,7 +215,7 @@ class DashboardControllerTest extends DatabaseTestCase {
         $nonExistentUuid = '12345678-1234-1234-1234-123456789012';
 
         // When
-        $output = $this->controller->deleteMonitor($nonExistentUuid);
+        $output = $this->getController()->deleteMonitor($nonExistentUuid);
 
         // Then
         Assert::assertStringContainsString('Failed to delete monitor', $output);

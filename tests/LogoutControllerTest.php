@@ -2,23 +2,27 @@
 
 namespace Cronbeat\Tests;
 
-use PHPUnit\Framework\Assert;
 use Cronbeat\Controllers\LogoutController;
 use Cronbeat\Database;
 use Cronbeat\RedirectException;
+use PHPUnit\Framework\Assert;
 
 class LogoutControllerTest extends DatabaseTestCase {
     private ?LogoutController $controller = null;
-    private int $userId;
+    private int $userId = 0;
     private string $username = 'testuser';
-    private string $passwordHash;
+    private string $passwordHash = '';
 
     protected function setUp(): void {
         parent::setUp();
 
         $this->passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($this->username, $this->passwordHash);
-        $this->userId = $this->getDatabase()->validateUser($this->username, $this->passwordHash);
+        $userId = $this->getDatabase()->validateUser($this->username, $this->passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+        $this->userId = $userId;
 
         $_SESSION = [];
         $_SESSION['user_id'] = $this->userId;
@@ -33,44 +37,46 @@ class LogoutControllerTest extends DatabaseTestCase {
 
     public function testDoRoutingCallsLogout(): void {
         // Given
+        Assert::assertNotNull($this->controller);
 
         // When/Then
         $this->expectException(RedirectException::class);
-        
+
         // Execute the method that should throw the exception
-        $this->controller->doRouting();
+        $this->controller?->doRouting();
     }
 
     public function testLogoutClearsSession(): void {
         // Given
         Assert::assertArrayHasKey('user_id', $_SESSION);
+        Assert::assertNotNull($this->controller);
 
         // Set up exception expectation
         $this->expectException(RedirectException::class);
-        
+
         // When
-        $this->controller->logout();
-        
+        $this->controller?->logout();
+
         // Then - This code won't be executed due to the exception
         // But we can verify the session is cleared because it happens before the exception is thrown
-        $this->assertEmpty($_SESSION);
+        Assert::assertEmpty($_SESSION);
     }
-    
+
     public function testLogoutRedirectsToLogin(): void {
         // Given
-        
+
         // When
         try {
-            $this->controller->logout();
+            $this->controller?->logout();
         } catch (RedirectException $e) {
             // Then - Verify the exception contains the correct headers
             $headers = $e->getHeaders();
-            $this->assertArrayHasKey('Location', $headers);
-            $this->assertEquals('/login', $headers['Location']);
+            Assert::assertArrayHasKey('Location', $headers);
+            Assert::assertEquals('/login', $headers['Location']);
             return;
         }
-        
-        $this->fail('Expected RedirectException was not thrown');
+
+        Assert::fail('Expected RedirectException was not thrown');
     }
 
 
@@ -80,12 +86,12 @@ class LogoutControllerTest extends DatabaseTestCase {
 
         // Set up exception expectation
         $this->expectException(RedirectException::class);
-        
+
         // When
-        $this->controller->logout();
-        
+        $this->controller?->logout();
+
         // Then - This code won't be executed due to the exception
         // But we can verify the session is still empty because it's checked before the exception is thrown
-        $this->assertEmpty($_SESSION);
+        Assert::assertEmpty($_SESSION);
     }
 }

@@ -29,8 +29,6 @@ class RedirectException extends \Exception {
     }
 
     /**
-     * Get the headers to be sent
-     *
      * @return array<string, string> Headers to be sent
      */
     public function getHeaders(): array {

@@ -120,6 +120,9 @@ class DatabaseTest extends DatabaseTestCase {
         $passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($username, $passwordHash);
         $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
         $monitorName = 'Test Monitor';
 
         // When
@@ -136,6 +139,9 @@ class DatabaseTest extends DatabaseTestCase {
         $passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($username, $passwordHash);
         $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
 
         // When
         $monitors = $this->getDatabase()->getMonitors($userId);
@@ -151,6 +157,9 @@ class DatabaseTest extends DatabaseTestCase {
         $passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($username, $passwordHash);
         $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
         $monitorName = 'Test Monitor';
         $uuid = $this->getDatabase()->createMonitor($monitorName, $userId);
 
@@ -170,14 +179,17 @@ class DatabaseTest extends DatabaseTestCase {
         $passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($username, $passwordHash);
         $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
 
         $monitorName2 = 'B Test Monitor';
         $monitorName1 = 'A Test Monitor';
         $monitorName3 = 'C Test Monitor';
 
-        $uuid2 = $this->getDatabase()->createMonitor($monitorName2, $userId);
-        $uuid1 = $this->getDatabase()->createMonitor($monitorName1, $userId);
-        $uuid3 = $this->getDatabase()->createMonitor($monitorName3, $userId);
+        $this->getDatabase()->createMonitor($monitorName2, $userId);
+        $this->getDatabase()->createMonitor($monitorName1, $userId);
+        $this->getDatabase()->createMonitor($monitorName3, $userId);
 
         // When
         $monitors = $this->getDatabase()->getMonitors($userId);
@@ -197,8 +209,14 @@ class DatabaseTest extends DatabaseTestCase {
         $passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($username, $passwordHash);
         $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
         $monitorName = 'Test Monitor';
         $uuid = $this->getDatabase()->createMonitor($monitorName, $userId);
+        if ($uuid === false) {
+            throw new \RuntimeException('Failed to create monitor for test');
+        }
 
         // When
         $result = $this->getDatabase()->deleteMonitor($uuid, $userId);
@@ -216,6 +234,9 @@ class DatabaseTest extends DatabaseTestCase {
         $passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($username, $passwordHash);
         $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
         $nonExistentUuid = '12345678-1234-1234-1234-123456789012';
 
         // When
@@ -231,13 +252,22 @@ class DatabaseTest extends DatabaseTestCase {
         $passwordHash1 = hash('sha256', 'password1');
         $this->getDatabase()->createUser($username1, $passwordHash1);
         $userId1 = $this->getDatabase()->validateUser($username1, $passwordHash1);
+        if ($userId1 === false) {
+            throw new \RuntimeException('Failed to validate test user 1');
+        }
         $monitorName = 'Test Monitor';
         $uuid = $this->getDatabase()->createMonitor($monitorName, $userId1);
+        if ($uuid === false) {
+            throw new \RuntimeException('Failed to create monitor for test');
+        }
 
         $username2 = 'testuser2';
         $passwordHash2 = hash('sha256', 'password2');
         $this->getDatabase()->createUser($username2, $passwordHash2);
         $userId2 = $this->getDatabase()->validateUser($username2, $passwordHash2);
+        if ($userId2 === false) {
+            throw new \RuntimeException('Failed to validate test user 2');
+        }
 
         // When
         $result = $this->getDatabase()->deleteMonitor($uuid, $userId2);
@@ -255,6 +285,9 @@ class DatabaseTest extends DatabaseTestCase {
         $passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($username, $passwordHash);
         $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
 
         // When
         $result = $this->getDatabase()->getUsername($userId);
