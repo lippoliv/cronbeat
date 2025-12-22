@@ -2,22 +2,9 @@
 
 namespace Cronbeat;
 
-/**
- * Exception thrown when a controller needs to redirect to another page.
- * Contains headers that should be sent before the redirect.
- */
 class RedirectException extends \Exception {
-    /**
-     * @var array<string, string> Headers to be sent
-     */
     private array $headers;
 
-    /**
-     * @param array<string, string> $headers Headers to be sent
-     * @param string $message Exception message
-     * @param int $code Exception code
-     * @param \Throwable|null $previous Previous exception
-     */
     public function __construct(
         array $headers,
         string $message = 'Redirect',
@@ -28,9 +15,6 @@ class RedirectException extends \Exception {
         $this->headers = $headers;
     }
 
-    /**
-     * @return array<string, string> Headers to be sent
-     */
     public function getHeaders(): array {
         return $this->headers;
     }

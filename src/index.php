@@ -44,14 +44,16 @@ $database = new Database(__DIR__ . '/db/db.sqlite');
 
 // Check if database exists
 if (!$database->databaseExists() && $controllerName !== 'setup') {
-    throw new RedirectException(['Location' => '/setup']);
+    header('Location: /setup');
+    exit;
 }
 
 // Check if database needs migration
 if ($database->databaseExists() && $controllerName !== 'migrate' && $controllerName !== 'setup') {
     if ($database->needsMigration(DB_VERSION)) {
         Logger::info("Database needs migration, redirecting to migrate page");
-        throw new RedirectException(['Location' => '/migrate']);
+        header('Location: /migrate');
+        exit;
     }
 }
 
