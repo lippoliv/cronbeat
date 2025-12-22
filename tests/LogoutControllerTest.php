@@ -39,10 +39,8 @@ class LogoutControllerTest extends DatabaseTestCase {
         // Given
         Assert::assertNotNull($this->controller);
 
-        // When/Then
+        // When & Then
         $this->expectException(RedirectException::class);
-
-        // Execute the method that should throw the exception
         $this->controller?->doRouting();
     }
 
@@ -51,15 +49,9 @@ class LogoutControllerTest extends DatabaseTestCase {
         Assert::assertArrayHasKey('user_id', $_SESSION);
         Assert::assertNotNull($this->controller);
 
-        // Set up exception expectation
+        // When & Then
         $this->expectException(RedirectException::class);
-
-        // When
         $this->controller?->logout();
-
-        // Then - This code won't be executed due to the exception
-        // But we can verify the session is cleared because it happens before the exception is thrown
-        Assert::assertEmpty($_SESSION);
     }
 
     public function testLogoutRedirectsToLogin(): void {

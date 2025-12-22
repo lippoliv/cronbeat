@@ -114,9 +114,6 @@ class DashboardControllerTest extends DatabaseTestCase {
         // When & Then
         $this->expectException(RedirectException::class);
         $this->getController()->addMonitor();
-
-        // Note: The following assertions would normally be executed after the exception is thrown,
-        // but since expectException causes the test to exit, we need to verify these in a separate test.
     }
 
     public function testAddMonitorCreatesNewMonitorWithCorrectData(): void {
