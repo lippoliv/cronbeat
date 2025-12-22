@@ -43,17 +43,6 @@ class DashboardControllerTest extends DatabaseTestCase {
         // Given
         $_SESSION = []; // Clear session to simulate unauthenticated user
 
-        // Set up exception expectation
-        $this->expectException(RedirectException::class);
-
-        // When
-        $this->getController()->doRouting();
-    }
-
-    public function testDoRoutingRedirectsToLoginWithCorrectHeaders(): void {
-        // Given
-        $_SESSION = []; // Clear session to simulate unauthenticated user
-
         // When & Then
         $this->expectException(RedirectException::class);
         $this->getController()->doRouting();
@@ -63,9 +52,16 @@ class DashboardControllerTest extends DatabaseTestCase {
         // Given
         $_SESSION = []; // Clear session to simulate unauthenticated user
 
-        // When & Then
-        $this->expectException(RedirectException::class);
-        $this->getController()->doRouting();
+        // When
+        try {
+            $this->getController()->doRouting();
+            Assert::fail('Expected RedirectException was not thrown');
+        } catch (RedirectException $e) {
+            // Then
+            $headers = $e->getHeaders();
+            Assert::assertArrayHasKey('Location', $headers);
+            Assert::assertSame('/login', $headers['Location']);
+        }
     }
 
 
