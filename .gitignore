@@ -31,3 +31,6 @@ Thumbs.db
 /logs/
 /cache/
 /.phpcs-cache
+
+# Test results
+/tests/results/junit.xml
