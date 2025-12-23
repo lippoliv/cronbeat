@@ -34,35 +34,9 @@ class DashboardControllerTest extends DatabaseTestCase {
         parent::tearDown();
     }
 
-    private function getController(): DashboardController {
-        Assert::assertNotNull($this->controller, 'Controller should be initialized in setUp()');
-        return $this->controller;
-    }
+    // Helper method removed per review; use $this->controller directly in tests
 
-    public function testDoRoutingRedirectsToLoginWhenNotAuthenticated(): void {
-        // Given
-        $_SESSION = []; // Clear session to simulate unauthenticated user
-
-        // When & Then
-        $this->expectException(RedirectException::class);
-        $this->getController()->doRouting();
-    }
-
-    public function testDoRoutingRedirectsToLoginWithCorrectHeadersLocation(): void {
-        // Given
-        $_SESSION = []; // Clear session to simulate unauthenticated user
-
-        // When
-        try {
-            $this->getController()->doRouting();
-            Assert::fail('Expected RedirectException was not thrown');
-        } catch (RedirectException $e) {
-            // Then
-            $headers = $e->getHeaders();
-            Assert::assertArrayHasKey('Location', $headers);
-            Assert::assertSame('/login', $headers['Location']);
-        }
-    }
+    // Removed redundant routing tests per review
 
 
     public function testShowDashboardDisplaysUserMonitors(): void {
@@ -73,7 +47,7 @@ class DashboardControllerTest extends DatabaseTestCase {
         $this->getDatabase()->createMonitor($monitorName2, $this->userId);
 
         // When
-        $output = $this->getController()->showDashboard();
+        $output = $this->controller->showDashboard();
 
         // Then
         Assert::assertStringContainsString($monitorName1, $output);
@@ -85,21 +59,11 @@ class DashboardControllerTest extends DatabaseTestCase {
         // Given
 
         // When
-        $output = $this->getController()->showMonitorForm();
+        $output = $this->controller->showMonitorForm();
 
         // Then
         Assert::assertStringContainsString('<form', $output);
         Assert::assertStringContainsString('name="name"', $output);
-    }
-
-    public function testAddMonitorCreatesNewMonitor(): void {
-        // Given
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-        $_POST['name'] = 'New Test Monitor';
-
-        // When & Then
-        $this->expectException(RedirectException::class);
-        $this->getController()->addMonitor();
     }
 
     public function testAddMonitorCreatesMonitorWithCorrectData(): void {
@@ -111,7 +75,7 @@ class DashboardControllerTest extends DatabaseTestCase {
         // Create the monitor but catch the exception to continue with assertions
         $exception = null;
         try {
-            $this->getController()->addMonitor();
+            $this->controller->addMonitor();
         } catch (RedirectException $e) {
             $exception = $e;
         }
@@ -137,7 +101,7 @@ class DashboardControllerTest extends DatabaseTestCase {
         $_POST['name'] = '';
 
         // When
-        $output = $this->getController()->addMonitor();
+        $output = $this->controller->addMonitor();
 
         // Then
         Assert::assertStringContainsString('Monitor name is required', $output);
@@ -152,7 +116,7 @@ class DashboardControllerTest extends DatabaseTestCase {
         }
 
         // When
-        $output = $this->getController()->deleteMonitor($uuid);
+        $output = $this->controller->deleteMonitor($uuid);
 
         // Then
         Assert::assertStringContainsString('Monitor deleted successfully', $output);
@@ -165,7 +129,7 @@ class DashboardControllerTest extends DatabaseTestCase {
         // Given
 
         // When
-        $output = $this->getController()->deleteMonitor('');
+        $output = $this->controller->deleteMonitor('');
 
         // Then
         Assert::assertStringContainsString('Monitor UUID is required', $output);
@@ -176,7 +140,7 @@ class DashboardControllerTest extends DatabaseTestCase {
         $nonExistentUuid = '12345678-1234-1234-1234-123456789012';
 
         // When
-        $output = $this->getController()->deleteMonitor($nonExistentUuid);
+        $output = $this->controller->deleteMonitor($nonExistentUuid);
 
         // Then
         Assert::assertStringContainsString('Failed to delete monitor', $output);

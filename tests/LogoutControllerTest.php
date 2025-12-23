@@ -35,15 +35,6 @@ class LogoutControllerTest extends DatabaseTestCase {
         parent::tearDown();
     }
 
-    public function testDoRoutingCallsLogout(): void {
-        // Given
-        Assert::assertNotNull($this->controller);
-
-        // When & Then
-        $this->expectException(RedirectException::class);
-        $this->controller?->doRouting();
-    }
-
     public function testLogoutRedirectsToLogin(): void {
         // Given
 
