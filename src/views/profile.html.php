@@ -7,21 +7,22 @@
  * @var string $email
  */
 ?>
-<div class="profile-header">
-    <h1>Your Profile</h1>
-    <div class="profile-nav">
-        <a href="/dashboard">Back to dashboard</a>
+<div class="dashboard-header">
+    <h1>CronBeat Dashboard</h1>
+    <div class="user-info">
+        <p>Welcome, <?= htmlspecialchars($username) ?>!</p>
+        <a href="/profile">profile</a>
         <a href="/login/logout">logout</a>
     </div>
-    <p class="username-line">Username: <strong><?= htmlspecialchars($username) ?></strong></p>
-    <p><a href="/profile">Profile</a></p>
-    <?php if ($error !== null) : ?>
-    <div class="error"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
-    <?php if ($success !== null) : ?>
-    <div class="success"><?= htmlspecialchars($success) ?></div>
-    <?php endif; ?>
 </div>
+
+<?php if ($error !== null) : ?>
+<div class='error'><?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
+
+<?php if ($success !== null) : ?>
+<div class='success'><?= htmlspecialchars($success) ?></div>
+<?php endif; ?>
 
 <div class="profile-content">
     <div class="profile-section">

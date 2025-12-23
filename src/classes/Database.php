@@ -67,6 +67,22 @@ class Database {
     }
 
 
+    /**
+     * Ensures a PDO connection is available and returns it.
+     */
+    private function getPdo(): \PDO {
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        return $this->pdo;
+    }
+
+
 
     public function createUser(string $username, string $passwordHash): bool {
         Logger::info("Creating new user", ['username' => $username]);
@@ -417,17 +433,10 @@ class Database {
 
     public function getUsername(int $userId): string|false {
         Logger::debug("Getting username for user ID", ['user_id' => $userId]);
-
-        if ($this->pdo === null) {
-            $this->connect();
-        }
-
-        if ($this->pdo === null) {
-            throw new \RuntimeException("Failed to connect to database");
-        }
+        $pdo = $this->getPdo();
 
         try {
-            $stmt = $this->pdo->prepare("SELECT username FROM users WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT username FROM users WHERE id = ?");
             $stmt->execute([$userId]);
             $username = $stmt->fetchColumn();
 
@@ -453,17 +462,10 @@ class Database {
      */
     public function getUserProfile(int $userId): UserProfileData|false {
         Logger::debug("Getting user profile", ['user_id' => $userId]);
-
-        if ($this->pdo === null) {
-            $this->connect();
-        }
-
-        if ($this->pdo === null) {
-            throw new \RuntimeException("Failed to connect to database");
-        }
+        $pdo = $this->getPdo();
 
         try {
-            $stmt = $this->pdo->prepare("SELECT username, name, email FROM users WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT username, name, email FROM users WHERE id = ?");
             $stmt->execute([$userId]);
             $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -488,17 +490,10 @@ class Database {
 
     public function updateUserProfile(int $userId, ?string $name, ?string $email): bool {
         Logger::info("Updating user profile", ['user_id' => $userId]);
-
-        if ($this->pdo === null) {
-            $this->connect();
-        }
-
-        if ($this->pdo === null) {
-            throw new \RuntimeException("Failed to connect to database");
-        }
+        $pdo = $this->getPdo();
 
         try {
-            $stmt = $this->pdo->prepare("UPDATE users SET name = ?, email = ? WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ? WHERE id = ?");
             $result = $stmt->execute([$name, $email, $userId]);
 
             if ($result) {
@@ -519,17 +514,10 @@ class Database {
 
     public function updateUserPassword(int $userId, string $passwordHash): bool {
         Logger::info("Updating user password", ['user_id' => $userId]);
-
-        if ($this->pdo === null) {
-            $this->connect();
-        }
-
-        if ($this->pdo === null) {
-            throw new \RuntimeException("Failed to connect to database");
-        }
+        $pdo = $this->getPdo();
 
         try {
-            $stmt = $this->pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+            $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
             $result = $stmt->execute([$passwordHash, $userId]);
 
             if ($result) {
