@@ -44,16 +44,6 @@ class LogoutControllerTest extends DatabaseTestCase {
         $this->controller?->doRouting();
     }
 
-    public function testLogoutClearsSession(): void {
-        // Given
-        Assert::assertArrayHasKey('user_id', $_SESSION);
-        Assert::assertNotNull($this->controller);
-
-        // When & Then
-        $this->expectException(RedirectException::class);
-        $this->controller?->logout();
-    }
-
     public function testLogoutRedirectsToLogin(): void {
         // Given
 

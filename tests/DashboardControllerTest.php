@@ -102,38 +102,6 @@ class DashboardControllerTest extends DatabaseTestCase {
         $this->getController()->addMonitor();
     }
 
-    public function testAddMonitorCreatesNewMonitorAndVerifyData(): void {
-        // Given
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-        $_POST['name'] = 'New Test Monitor';
-
-        // When & Then
-        $this->expectException(RedirectException::class);
-        $this->getController()->addMonitor();
-    }
-
-    public function testAddMonitorCreatesNewMonitorWithCorrectData(): void {
-        // Given
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-        $_POST['name'] = 'New Test Monitor';
-
-        // When & Then
-        $this->expectException(RedirectException::class);
-        $this->expectExceptionMessage('Redirect');
-        $this->getController()->addMonitor();
-    }
-
-    public function testAddMonitorCreatesMonitorWithCorrectDataAndRedirectsToCorrectLocation(): void {
-        // Given
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-        $_POST['name'] = 'New Test Monitor';
-
-        // When & Then
-        $this->expectException(RedirectException::class);
-        $this->expectExceptionMessage('Redirect');
-        $this->getController()->addMonitor();
-    }
-
     public function testAddMonitorCreatesMonitorWithCorrectData(): void {
         // Given
         $_SERVER['REQUEST_METHOD'] = 'POST';
