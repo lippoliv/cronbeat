@@ -34,9 +34,22 @@ class DashboardControllerTest extends DatabaseTestCase {
         parent::tearDown();
     }
 
-    // Helper method removed per review; use $this->controller directly in tests
 
-    // Removed redundant routing tests per review
+    public function testDoRoutingRedirectsToLoginWithCorrectHeadersLocation(): void {
+        // Given
+        $_SESSION = []; // Clear session to simulate unauthenticated user
+
+        // When
+        try {
+            $this->controller->doRouting();
+            Assert::fail('Expected RedirectException was not thrown');
+        } catch (RedirectException $e) {
+            // Then
+            $headers = $e->getHeaders();
+            Assert::assertArrayHasKey('Location', $headers);
+            Assert::assertSame('/login', $headers['Location']);
+        }
+    }
 
 
     public function testShowDashboardDisplaysUserMonitors(): void {

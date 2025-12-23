@@ -35,7 +35,6 @@ use Cronbeat\UrlHelper;
 $logLevel = getenv('LOG_LEVEL') !== false ? getenv('LOG_LEVEL') : Logger::INFO;
 Logger::setMinLevel($logLevel);
 
-// Start the session
 session_start();
 
 $controllerName = UrlHelper::parseControllerFromUrl();
