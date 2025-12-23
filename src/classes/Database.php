@@ -447,4 +447,104 @@ class Database {
             throw $e;
         }
     }
+
+    /**
+     * @return array{username: string, name: ?string, email: ?string}|false
+     */
+    public function getUserProfile(int $userId): array|false {
+        Logger::debug("Getting user profile", ['user_id' => $userId]);
+
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        try {
+            $stmt = $this->pdo->prepare("SELECT username, name, email FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($row === false || !is_array($row)) {
+                Logger::warning("User not found when fetching profile", ['user_id' => $userId]);
+                return false;
+            }
+
+            return [
+                'username' => (string)$row['username'],
+                'name' => $row['name'] !== null ? (string)$row['name'] : null,
+                'email' => $row['email'] !== null ? (string)$row['email'] : null,
+            ];
+        } catch (\PDOException $e) {
+            Logger::error("Error getting user profile", [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    public function updateUserProfile(int $userId, ?string $name, ?string $email): bool {
+        Logger::info("Updating user profile", ['user_id' => $userId]);
+
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        try {
+            $stmt = $this->pdo->prepare("UPDATE users SET name = ?, email = ? WHERE id = ?");
+            $result = $stmt->execute([$name, $email, $userId]);
+
+            if ($result && $stmt->rowCount() >= 0) {
+                Logger::info("User profile updated", ['user_id' => $userId]);
+                return true;
+            }
+
+            Logger::warning("Failed to update user profile", ['user_id' => $userId]);
+            return false;
+        } catch (\PDOException $e) {
+            Logger::error("Error updating user profile", [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    public function updateUserPassword(int $userId, string $passwordHash): bool {
+        Logger::info("Updating user password", ['user_id' => $userId]);
+
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        try {
+            $stmt = $this->pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+            $result = $stmt->execute([$passwordHash, $userId]);
+
+            if ($result && $stmt->rowCount() >= 0) {
+                Logger::info("User password updated", ['user_id' => $userId]);
+                return true;
+            }
+
+            Logger::warning("Failed to update user password", ['user_id' => $userId]);
+            return false;
+        } catch (\PDOException $e) {
+            Logger::error("Error updating user password", [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
 }

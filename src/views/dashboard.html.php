@@ -10,6 +10,7 @@
     <h1>CronBeat Dashboard</h1>
     <div class="user-info">
         <p>Welcome, <?= htmlspecialchars($username) ?>!</p>
+        <a href="/profile">profile</a>
         <a href="/login/logout">logout</a>
     </div>
 </div>
