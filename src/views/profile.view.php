@@ -11,7 +11,8 @@ class ProfileView extends BaseView {
 
     public function __construct() {
         $this->setTitle('Your Profile');
-        $this->setContainerClass('profile-container');
+        // Reuse dashboard container styling for profile while keeping a specific hook
+        $this->setContainerClass('dashboard-container profile-container');
     }
 
     public function setError(?string $error): self {

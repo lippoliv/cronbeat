@@ -8,7 +8,7 @@
  */
 ?>
 <div class="dashboard-header">
-    <h1>CronBeat Dashboard</h1>
+    <h1><a href="/dashboard">CronBeat Dashboard</a></h1>
     <div class="user-info">
         <p>Welcome, <?= htmlspecialchars($username) ?>!</p>
         <a href="/profile">profile</a>
