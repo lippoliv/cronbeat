@@ -2,6 +2,7 @@
 /**
  * @var string $title Page title
  * @var string $content Page content
+ * @var string|null $containerClass Container CSS class
  */
 ?>
 <!DOCTYPE html>
@@ -13,7 +14,7 @@
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <div class="container">
+    <div class="<?= $containerClass ?? 'container' ?>">
         <?= $content ?>
     </div>
 

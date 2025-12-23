@@ -21,7 +21,6 @@ class DatabaseTest extends DatabaseTestCase {
 
     public function testDatabaseExistsAfterCreation(): void {
         // Given
-        // Database is already created in setUp()
 
         // When
         $exists = $this->getDatabase()->databaseExists();
@@ -44,7 +43,6 @@ class DatabaseTest extends DatabaseTestCase {
         Assert::assertTrue(file_exists($testDbPath));
         Assert::assertTrue(is_dir($testDbDir));
 
-        // Cleanup
         unlink($testDbPath);
         if (is_dir($testDbDir)) {
             rmdir($testDbDir);
@@ -53,7 +51,6 @@ class DatabaseTest extends DatabaseTestCase {
 
     public function testCreateUserReturnsTrue(): void {
         // Given
-        // Database and migrations are already set up in setUp()
 
         // When
         $username = 'testuser';
@@ -66,7 +63,6 @@ class DatabaseTest extends DatabaseTestCase {
 
     public function testCreatedUserExists(): void {
         // Given
-        // Database and migrations are already set up in setUp()
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($username, $passwordHash);
@@ -80,7 +76,6 @@ class DatabaseTest extends DatabaseTestCase {
 
     public function testValidateUserWithCorrectCredentials(): void {
         // Given
-        // Database and migrations are already set up in setUp()
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($username, $passwordHash);
@@ -89,12 +84,12 @@ class DatabaseTest extends DatabaseTestCase {
         $validResult = $this->getDatabase()->validateUser($username, $passwordHash);
 
         // Then
-        Assert::assertTrue($validResult);
+        Assert::assertIsInt($validResult);
+        Assert::assertGreaterThan(0, $validResult);
     }
 
     public function testValidateUserWithIncorrectPassword(): void {
         // Given
-        // Database and migrations are already set up in setUp()
         $username = 'testuser';
         $passwordHash = hash('sha256', 'password');
         $this->getDatabase()->createUser($username, $passwordHash);
@@ -117,5 +112,198 @@ class DatabaseTest extends DatabaseTestCase {
 
         // Then
         Assert::assertFalse($nonExistentResult);
+    }
+
+    public function testCreateMonitorReturnsUuid(): void {
+        // Given
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+        $monitorName = 'Test Monitor';
+
+        // When
+        $uuid = $this->getDatabase()->createMonitor($monitorName, $userId);
+
+        // Then
+        Assert::assertIsString($uuid);
+        Assert::assertNotEmpty($uuid);
+    }
+
+    public function testGetMonitorsReturnsEmptyArrayWhenNoMonitors(): void {
+        // Given
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+
+        // When
+        $monitors = $this->getDatabase()->getMonitors($userId);
+
+        // Then
+        Assert::assertIsArray($monitors);
+        Assert::assertEmpty($monitors);
+    }
+
+    public function testGetMonitorsReturnsMonitorsForUser(): void {
+        // Given
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+        $monitorName = 'Test Monitor';
+        $uuid = $this->getDatabase()->createMonitor($monitorName, $userId);
+
+        // When
+        $monitors = $this->getDatabase()->getMonitors($userId);
+
+        // Then
+        Assert::assertIsArray($monitors);
+        Assert::assertCount(1, $monitors);
+        Assert::assertEquals($uuid, $monitors[0]['uuid']);
+        Assert::assertEquals($monitorName, $monitors[0]['name']);
+    }
+
+    public function testGetMonitorsReturnsMultipleMonitorsOrderedByName(): void {
+        // Given
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+
+        $monitorName2 = 'B Test Monitor';
+        $monitorName1 = 'A Test Monitor';
+        $monitorName3 = 'C Test Monitor';
+
+        $this->getDatabase()->createMonitor($monitorName2, $userId);
+        $this->getDatabase()->createMonitor($monitorName1, $userId);
+        $this->getDatabase()->createMonitor($monitorName3, $userId);
+
+        // When
+        $monitors = $this->getDatabase()->getMonitors($userId);
+
+        // Then
+        Assert::assertIsArray($monitors);
+        Assert::assertCount(3, $monitors);
+
+        Assert::assertEquals($monitorName1, $monitors[0]['name']);
+        Assert::assertEquals($monitorName2, $monitors[1]['name']);
+        Assert::assertEquals($monitorName3, $monitors[2]['name']);
+    }
+
+    public function testDeleteMonitorReturnsTrueWhenMonitorExists(): void {
+        // Given
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+        $monitorName = 'Test Monitor';
+        $uuid = $this->getDatabase()->createMonitor($monitorName, $userId);
+        if ($uuid === false) {
+            throw new \RuntimeException('Failed to create monitor for test');
+        }
+
+        // When
+        $result = $this->getDatabase()->deleteMonitor($uuid, $userId);
+
+        // Then
+        Assert::assertTrue($result);
+
+        $monitors = $this->getDatabase()->getMonitors($userId);
+        Assert::assertEmpty($monitors);
+    }
+
+    public function testDeleteMonitorReturnsFalseWhenMonitorDoesNotExist(): void {
+        // Given
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+        $nonExistentUuid = '12345678-1234-1234-1234-123456789012';
+
+        // When
+        $result = $this->getDatabase()->deleteMonitor($nonExistentUuid, $userId);
+
+        // Then
+        Assert::assertFalse($result);
+    }
+
+    public function testDeleteMonitorReturnsFalseWhenMonitorBelongsToAnotherUser(): void {
+        // Given
+        $username1 = 'testuser1';
+        $passwordHash1 = hash('sha256', 'password1');
+        $this->getDatabase()->createUser($username1, $passwordHash1);
+        $userId1 = $this->getDatabase()->validateUser($username1, $passwordHash1);
+        if ($userId1 === false) {
+            throw new \RuntimeException('Failed to validate test user 1');
+        }
+        $monitorName = 'Test Monitor';
+        $uuid = $this->getDatabase()->createMonitor($monitorName, $userId1);
+        if ($uuid === false) {
+            throw new \RuntimeException('Failed to create monitor for test');
+        }
+
+        $username2 = 'testuser2';
+        $passwordHash2 = hash('sha256', 'password2');
+        $this->getDatabase()->createUser($username2, $passwordHash2);
+        $userId2 = $this->getDatabase()->validateUser($username2, $passwordHash2);
+        if ($userId2 === false) {
+            throw new \RuntimeException('Failed to validate test user 2');
+        }
+
+        // When
+        $result = $this->getDatabase()->deleteMonitor($uuid, $userId2);
+
+        // Then
+        Assert::assertFalse($result);
+
+        $monitors = $this->getDatabase()->getMonitors($userId1);
+        Assert::assertCount(1, $monitors);
+    }
+
+    public function testGetUsernameReturnsUsernameWhenUserExists(): void {
+        // Given
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+
+        // When
+        $result = $this->getDatabase()->getUsername($userId);
+
+        // Then
+        Assert::assertEquals($username, $result);
+    }
+
+    public function testGetUsernameReturnsFalseWhenUserDoesNotExist(): void {
+        // Given
+        $nonExistentUserId = 9999;
+
+        // When
+        $result = $this->getDatabase()->getUsername($nonExistentUserId);
+
+        // Then
+        Assert::assertFalse($result);
     }
 }

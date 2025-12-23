@@ -2,6 +2,7 @@
 
 namespace Cronbeat\Controllers;
 
+use Cronbeat\RedirectException;
 use Cronbeat\Views\LoginView;
 
 class LoginController extends BaseController {
@@ -39,8 +40,11 @@ class LoginController extends BaseController {
             if ($username === '' || $passwordHash === '') {
                 $error = 'Username and password are required';
             } else {
-                if ($this->database->validateUser($username, $passwordHash)) {
-                    $error = "Login successful for $username";
+                $userId = $this->database->validateUser($username, $passwordHash);
+                if ($userId !== false) {
+                    $_SESSION['user_id'] = $userId;
+
+                    throw new RedirectException(['Location' => '/dashboard']);
                 } else {
                     $error = 'Invalid username or password';
                 }

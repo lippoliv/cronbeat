@@ -4,6 +4,7 @@ namespace Cronbeat\Controllers;
 
 use Cronbeat\Views\SetupView;
 use Cronbeat\MigrationHelper;
+use Cronbeat\RedirectException;
 
 class SetupController extends BaseController {
     public function doRouting(): string {
@@ -36,8 +37,7 @@ class SetupController extends BaseController {
                 $error = $this->runSetup($username, $passwordHash);
 
                 if ($error === null) {
-                    header('Location: /login');
-                    exit;
+                    throw new RedirectException(['Location' => '/login']);
                 }
             }
 
