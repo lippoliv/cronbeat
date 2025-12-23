@@ -501,7 +501,7 @@ class Database {
             $stmt = $this->pdo->prepare("UPDATE users SET name = ?, email = ? WHERE id = ?");
             $result = $stmt->execute([$name, $email, $userId]);
 
-            if ($result && $stmt->rowCount() >= 0) {
+            if ($result) {
                 Logger::info("User profile updated", ['user_id' => $userId]);
                 return true;
             }
@@ -532,7 +532,7 @@ class Database {
             $stmt = $this->pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
             $result = $stmt->execute([$passwordHash, $userId]);
 
-            if ($result && $stmt->rowCount() >= 0) {
+            if ($result) {
                 Logger::info("User password updated", ['user_id' => $userId]);
                 return true;
             }
