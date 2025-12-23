@@ -39,9 +39,9 @@ class ProfileController extends BaseController {
 
         $view = new ProfileView();
         if ($profile !== false) {
-            $view->setUsername($profile['username']);
-            $view->setName($profile['name'] ?? '');
-            $view->setEmail($profile['email'] ?? '');
+            $view->setUsername($profile->getUsername());
+            $view->setName($profile->getName() ?? '');
+            $view->setEmail($profile->getEmail() ?? '');
         }
         if ($error !== null) {
             $view->setError($error);

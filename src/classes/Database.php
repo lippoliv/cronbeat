@@ -449,9 +449,9 @@ class Database {
     }
 
     /**
-     * @return array{username: string, name: ?string, email: ?string}|false
+     * @return UserProfileData|false
      */
-    public function getUserProfile(int $userId): array|false {
+    public function getUserProfile(int $userId): UserProfileData|false {
         Logger::debug("Getting user profile", ['user_id' => $userId]);
 
         if ($this->pdo === null) {
@@ -472,11 +472,11 @@ class Database {
                 return false;
             }
 
-            return [
-                'username' => (string)$row['username'],
-                'name' => $row['name'] !== null ? (string)$row['name'] : null,
-                'email' => $row['email'] !== null ? (string)$row['email'] : null,
-            ];
+            return new UserProfileData(
+                (string)$row['username'],
+                $row['name'] !== null ? (string)$row['name'] : null,
+                $row['email'] !== null ? (string)$row['email'] : null,
+            );
         } catch (\PDOException $e) {
             Logger::error("Error getting user profile", [
                 'user_id' => $userId,
