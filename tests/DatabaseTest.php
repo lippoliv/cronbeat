@@ -306,4 +306,81 @@ class DatabaseTest extends DatabaseTestCase {
         // Then
         Assert::assertFalse($result);
     }
+
+    public function testGetUserProfileReturnsModelForExistingUser(): void {
+        // Given
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+        $name = 'Jane Doe';
+        $email = 'jane@example.com';
+        $this->getDatabase()->updateUserProfile($userId, $name, $email);
+
+        // When
+        $profile = $this->getDatabase()->getUserProfile($userId);
+
+        // Then
+        Assert::assertInstanceOf(\Cronbeat\UserProfileData::class, $profile);
+        Assert::assertSame($username, $profile->getUsername());
+        Assert::assertSame($name, $profile->getName());
+        Assert::assertSame($email, $profile->getEmail());
+    }
+
+    public function testGetUserProfileReturnsFalseForMissingUser(): void {
+        // Given
+        $nonExistentUserId = 123456;
+
+        // When
+        $profile = $this->getDatabase()->getUserProfile($nonExistentUserId);
+
+        // Then
+        Assert::assertFalse($profile);
+    }
+
+    public function testUpdateUserProfileUpdatesNameAndEmail(): void {
+        // Given
+        $username = 'testuser';
+        $passwordHash = hash('sha256', 'password');
+        $this->getDatabase()->createUser($username, $passwordHash);
+        $userId = $this->getDatabase()->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+
+        // When
+        $result = $this->getDatabase()->updateUserProfile($userId, 'John Smith', 'john.smith@example.com');
+
+        // Then
+        Assert::assertTrue($result);
+        $profile = $this->getDatabase()->getUserProfile($userId);
+        Assert::assertInstanceOf(\Cronbeat\UserProfileData::class, $profile);
+        Assert::assertSame('John Smith', $profile->getName());
+        Assert::assertSame('john.smith@example.com', $profile->getEmail());
+    }
+
+    public function testUpdateUserPasswordPersistsNewHash(): void {
+        // Given
+        $username = 'testuser';
+        $oldHash = hash('sha256', 'oldpassword');
+        $this->getDatabase()->createUser($username, $oldHash);
+        $userId = $this->getDatabase()->validateUser($username, $oldHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+        $newHash = hash('sha256', 'newpassword');
+
+        // When
+        $result = $this->getDatabase()->updateUserPassword($userId, $newHash);
+
+        // Then
+        Assert::assertTrue($result);
+        Assert::assertFalse($this->getDatabase()->validateUser($username, $oldHash));
+        $validated = $this->getDatabase()->validateUser($username, $newHash);
+        Assert::assertIsInt($validated);
+        Assert::assertSame($userId, $validated);
+    }
 }

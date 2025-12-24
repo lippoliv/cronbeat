@@ -67,9 +67,6 @@ class Database {
     }
 
 
-    /**
-     * Ensures a PDO connection is available and returns it.
-     */
     private function getPdo(): \PDO {
         if ($this->pdo === null) {
             $this->connect();
