@@ -14,6 +14,10 @@ class MonitorController extends BaseController {
         $parts = array_values(array_filter(explode('/', $path), fn($p) => $p !== ''));
 
         $uuid = $parts[0] ?? '';
+        $qPos = strpos($uuid, '?');
+        if ($qPos !== false) {
+            $uuid = substr($uuid, 0, $qPos);
+        }
         $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 
         return $this->showMonitorHistory($uuid, $page);
