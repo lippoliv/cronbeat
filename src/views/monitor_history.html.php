@@ -22,7 +22,7 @@
         <h2>History for <?= htmlspecialchars($monitorName !== '' ? $monitorName : $monitorUuid) ?></h2>
     </div>
     <p class="monitor-uuid">UUID: <span id="monitor-uuid-copy" title="Copy URL" style="cursor: pointer;" data-uuid="<?= htmlspecialchars($monitorUuid) ?>"><?= htmlspecialchars($monitorUuid) ?></span></p>
-    <p>Total entries: <?= $total ?></p>
+    <p>Total pings: <?= $total ?></p>
     <hr/>
     <?php if (count($history) === 0): ?>
         <p>No ping activity yet.</p>
@@ -32,7 +32,7 @@
                 <li class="history-item">
                     <span class="history-time"><?= htmlspecialchars($entry->getPingedAt()) ?></span>
                     <?php if ($entry->getDurationMs() !== null): ?>
-                        <span class="history-duration"><?= $entry->getDurationMs() ?> ms</span>
+                        <span class="history-duration">(<?= $entry->getDurationMs() ?> ms)</span>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>
@@ -44,10 +44,22 @@
         $prevPage = max(1, $page - 1);
         $nextPage = min($totalPages, $page + 1);
     ?>
-    <div class="pagination">
-        <a class="page-link<?= $page <= 1 ? ' disabled' : '' ?>" href="/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $prevPage ?>">Prev</a>
+    <div class="pagination" style="display: flex; align-items: center; gap: 0.75rem;">
+        <button type="button"
+                style="width: auto;"
+                class="page-btn"
+                onclick="window.location.href='/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $prevPage ?>'"
+                <?= $page <= 1 ? 'disabled' : '' ?>>
+            &lt;
+        </button>
         <span>Page <?= $page ?> / <?= $totalPages ?></span>
-        <a class="page-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $nextPage ?>">Next</a>
+        <button type="button"
+                style="width: auto;"
+                class="page-btn"
+                onclick="window.location.href='/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $nextPage ?>'"
+                <?= $page >= $totalPages ? 'disabled' : '' ?>>
+            &gt;
+        </button>
     </div>
 
     <script>
