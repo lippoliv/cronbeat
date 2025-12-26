@@ -40,15 +40,15 @@
                 <p class="monitor-uuid">UUID: <?= htmlspecialchars($monitor['uuid']) ?></p>
                 <p class="monitor-last-ping">
                     Last ping:
-                    <?php if (!empty($monitor['last_ping_at'])): ?>
-                        <span class="last-ping-time"><?= htmlspecialchars((string)$monitor['last_ping_at']) ?></span>
-                        <?php if (isset($monitor['last_duration_ms']) && $monitor['last_duration_ms'] !== null): ?>
-                            <span class="last-ping-duration">(<?= (int)$monitor['last_duration_ms'] ?> ms)</span>
+                    <?php if (isset($monitor['last_ping_at']) && $monitor['last_ping_at'] !== ''): ?>
+                        <span class="last-ping-time"><?= htmlspecialchars((string) $monitor['last_ping_at']) ?></span>
+                        <?php if (isset($monitor['last_duration_ms']) && is_numeric($monitor['last_duration_ms'])): ?>
+                            <span class="last-ping-duration">(<?= (int) $monitor['last_duration_ms'] ?> ms)</span>
                         <?php endif; ?>
                     <?php else: ?>
                         <span class="last-ping-time">—</span>
                     <?php endif; ?>
-                    <?php if (!empty($monitor['pending_start']) && (int)$monitor['pending_start'] === 1): ?>
+                    <?php if (isset($monitor['pending_start']) && (int) $monitor['pending_start'] === 1): ?>
                         <span class="spinner" title="waiting for ping"></span>
                     <?php endif; ?>
                 </p>

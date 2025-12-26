@@ -14,7 +14,7 @@
         <a href="/dashboard">Back to dashboard</a>
     </div>
     <p class="monitor-uuid">UUID: <?= htmlspecialchars($monitorUuid) ?></p>
-    <p>Total entries: <?= (int)$total ?></p>
+    <p>Total entries: <?= $total ?></p>
     <hr/>
     <?php if (count($history) === 0): ?>
         <p>No ping activity yet.</p>
@@ -22,9 +22,9 @@
         <ul class="history-list">
             <?php foreach ($history as $entry): ?>
                 <li class="history-item">
-                    <span class="history-time"><?= htmlspecialchars((string)$entry['pinged_at']) ?></span>
+                    <span class="history-time"><?= htmlspecialchars($entry['pinged_at']) ?></span>
                     <?php if ($entry['duration_ms'] !== null): ?>
-                        <span class="history-duration">(<?= (int)$entry['duration_ms'] ?> ms)</span>
+                        <span class="history-duration"><?= $entry['duration_ms'] ?> ms</span>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>
@@ -38,7 +38,7 @@
     ?>
     <div class="pagination">
         <a class="page-link<?= $page <= 1 ? ' disabled' : '' ?>" href="/dashboard/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $prevPage ?>">Prev</a>
-        <span>Page <?= (int)$page ?> / <?= (int)$totalPages ?></span>
+        <span>Page <?= $page ?> / <?= $totalPages ?></span>
         <a class="page-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="/dashboard/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $nextPage ?>">Next</a>
     </div>
 </div>

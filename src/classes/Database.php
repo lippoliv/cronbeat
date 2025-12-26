@@ -514,11 +514,25 @@ class Database {
             if ($startedAt !== false && $startedAt !== null) {
                 // Compute duration as difference between now and started_at in milliseconds
                 $stmtNow = $pdo->query("SELECT strftime('%s','now') * 1000");
-                $nowMs = (int)$stmtNow->fetchColumn();
+                if ($stmtNow === false) {
+                    throw new \RuntimeException('Failed to query current timestamp');
+                }
+                $nowCol = $stmtNow->fetchColumn();
+                if ($nowCol === false || $nowCol === null) {
+                    throw new \RuntimeException('Failed to fetch current timestamp');
+                }
+                $nowMs = (int) $nowCol;
+
                 $stmtStartMs = $pdo->prepare("SELECT strftime('%s', ?) * 1000");
-                $stmtStartMs->execute([(string)$startedAt]);
-                $startMs = (int)$stmtStartMs->fetchColumn();
-                $durationMs = max(0, $nowMs - $startMs);
+                $stmtStartMs->execute([(string) $startedAt]);
+                $startCol = $stmtStartMs->fetchColumn();
+                if ($startCol === false || $startCol === null) {
+                    // If for some reason conversion failed, treat as no duration
+                    $durationMs = null;
+                } else {
+                    $startMs = (int) $startCol;
+                    $durationMs = max(0, $nowMs - $startMs);
+                }
             }
 
             $stmtInsert = $pdo->prepare("INSERT INTO ping_history (monitor_id, pinged_at, duration_ms) VALUES (?, CURRENT_TIMESTAMP, ?)");

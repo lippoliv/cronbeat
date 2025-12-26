@@ -125,7 +125,8 @@ class DashboardController extends BaseController {
         if ($monitorId === false) {
             $view = new DashboardView();
             $view->setError('Monitor not found');
-            $view->setUsername($this->database->getUsername($userId) ?: 'Unknown');
+            $username = $this->database->getUsername($userId);
+            $view->setUsername($username !== false ? $username : 'Unknown');
             $view->setMonitors($this->database->getMonitors($userId));
             return $view->render();
         }

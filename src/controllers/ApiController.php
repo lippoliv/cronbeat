@@ -50,6 +50,9 @@ class ApiController extends BaseController {
         ]);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private function json(array $data): string {
         header('Content-Type: application/json');
         return json_encode($data, JSON_THROW_ON_ERROR);

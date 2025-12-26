@@ -10,20 +10,21 @@ class PingDatabaseTest extends DatabaseTestCase {
         // Given
         $this->getDatabase()->createUser('u', 'p');
         $userId = $this->getDatabase()->validateUser('u', 'p');
-        if ($userId === false) { $this->fail('user validate failed'); }
+        if ($userId === false) { Assert::fail('user validate failed'); }
         $uuid = $this->getDatabase()->createMonitor('m1', $userId);
-        if ($uuid === false) { $this->fail('monitor create failed'); }
+        if ($uuid === false) { Assert::fail('monitor create failed'); }
 
         // When
         $result = $this->getDatabase()->completePing($uuid);
 
         // Then
         Assert::assertIsArray($result);
+        /** @var array{history_id:int, duration_ms:int|null} $result */
         Assert::assertArrayHasKey('duration_ms', $result);
         Assert::assertNull($result['duration_ms']);
 
         $monitorId = $this->getDatabase()->getMonitorIdByUuid($uuid);
-        if ($monitorId === false) { $this->fail('monitor id not found'); }
+        if ($monitorId === false) { Assert::fail('monitor id not found'); }
         $history = $this->getDatabase()->getPingHistory($monitorId, 10, 0);
         Assert::assertCount(1, $history);
         Assert::assertNull($history[0]['duration_ms']);
@@ -33,9 +34,9 @@ class PingDatabaseTest extends DatabaseTestCase {
         // Given
         $this->getDatabase()->createUser('u', 'p');
         $userId = $this->getDatabase()->validateUser('u', 'p');
-        if ($userId === false) { $this->fail('user validate failed'); }
+        if ($userId === false) { Assert::fail('user validate failed'); }
         $uuid = $this->getDatabase()->createMonitor('m1', $userId);
-        if ($uuid === false) { $this->fail('monitor create failed'); }
+        if ($uuid === false) { Assert::fail('monitor create failed'); }
 
         // When
         $started = $this->getDatabase()->startPingTracking($uuid);
@@ -44,12 +45,13 @@ class PingDatabaseTest extends DatabaseTestCase {
         // Then
         Assert::assertTrue($started);
         Assert::assertIsArray($result);
+        /** @var array{history_id:int, duration_ms:int|null} $result */
         Assert::assertArrayHasKey('duration_ms', $result);
         Assert::assertIsInt($result['duration_ms']);
         Assert::assertGreaterThanOrEqual(0, $result['duration_ms']);
 
         $monitorId = $this->getDatabase()->getMonitorIdByUuid($uuid);
-        if ($monitorId === false) { $this->fail('monitor id not found'); }
+        if ($monitorId === false) { Assert::fail('monitor id not found'); }
         $pending = $this->getDatabase()->hasPendingStart($monitorId);
         Assert::assertFalse($pending);
     }
@@ -58,15 +60,15 @@ class PingDatabaseTest extends DatabaseTestCase {
         // Given
         $this->getDatabase()->createUser('u', 'p');
         $userId = $this->getDatabase()->validateUser('u', 'p');
-        if ($userId === false) { $this->fail('user validate failed'); }
+        if ($userId === false) { Assert::fail('user validate failed'); }
         $uuid = $this->getDatabase()->createMonitor('m1', $userId);
-        if ($uuid === false) { $this->fail('monitor create failed'); }
+        if ($uuid === false) { Assert::fail('monitor create failed'); }
         // produce 120 pings
         for ($i = 0; $i < 120; $i++) {
             $this->getDatabase()->completePing($uuid);
         }
         $monitorId = $this->getDatabase()->getMonitorIdByUuid($uuid);
-        if ($monitorId === false) { $this->fail('monitor id not found'); }
+        if ($monitorId === false) { Assert::fail('monitor id not found'); }
 
         // When
         $page1 = $this->getDatabase()->getPingHistory($monitorId, 50, 0);
