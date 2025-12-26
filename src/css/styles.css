@@ -194,6 +194,13 @@ button:hover {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
+/* Make the inner link look like plain text within the tile */
+.monitor-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
 .monitor-info {
     margin-bottom: 1.5rem;
 }

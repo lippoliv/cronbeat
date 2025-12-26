@@ -34,34 +34,35 @@
     <?php else : ?>
     <div class="monitors-grid">
         <?php foreach ($monitors as $monitor) : ?>
-        <a class="monitor-tile" href="/monitor/<?= htmlspecialchars($monitor->getUuid()) ?>">
-            <div class="monitor-info">
-                <h3><?= htmlspecialchars($monitor->getName()) ?></h3>
-                <p class="monitor-uuid">UUID: <?= htmlspecialchars($monitor->getUuid()) ?></p>
-                <p class="monitor-last-ping">
-                    Last ping:
-                    <?php if ($monitor->getLastPingAt() !== null && $monitor->getLastPingAt() !== ''): ?>
-                        <span class="last-ping-time"><?= htmlspecialchars((string) $monitor->getLastPingAt()) ?></span>
-                        <?php if ($monitor->getLastDurationMs() !== null): ?>
-                            <span class="last-ping-duration">(<?= (int) $monitor->getLastDurationMs() ?> ms)</span>
+        <div class="monitor-tile">
+            <a class="monitor-link" href="/monitor/<?= htmlspecialchars($monitor->getUuid()) ?>">
+                <div class="monitor-info">
+                    <h3><?= htmlspecialchars($monitor->getName()) ?></h3>
+                    <p class="monitor-uuid">UUID: <?= htmlspecialchars($monitor->getUuid()) ?></p>
+                    <p class="monitor-last-ping">
+                        Last ping:
+                        <?php if ($monitor->getLastPingAt() !== null && $monitor->getLastPingAt() !== ''): ?>
+                            <span class="last-ping-time"><?= htmlspecialchars((string) $monitor->getLastPingAt()) ?></span>
+                            <?php if ($monitor->getLastDurationMs() !== null): ?>
+                                <span class="last-ping-duration">(<?= (int) $monitor->getLastDurationMs() ?> ms)</span>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <span class="last-ping-time">—</span>
                         <?php endif; ?>
-                    <?php else: ?>
-                        <span class="last-ping-time">—</span>
-                    <?php endif; ?>
-                    <?php if ($monitor->hasPendingStart()): ?>
-                        <span class="spinner" title="waiting for ping"></span>
-                    <?php endif; ?>
-                </p>
-            </div>
+                        <?php if ($monitor->hasPendingStart()): ?>
+                            <span class="spinner" title="waiting for ping"></span>
+                        <?php endif; ?>
+                    </p>
+                </div>
+            </a>
             <div class="monitor-actions">
                 <a href="/dashboard/delete/<?= htmlspecialchars($monitor->getUuid()) ?>"
                    class="delete-button"
-                   onclick="return confirm('Are you sure you want to delete this monitor?')"
-                   onclick="event.stopPropagation();">
+                   onclick="return confirm('Are you sure you want to delete this monitor?')">
                     Delete
                 </a>
             </div>
-        </a>
+        </div>
         <?php endforeach; ?>
     </div>
     <?php endif; ?>
