@@ -8,10 +8,16 @@
  * @var int $total
  */
 ?>
-<div class="history-header">
-    <h1>History for <?= htmlspecialchars($monitorName !== '' ? $monitorName : $monitorUuid) ?></h1>
-    <div>
-        <a href="/dashboard">Back to dashboard</a>
+<div class="dashboard-header">
+    <h1><a href="/dashboard">CronBeat Dashboard</a></h1>
+    <div class="user-info">
+        <p>Welcome, <?= htmlspecialchars($username) ?>!</p>
+        <a href="/profile">profile</a>
+        <a href="/login/logout">logout</a>
+    </div>
+    
+    <div class="history-title">
+        <h2>History for <?= htmlspecialchars($monitorName !== '' ? $monitorName : $monitorUuid) ?></h2>
     </div>
     <p class="monitor-uuid">UUID: <?= htmlspecialchars($monitorUuid) ?></p>
     <p>Total entries: <?= $total ?></p>

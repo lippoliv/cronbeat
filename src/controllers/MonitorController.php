@@ -46,12 +46,14 @@ class MonitorController extends BaseController {
         }
 
         $view = new \Cronbeat\Views\MonitorHistoryView();
+        $username = $this->database->getUsername($userId);
         $view->setMonitorUuid($uuid)
             ->setMonitorName($monitorName)
             ->setHistory($history)
             ->setPage($page)
             ->setPageSize($pageSize)
-            ->setTotal($total);
+            ->setTotal($total)
+            ->setUsername($username !== false ? $username : 'Unknown');
 
         return $view->render();
     }
