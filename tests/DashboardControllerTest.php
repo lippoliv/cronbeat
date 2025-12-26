@@ -47,15 +47,18 @@ class DashboardControllerTest extends DatabaseTestCase {
         $_SESSION = []; // Clear session to simulate unauthenticated user
 
         // When
+        $thrown = null;
         try {
             $this->getController()->doRouting();
-            Assert::fail('Expected RedirectException was not thrown');
         } catch (RedirectException $e) {
-            // Then
-            $headers = $e->getHeaders();
-            Assert::assertArrayHasKey('Location', $headers);
-            Assert::assertSame('/login', $headers['Location']);
+            $thrown = $e;
         }
+
+        // Then
+        Assert::assertInstanceOf(RedirectException::class, $thrown);
+        $headers = $thrown?->getHeaders() ?? [];
+        Assert::assertArrayHasKey('Location', $headers);
+        Assert::assertSame('/login', $headers['Location']);
     }
 
 
@@ -133,7 +136,7 @@ class DashboardControllerTest extends DatabaseTestCase {
         $monitorName = 'Test Monitor';
         $uuid = $this->getDatabase()->createMonitor($monitorName, $this->userId);
         if ($uuid === false) {
-            Assert::fail('Failed to create monitor for test');
+            throw new \RuntimeException('Failed to create monitor for test');
         }
 
         // When

@@ -16,9 +16,9 @@ class ApiControllerTest extends DatabaseTestCase {
         $db = $this->getDatabase();
         $db->createUser('u', 'p');
         $userId = $db->validateUser('u', 'p');
-        if ($userId === false) { Assert::fail('user validate failed'); }
+        if ($userId === false) { throw new \RuntimeException('user validate failed'); }
         $uuid = $db->createMonitor('m1', $userId);
-        if ($uuid === false) { Assert::fail('monitor create failed'); }
+        if ($uuid === false) { throw new \RuntimeException('monitor create failed'); }
         $controller = new ApiController($db);
 
         // When
@@ -55,9 +55,9 @@ class ApiControllerTest extends DatabaseTestCase {
         $db = $this->getDatabase();
         $db->createUser('u2', 'p2');
         $userId = $db->validateUser('u2', 'p2');
-        if ($userId === false) { Assert::fail('user validate failed'); }
+        if ($userId === false) { throw new \RuntimeException('user validate failed'); }
         $uuid = $db->createMonitor('m2', $userId);
-        if ($uuid === false) { Assert::fail('monitor create failed'); }
+        if ($uuid === false) { throw new \RuntimeException('monitor create failed'); }
         $controller = new ApiController($db);
 
         // When

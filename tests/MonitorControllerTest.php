@@ -20,7 +20,7 @@ class MonitorControllerTest extends DatabaseTestCase {
         $db->createUser($this->username, $this->passwordHash);
         $validated = $db->validateUser($this->username, $this->passwordHash);
         if ($validated === false) {
-            Assert::fail('Failed to validate test user');
+            throw new \RuntimeException('Failed to validate test user');
         }
         $this->userId = $validated;
 
@@ -48,22 +48,25 @@ class MonitorControllerTest extends DatabaseTestCase {
         $_SERVER['REQUEST_URI'] = '/monitor/anything';
 
         // When
+        $thrown = null;
         try {
             $this->getController()->doRouting();
-            Assert::fail('Expected RedirectException was not thrown');
         } catch (RedirectException $e) {
-            // Then
-            $headers = $e->getHeaders();
-            Assert::assertArrayHasKey('Location', $headers);
-            Assert::assertSame('/login', $headers['Location']);
+            $thrown = $e;
         }
+
+        // Then
+        Assert::assertInstanceOf(RedirectException::class, $thrown);
+        $headers = $thrown?->getHeaders() ?? [];
+        Assert::assertArrayHasKey('Location', $headers);
+        Assert::assertSame('/login', $headers['Location']);
     }
 
     public function testDoRoutingServesHistoryFirstPageWithPagination(): void {
         // Given
         $db = $this->getDatabase();
         $uuid = $db->createMonitor('My Monitor', $this->userId);
-        if ($uuid === false) { Assert::fail('monitor create failed'); }
+        if ($uuid === false) { throw new \RuntimeException('monitor create failed'); }
 
         // Create 75 pings so that there are 2 pages (50 + 25)
         for ($i = 0; $i < 75; $i++) {
@@ -90,7 +93,7 @@ class MonitorControllerTest extends DatabaseTestCase {
         // Given
         $db = $this->getDatabase();
         $uuid = $db->createMonitor('Another Monitor', $this->userId);
-        if ($uuid === false) { Assert::fail('monitor create failed'); }
+        if ($uuid === false) { throw new \RuntimeException('monitor create failed'); }
 
         for ($i = 0; $i < 75; $i++) {
             $db->completePing($uuid);
