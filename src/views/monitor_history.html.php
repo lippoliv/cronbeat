@@ -15,7 +15,9 @@
         <a href="/profile">profile</a>
         <a href="/login/logout">logout</a>
     </div>
-    
+</div>
+
+<div class="dashboard-content">
     <div class="history-title">
         <h2>History for <?= htmlspecialchars($monitorName !== '' ? $monitorName : $monitorUuid) ?></h2>
     </div>
@@ -47,4 +49,5 @@
         <span>Page <?= $page ?> / <?= $totalPages ?></span>
         <a class="page-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $nextPage ?>">Next</a>
     </div>
+
 </div>
