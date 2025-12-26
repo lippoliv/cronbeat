@@ -32,7 +32,8 @@ class ApiController extends BaseController {
             http_response_code(404);
             return $this->json(['status' => 'error', 'message' => 'Monitor not found', 'uuid' => $uuid]);
         }
-        return $this->json(['status' => 'ok', 'action' => 'start', 'uuid' => $uuid]);
+        http_response_code(200);
+        return '';
     }
 
     private function handleComplete(string $uuid): string {
@@ -42,12 +43,8 @@ class ApiController extends BaseController {
             http_response_code(404);
             return $this->json(['status' => 'error', 'message' => 'Monitor not found', 'uuid' => $uuid]);
         }
-        return $this->json([
-            'status' => 'ok',
-            'action' => 'ping',
-            'uuid' => $uuid,
-            'duration_ms' => $result['duration_ms'],
-        ]);
+        http_response_code(200);
+        return '';
     }
 
     /**

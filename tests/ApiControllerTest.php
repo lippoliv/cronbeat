@@ -26,23 +26,18 @@ class ApiControllerTest extends DatabaseTestCase {
         $ping = $this->call($controller, "/api/ping/$uuid");
 
         // Then
-        $startJson = json_decode($start, true, 512, JSON_THROW_ON_ERROR);
-        $pingJson = json_decode($ping, true, 512, JSON_THROW_ON_ERROR);
-        Assert::assertIsArray($startJson);
-        Assert::assertIsArray($pingJson);
-        /** @var array{status:string, action:string, uuid:string} $startJson */
-        /** @var array{status:string, action:string, uuid:string, duration_ms:int|null} $pingJson */
-        Assert::assertEquals('ok', $startJson['status']);
-        Assert::assertEquals('ok', $pingJson['status']);
-        Assert::assertArrayHasKey('duration_ms', $pingJson);
-        if ($pingJson['duration_ms'] !== null) {
-            Assert::assertGreaterThanOrEqual(0, $pingJson['duration_ms']);
-        }
+        Assert::assertSame('', $start);
+        Assert::assertSame(200, http_response_code());
+        Assert::assertSame('', $ping);
+        Assert::assertSame(200, http_response_code());
     }
 
     public function testUnknownUuidReturns404(): void {
         // Given
         $controller = new ApiController($this->getDatabase());
+
+        // Reset status code
+        http_response_code(200);
 
         // When
         $result = $this->call($controller, "/api/ping/00000000-0000-0000-0000-000000000000");

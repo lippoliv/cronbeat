@@ -56,7 +56,6 @@ class Database {
         try {
             $this->pdo = new \PDO("sqlite:{$this->dbPath}");
             $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            // Ensure UTC timestamps for consistency
             $this->pdo->exec('PRAGMA foreign_keys = ON');
 
             Logger::info("Successfully connected to database");
@@ -419,8 +418,6 @@ class Database {
         }
 
         try {
-            // Clean up dependent records first to avoid orphaned rows in environments
-            // where SQLite foreign_keys pragma might be disabled
             $this->pdo->beginTransaction();
 
             $stmtId = $this->pdo->prepare("SELECT id FROM monitors WHERE uuid = ? AND user_id = ?");
@@ -481,7 +478,6 @@ class Database {
             return false;
         }
         try {
-            // Upsert style: try delete then insert to ensure a single row
             $pdo->prepare("DELETE FROM ping_tracking WHERE monitor_id = ?")->execute([$monitorId]);
             $stmt = $pdo->prepare("INSERT INTO ping_tracking (monitor_id, started_at) VALUES (?, CURRENT_TIMESTAMP)");
             return $stmt->execute([$monitorId]);
@@ -491,11 +487,6 @@ class Database {
         }
     }
 
-    /**
-     * Completes a ping for given monitor uuid. If a tracking start exists, a duration is recorded.
-     * Returns the inserted history id and duration in milliseconds (or null if not available)
-     * @return array{history_id:int, duration_ms: int|null}|false
-     */
     public function completePing(string $uuid): array|false {
         $pdo = $this->getPdo();
         $monitorId = $this->getMonitorIdByUuid($uuid);
@@ -512,34 +503,21 @@ class Database {
 
             $durationMs = null;
             if ($startedAt !== false && $startedAt !== null) {
-                // Compute duration as difference between now and started_at in milliseconds
-                $stmtNow = $pdo->query("SELECT strftime('%s','now') * 1000");
-                if ($stmtNow === false) {
-                    throw new \RuntimeException('Failed to query current timestamp');
+                $tz = new \DateTimeZone('UTC');
+                $now = new \DateTimeImmutable('now', $tz);
+                $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', (string)$startedAt, $tz);
+                if ($start === false) {
+                    // Fallback to flexible parsing
+                    $start = new \DateTimeImmutable((string)$startedAt, $tz);
                 }
-                $nowCol = $stmtNow->fetchColumn();
-                if ($nowCol === false || $nowCol === null) {
-                    throw new \RuntimeException('Failed to fetch current timestamp');
-                }
-                $nowMs = (int) $nowCol;
-
-                $stmtStartMs = $pdo->prepare("SELECT strftime('%s', ?) * 1000");
-                $stmtStartMs->execute([(string) $startedAt]);
-                $startCol = $stmtStartMs->fetchColumn();
-                if ($startCol === false || $startCol === null) {
-                    // If for some reason conversion failed, treat as no duration
-                    $durationMs = null;
-                } else {
-                    $startMs = (int) $startCol;
-                    $durationMs = max(0, $nowMs - $startMs);
-                }
+                $diffSeconds = max(0, $now->getTimestamp() - $start->getTimestamp());
+                $durationMs = $diffSeconds * 1000;
             }
 
             $stmtInsert = $pdo->prepare("INSERT INTO ping_history (monitor_id, pinged_at, duration_ms) VALUES (?, CURRENT_TIMESTAMP, ?)");
             $stmtInsert->execute([$monitorId, $durationMs]);
             $historyId = (int)$pdo->lastInsertId();
 
-            // Clear tracking row after recording
             $pdo->prepare("DELETE FROM ping_tracking WHERE monitor_id = ?")->execute([$monitorId]);
 
             $pdo->commit();
@@ -553,9 +531,6 @@ class Database {
         }
     }
 
-    /**
-     * @return array<array{pinged_at:string, duration_ms:int|null}>
-     */
     public function getPingHistory(int $monitorId, int $limit, int $offset = 0): array {
         $pdo = $this->getPdo();
         try {
@@ -564,7 +539,17 @@ class Database {
             $stmt->bindValue(2, $limit, \PDO::PARAM_INT);
             $stmt->bindValue(3, $offset, \PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            /** @var array<int, array{pinged_at:mixed, duration_ms:mixed}> $rows */
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $result = [];
+            foreach ($rows as $row) {
+                $result[] = [
+                    'pinged_at' => (string)$row['pinged_at'],
+                    'duration_ms' => $row['duration_ms'] !== null ? (int)$row['duration_ms'] : null,
+                ];
+            }
+            /** @var array<array{pinged_at:string, duration_ms:int|null}> $result */
+            return $result;
         } catch (\PDOException $e) {
             Logger::error("Error getting ping history", ['monitor_id' => $monitorId, 'error' => $e->getMessage()]);
             throw $e;
