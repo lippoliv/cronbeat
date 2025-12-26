@@ -494,8 +494,11 @@ class Database {
         }
         try {
             $pdo->prepare("DELETE FROM ping_tracking WHERE monitor_id = ?")->execute([$monitorId]);
-            $stmt = $pdo->prepare("INSERT INTO ping_tracking (monitor_id, started_at) VALUES (?, CURRENT_TIMESTAMP)");
-            return $stmt->execute([$monitorId]);
+            // store high-precision UTC timestamp to preserve milliseconds
+            $tz = new \DateTimeZone('UTC');
+            $startedAt = (new \DateTimeImmutable('now', $tz))->format('Y-m-d H:i:s.u');
+            $stmt = $pdo->prepare("INSERT INTO ping_tracking (monitor_id, started_at) VALUES (?, ?)");
+            return $stmt->execute([$monitorId, $startedAt]);
         } catch (\PDOException $e) {
             Logger::error("Error starting ping tracking", ['uuid' => $uuid, 'error' => $e->getMessage()]);
             throw $e;
@@ -520,12 +523,18 @@ class Database {
             if ($startedAt !== false && $startedAt !== null) {
                 $tz = new \DateTimeZone('UTC');
                 $now = new \DateTimeImmutable('now', $tz);
-                $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', (string)$startedAt, $tz);
+                // try microseconds first, then seconds, then generic
+                $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s.u', (string) $startedAt, $tz);
                 if ($start === false) {
-                    $start = new \DateTimeImmutable((string)$startedAt, $tz);
+                    $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', (string) $startedAt, $tz);
                 }
-                $diffSeconds = max(0, $now->getTimestamp() - $start->getTimestamp());
-                $durationMs = $diffSeconds * 1000;
+                if ($start === false) {
+                    $start = new \DateTimeImmutable((string) $startedAt, $tz);
+                }
+                $nowFloat = (float) $now->format('U.u');
+                $startFloat = (float) $start->format('U.u');
+                $ms = (int) round(($nowFloat - $startFloat) * 1000);
+                $durationMs = max(0, $ms);
             }
 
             $stmtInsert = $pdo->prepare("INSERT INTO ping_history (monitor_id, pinged_at, duration_ms) VALUES (?, CURRENT_TIMESTAMP, ?)");

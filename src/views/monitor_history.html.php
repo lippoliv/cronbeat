@@ -9,7 +9,7 @@
  */
 ?>
 <div class="dashboard-header">
-    <h1><a href="/dashboard">CronBeat Dashboard</a></h1>
+    <h1>CronBeat Dashboard</h1>
     <div class="user-info">
         <p>Welcome, <?= htmlspecialchars($username) ?>!</p>
         <a href="/profile">profile</a>
@@ -21,7 +21,7 @@
     <div class="history-title">
         <h2>History for <?= htmlspecialchars($monitorName !== '' ? $monitorName : $monitorUuid) ?></h2>
     </div>
-    <p class="monitor-uuid">UUID: <?= htmlspecialchars($monitorUuid) ?></p>
+    <p class="monitor-uuid">UUID: <span id="monitor-uuid-copy" title="Copy URL" style="cursor: pointer;" data-uuid="<?= htmlspecialchars($monitorUuid) ?>"><?= htmlspecialchars($monitorUuid) ?></span></p>
     <p>Total entries: <?= $total ?></p>
     <hr/>
     <?php if (count($history) === 0): ?>
@@ -49,5 +49,26 @@
         <span>Page <?= $page ?> / <?= $totalPages ?></span>
         <a class="page-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $nextPage ?>">Next</a>
     </div>
+
+    <script>
+        (function () {
+            var el = document.getElementById('monitor-uuid-copy');
+            if (!el) { return; }
+            el.addEventListener('click', function () {
+                var uuid = el.getAttribute('data-uuid') || '';
+                var url = window.location.origin + '/api/ping/' + uuid;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(url).catch(function () {});
+                } else {
+                    var ta = document.createElement('textarea');
+                    ta.value = url;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    try { document.execCommand('copy'); } catch (e) {}
+                    document.body.removeChild(ta);
+                }
+            });
+        })();
+    </script>
 
 </div>
