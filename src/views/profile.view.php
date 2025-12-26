@@ -2,16 +2,16 @@
 
 namespace Cronbeat\Views;
 
-class DashboardView extends BaseView {
+class ProfileView extends BaseView {
     protected ?string $error = null;
     protected ?string $success = null;
     protected string $username = '';
-    /** @var array<array{uuid: string, name: string}> */
-    protected array $monitors = [];
+    protected string $name = '';
+    protected string $email = '';
 
     public function __construct() {
-        $this->setTitle('CronBeat Dashboard');
-        $this->setContainerClass('view-container');
+        $this->setTitle('Your Profile');
+        $this->setContainerClass('view-container profile-container');
     }
 
     public function setError(?string $error): self {
@@ -29,11 +29,13 @@ class DashboardView extends BaseView {
         return $this;
     }
 
-    /**
-     * @param array<array{uuid: string, name: string}> $monitors
-     */
-    public function setMonitors(array $monitors): self {
-        $this->monitors = $monitors;
+    public function setName(string $name): self {
+        $this->name = $name;
+        return $this;
+    }
+
+    public function setEmail(string $email): self {
+        $this->email = $email;
         return $this;
     }
 
@@ -45,11 +47,13 @@ class DashboardView extends BaseView {
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $username = $this->username;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
-        $monitors = $this->monitors;
+        $name = $this->name;
+        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
+        $email = $this->email;
 
         ob_start();
 
-        include(defined('APP_DIR') ? APP_DIR . '/views' : __DIR__) . '/dashboard.html.php';
+        include(defined('APP_DIR') ? APP_DIR . '/views' : __DIR__) . '/profile.html.php';
 
         $result = ob_get_clean();
         $this->setContent($result !== false ? $result : '');

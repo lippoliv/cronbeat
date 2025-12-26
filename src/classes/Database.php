@@ -67,6 +67,19 @@ class Database {
     }
 
 
+    private function getPdo(): \PDO {
+        if ($this->pdo === null) {
+            $this->connect();
+        }
+
+        if ($this->pdo === null) {
+            throw new \RuntimeException("Failed to connect to database");
+        }
+
+        return $this->pdo;
+    }
+
+
 
     public function createUser(string $username, string $passwordHash): bool {
         Logger::info("Creating new user", ['username' => $username]);
@@ -417,17 +430,10 @@ class Database {
 
     public function getUsername(int $userId): string|false {
         Logger::debug("Getting username for user ID", ['user_id' => $userId]);
-
-        if ($this->pdo === null) {
-            $this->connect();
-        }
-
-        if ($this->pdo === null) {
-            throw new \RuntimeException("Failed to connect to database");
-        }
+        $pdo = $this->getPdo();
 
         try {
-            $stmt = $this->pdo->prepare("SELECT username FROM users WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT username FROM users WHERE id = ?");
             $stmt->execute([$userId]);
             $username = $stmt->fetchColumn();
 
@@ -441,6 +447,85 @@ class Database {
             return $usernameStr;
         } catch (\PDOException $e) {
             Logger::error("Error getting username", [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * @return UserProfileData|false
+     */
+    public function getUserProfile(int $userId): UserProfileData|false {
+        Logger::debug("Getting user profile", ['user_id' => $userId]);
+        $pdo = $this->getPdo();
+
+        try {
+            $stmt = $pdo->prepare("SELECT username, name, email FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($row === false || !is_array($row)) {
+                Logger::warning("User not found when fetching profile", ['user_id' => $userId]);
+                return false;
+            }
+
+            return new UserProfileData(
+                (string)$row['username'],
+                $row['name'] !== null ? (string)$row['name'] : null,
+                $row['email'] !== null ? (string)$row['email'] : null,
+            );
+        } catch (\PDOException $e) {
+            Logger::error("Error getting user profile", [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    public function updateUserProfile(int $userId, ?string $name, ?string $email): bool {
+        Logger::info("Updating user profile", ['user_id' => $userId]);
+        $pdo = $this->getPdo();
+
+        try {
+            $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ? WHERE id = ?");
+            $result = $stmt->execute([$name, $email, $userId]);
+
+            if ($result) {
+                Logger::info("User profile updated", ['user_id' => $userId]);
+                return true;
+            }
+
+            Logger::warning("Failed to update user profile", ['user_id' => $userId]);
+            return false;
+        } catch (\PDOException $e) {
+            Logger::error("Error updating user profile", [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    public function updateUserPassword(int $userId, string $passwordHash): bool {
+        Logger::info("Updating user password", ['user_id' => $userId]);
+        $pdo = $this->getPdo();
+
+        try {
+            $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+            $result = $stmt->execute([$passwordHash, $userId]);
+
+            if ($result) {
+                Logger::info("User password updated", ['user_id' => $userId]);
+                return true;
+            }
+
+            Logger::warning("Failed to update user password", ['user_id' => $userId]);
+            return false;
+        } catch (\PDOException $e) {
+            Logger::error("Error updating user password", [
                 'user_id' => $userId,
                 'error' => $e->getMessage()
             ]);

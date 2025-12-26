@@ -18,7 +18,16 @@
             "Cronbeat\\": "src/classes/",
             "Cronbeat\\Controllers\\": "src/controllers/",
             "Cronbeat\\Views\\": "src/views/"
-        }
+        },
+        "files": [
+            "src/views/base.view.php",
+            "src/views/dashboard.view.php",
+            "src/views/monitor_form.view.php",
+            "src/views/login.view.php",
+            "src/views/setup.view.php",
+            "src/views/migrate.view.php",
+            "src/views/profile.view.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

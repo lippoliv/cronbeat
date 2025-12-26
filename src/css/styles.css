@@ -16,7 +16,7 @@ body {
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-.dashboard-container {
+.view-container {
     width: 100%;
     max-width: 1200px;
     padding: 2rem;
@@ -38,7 +38,8 @@ label {
     font-weight: 500;
 }
 input[type="text"],
-input[type="password"] {
+input[type="password"],
+input[type="email"] {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid #ddd;

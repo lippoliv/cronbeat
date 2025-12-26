@@ -1,10 +1,11 @@
 <?php
 
 const APP_DIR = __DIR__;
-const DB_VERSION = 2; // Current expected database version
+const DB_VERSION = 3; // Current expected database version
 
 require_once APP_DIR . '/classes/UrlHelper.php';
 require_once APP_DIR . '/classes/Database.php';
+require_once APP_DIR . '/classes/UserProfileData.php';
 require_once APP_DIR . '/classes/Logger.php';
 require_once APP_DIR . '/classes/Migration.php';
 require_once APP_DIR . '/classes/MigrationHelper.php';
@@ -21,12 +22,15 @@ require_once APP_DIR . '/controllers/MigrateController.php';
 require_once APP_DIR . '/controllers/DashboardController.php';
 require_once APP_DIR . '/views/dashboard.view.php';
 require_once APP_DIR . '/views/monitor_form.view.php';
+require_once APP_DIR . '/controllers/ProfileController.php';
+require_once APP_DIR . '/views/profile.view.php';
 
 use Cronbeat\Controllers\LoginController;
 use Cronbeat\Controllers\LogoutController;
 use Cronbeat\Controllers\MigrateController;
 use Cronbeat\Controllers\SetupController;
 use Cronbeat\Controllers\DashboardController;
+use Cronbeat\Controllers\ProfileController;
 use Cronbeat\Database;
 use Cronbeat\Logger;
 use Cronbeat\RedirectException;
@@ -65,6 +69,9 @@ switch ($controllerName) {
         break;
     case 'dashboard':
         $controller = new DashboardController($database);
+        break;
+    case 'profile':
+        $controller = new ProfileController($database);
         break;
     case 'logout':
         $controller = new LogoutController($database);
