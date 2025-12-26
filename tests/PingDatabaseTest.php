@@ -27,7 +27,7 @@ class PingDatabaseTest extends DatabaseTestCase {
         if ($monitorId === false) { Assert::fail('monitor id not found'); }
         $history = $this->getDatabase()->getPingHistory($monitorId, 10, 0);
         Assert::assertCount(1, $history);
-        Assert::assertNull($history[0]['duration_ms']);
+        Assert::assertNull($history[0]->getDurationMs());
     }
 
     public function testStartThenCompletePingRecordsDurationAndClearsPending(): void {

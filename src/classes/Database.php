@@ -507,7 +507,6 @@ class Database {
                 $now = new \DateTimeImmutable('now', $tz);
                 $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', (string)$startedAt, $tz);
                 if ($start === false) {
-                    // Fallback to flexible parsing
                     $start = new \DateTimeImmutable((string)$startedAt, $tz);
                 }
                 $diffSeconds = max(0, $now->getTimestamp() - $start->getTimestamp());
@@ -531,6 +530,9 @@ class Database {
         }
     }
 
+    /**
+     * @return array<PingData>
+     */
     public function getPingHistory(int $monitorId, int $limit, int $offset = 0): array {
         $pdo = $this->getPdo();
         try {
@@ -541,15 +543,15 @@ class Database {
             $stmt->execute();
             /** @var array<int, array{pinged_at:mixed, duration_ms:mixed}> $rows */
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            $result = [];
+            $items = [];
             foreach ($rows as $row) {
-                $result[] = [
-                    'pinged_at' => (string)$row['pinged_at'],
-                    'duration_ms' => $row['duration_ms'] !== null ? (int)$row['duration_ms'] : null,
-                ];
+                $items[] = new PingData(
+                    (string)$row['pinged_at'],
+                    $row['duration_ms'] !== null ? (int)$row['duration_ms'] : null,
+                );
             }
-            /** @var array<array{pinged_at:string, duration_ms:int|null}> $result */
-            return $result;
+            /** @var array<PingData> $items */
+            return $items;
         } catch (\PDOException $e) {
             Logger::error("Error getting ping history", ['monitor_id' => $monitorId, 'error' => $e->getMessage()]);
             throw $e;

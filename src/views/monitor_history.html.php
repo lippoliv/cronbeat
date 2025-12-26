@@ -2,7 +2,7 @@
 /**
  * @var string $monitorUuid
  * @var string $monitorName
- * @var array<array{pinged_at:string, duration_ms:int|null}> $history
+ * @var array<\Cronbeat\PingData> $history
  * @var int $page
  * @var int $pageSize
  * @var int $total
@@ -22,9 +22,9 @@
         <ul class="history-list">
             <?php foreach ($history as $entry): ?>
                 <li class="history-item">
-                    <span class="history-time"><?= htmlspecialchars($entry['pinged_at']) ?></span>
-                    <?php if ($entry['duration_ms'] !== null): ?>
-                        <span class="history-duration"><?= $entry['duration_ms'] ?> ms</span>
+                    <span class="history-time"><?= htmlspecialchars($entry->getPingedAt()) ?></span>
+                    <?php if ($entry->getDurationMs() !== null): ?>
+                        <span class="history-duration"><?= $entry->getDurationMs() ?> ms</span>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>

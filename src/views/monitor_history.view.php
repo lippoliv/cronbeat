@@ -5,7 +5,7 @@ namespace Cronbeat\Views;
 class MonitorHistoryView extends BaseView {
     private string $monitorUuid = '';
     private string $monitorName = '';
-    /** @var array<array{pinged_at:string, duration_ms:int|null}> */
+    /** @var array<\Cronbeat\PingData> */
     private array $history = [];
     private int $page = 1;
     private int $pageSize = 50;
@@ -19,7 +19,7 @@ class MonitorHistoryView extends BaseView {
     public function setMonitorUuid(string $uuid): self { $this->monitorUuid = $uuid; return $this; }
     public function setMonitorName(string $name): self { $this->monitorName = $name; return $this; }
     /**
-     * @param array<array{pinged_at:string, duration_ms:int|null}> $history
+     * @param array<\Cronbeat\PingData> $history
      */
     public function setHistory(array $history): self { $this->history = $history; return $this; }
     public function setPage(int $page): self { $this->page = $page; return $this; }
