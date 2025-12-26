@@ -34,19 +34,34 @@
     <?php else : ?>
     <div class="monitors-grid">
         <?php foreach ($monitors as $monitor) : ?>
-        <div class="monitor-tile">
+        <a class="monitor-tile" href="/dashboard/monitor/<?= htmlspecialchars($monitor['uuid']) ?>">
             <div class="monitor-info">
                 <h3><?= htmlspecialchars($monitor['name']) ?></h3>
                 <p class="monitor-uuid">UUID: <?= htmlspecialchars($monitor['uuid']) ?></p>
+                <p class="monitor-last-ping">
+                    Last ping:
+                    <?php if (!empty($monitor['last_ping_at'])): ?>
+                        <span class="last-ping-time"><?= htmlspecialchars((string)$monitor['last_ping_at']) ?></span>
+                        <?php if (isset($monitor['last_duration_ms']) && $monitor['last_duration_ms'] !== null): ?>
+                            <span class="last-ping-duration">(<?= (int)$monitor['last_duration_ms'] ?> ms)</span>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <span class="last-ping-time">—</span>
+                    <?php endif; ?>
+                    <?php if (!empty($monitor['pending_start']) && (int)$monitor['pending_start'] === 1): ?>
+                        <span class="spinner" title="waiting for ping"></span>
+                    <?php endif; ?>
+                </p>
             </div>
             <div class="monitor-actions">
                 <a href="/dashboard/delete/<?= htmlspecialchars($monitor['uuid']) ?>"
                    class="delete-button"
-                   onclick="return confirm('Are you sure you want to delete this monitor?')">
+                   onclick="return confirm('Are you sure you want to delete this monitor?')"
+                   onclick="event.stopPropagation();">
                     Delete
                 </a>
             </div>
-        </div>
+        </a>
         <?php endforeach; ?>
     </div>
     <?php endif; ?>

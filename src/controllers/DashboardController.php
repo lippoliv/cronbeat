@@ -28,6 +28,10 @@ class DashboardController extends BaseController {
             case 'delete':
                 $uuid = $pathParts[1] ?? '';
                 return $this->deleteMonitor($uuid);
+            case 'monitor':
+                $uuid = $pathParts[1] ?? '';
+                $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+                return $this->showMonitorHistory($uuid, $page);
             default:
                 return $this->showDashboard();
         }
@@ -110,6 +114,43 @@ class DashboardController extends BaseController {
         if ($success !== null) {
             $view->setSuccess($success);
         }
+
+        return $view->render();
+    }
+
+    public function showMonitorHistory(string $uuid, int $page = 1): string {
+        $userId = $_SESSION['user_id'];
+        // Resolve monitor id and ensure it belongs to the user
+        $monitorId = $this->database->getMonitorIdByUuid($uuid);
+        if ($monitorId === false) {
+            $view = new DashboardView();
+            $view->setError('Monitor not found');
+            $view->setUsername($this->database->getUsername($userId) ?: 'Unknown');
+            $view->setMonitors($this->database->getMonitors($userId));
+            return $view->render();
+        }
+
+        $pageSize = 50;
+        $offset = ($page - 1) * $pageSize;
+
+        $total = $this->database->countPingHistory($monitorId);
+        $history = $this->database->getPingHistory($monitorId, $pageSize, $offset);
+
+        $monitorName = '';
+        foreach ($this->database->getMonitors($userId) as $m) {
+            if ($m['uuid'] === $uuid) {
+                $monitorName = $m['name'];
+                break;
+            }
+        }
+
+        $view = new \Cronbeat\Views\MonitorHistoryView();
+        $view->setMonitorUuid($uuid)
+            ->setMonitorName($monitorName)
+            ->setHistory($history)
+            ->setPage($page)
+            ->setPageSize($pageSize)
+            ->setTotal($total);
 
         return $view->render();
     }

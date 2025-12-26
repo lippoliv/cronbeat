@@ -231,6 +231,28 @@ button:hover {
     background-color: #c0392b;
 }
 
+.monitor-last-ping {
+    margin: 0.5rem 0 0 0;
+    color: #555;
+}
+
+.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #ccc;
+    border-top-color: #3498db;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .container {
