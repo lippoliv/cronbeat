@@ -5,6 +5,8 @@ const DB_VERSION = 4; // Current expected database version
 
 require_once APP_DIR . '/classes/UrlHelper.php';
 require_once APP_DIR . '/classes/Database.php';
+require_once APP_DIR . '/classes/MonitorData.php';
+require_once APP_DIR . '/classes/PingData.php';
 require_once APP_DIR . '/classes/UserProfileData.php';
 require_once APP_DIR . '/classes/Logger.php';
 require_once APP_DIR . '/classes/Migration.php';
