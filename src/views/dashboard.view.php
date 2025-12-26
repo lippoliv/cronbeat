@@ -6,7 +6,7 @@ class DashboardView extends BaseView {
     protected ?string $error = null;
     protected ?string $success = null;
     protected string $username = '';
-    /** @var array<array{uuid: string, name: string}> */
+    /** @var array<\Cronbeat\MonitorData> */
     protected array $monitors = [];
 
     public function __construct() {
@@ -30,7 +30,7 @@ class DashboardView extends BaseView {
     }
 
     /**
-     * @param array<array{uuid: string, name: string}> $monitors
+     * @param array<\Cronbeat\MonitorData> $monitors
      */
     public function setMonitors(array $monitors): self {
         $this->monitors = $monitors;

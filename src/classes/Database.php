@@ -352,7 +352,9 @@ class Database {
         }
     }
 
-    /** @return array<array{uuid: string, name: string}> */
+    /**
+     * @return array<MonitorData>
+     */
     public function getMonitors(int $userId): array {
         Logger::info("Getting monitors for user", ['user_id' => $userId]);
 
@@ -389,14 +391,27 @@ class Database {
                 ORDER BY m.name ASC
             ");
             $stmt->execute([$userId]);
-            $monitors = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            /** @var array<int, array{uuid:mixed, name:mixed, last_ping_at:mixed, last_duration_ms:mixed, pending_start:mixed}> $rows */
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $items = [];
+            foreach ($rows as $row) {
+                $items[] = new MonitorData(
+                    (string)$row['uuid'],
+                    (string)$row['name'],
+                    $row['last_ping_at'] !== null ? (string)$row['last_ping_at'] : null,
+                    $row['last_duration_ms'] !== null ? (int)$row['last_duration_ms'] : null,
+                    (bool)$row['pending_start'],
+                );
+            }
 
             Logger::info("Found monitors for user", [
                 'user_id' => $userId,
-                'count' => count($monitors)
+                'count' => count($items)
             ]);
 
-            return $monitors;
+            /** @var array<MonitorData> $items */
+            return $items;
         } catch (\PDOException $e) {
             Logger::error("Error getting monitors", [
                 'user_id' => $userId,

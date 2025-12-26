@@ -49,4 +49,23 @@ class ApiControllerTest extends DatabaseTestCase {
         Assert::assertEquals('error', $json['status']);
         Assert::assertArrayHasKey('message', $json);
     }
+
+    public function testPingWithoutStartReturns200(): void {
+        // Given
+        $db = $this->getDatabase();
+        $db->createUser('u2', 'p2');
+        $userId = $db->validateUser('u2', 'p2');
+        if ($userId === false) { Assert::fail('user validate failed'); }
+        $uuid = $db->createMonitor('m2', $userId);
+        if ($uuid === false) { Assert::fail('monitor create failed'); }
+        $controller = new ApiController($db);
+
+        // When
+        http_response_code(200);
+        $ping = $this->call($controller, "/api/ping/$uuid");
+
+        // Then
+        Assert::assertSame('', $ping);
+        Assert::assertSame(200, http_response_code());
+    }
 }

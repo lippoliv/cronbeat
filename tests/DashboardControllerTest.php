@@ -104,7 +104,8 @@ class DashboardControllerTest extends DatabaseTestCase {
         // Verify the monitor was created
         $monitors = $this->getDatabase()->getMonitors($this->userId);
         Assert::assertCount(1, $monitors);
-        Assert::assertEquals('New Test Monitor', $monitors[0]['name']);
+        Assert::assertInstanceOf(\Cronbeat\MonitorData::class, $monitors[0]);
+        Assert::assertEquals('New Test Monitor', $monitors[0]->getName());
 
         // Verify we got the expected exception
         Assert::assertInstanceOf(RedirectException::class, $exception);

@@ -37,8 +37,8 @@
         $nextPage = min($totalPages, $page + 1);
     ?>
     <div class="pagination">
-        <a class="page-link<?= $page <= 1 ? ' disabled' : '' ?>" href="/dashboard/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $prevPage ?>">Prev</a>
+        <a class="page-link<?= $page <= 1 ? ' disabled' : '' ?>" href="/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $prevPage ?>">Prev</a>
         <span>Page <?= $page ?> / <?= $totalPages ?></span>
-        <a class="page-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="/dashboard/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $nextPage ?>">Next</a>
+        <a class="page-link<?= $page >= $totalPages ? ' disabled' : '' ?>" href="/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $nextPage ?>">Next</a>
     </div>
 </div>

@@ -20,9 +20,11 @@ require_once APP_DIR . '/controllers/LoginController.php';
 require_once APP_DIR . '/controllers/LogoutController.php';
 require_once APP_DIR . '/controllers/MigrateController.php';
 require_once APP_DIR . '/controllers/DashboardController.php';
+require_once APP_DIR . '/controllers/MonitorController.php';
 require_once APP_DIR . '/controllers/ApiController.php';
 require_once APP_DIR . '/views/dashboard.view.php';
 require_once APP_DIR . '/views/monitor_form.view.php';
+require_once APP_DIR . '/views/monitor_history.view.php';
 require_once APP_DIR . '/controllers/ProfileController.php';
 require_once APP_DIR . '/views/profile.view.php';
 
@@ -31,6 +33,7 @@ use Cronbeat\Controllers\LogoutController;
 use Cronbeat\Controllers\MigrateController;
 use Cronbeat\Controllers\SetupController;
 use Cronbeat\Controllers\DashboardController;
+use Cronbeat\Controllers\MonitorController;
 use Cronbeat\Controllers\ApiController;
 use Cronbeat\Controllers\ProfileController;
 use Cronbeat\Database;
@@ -74,6 +77,9 @@ switch ($controllerName) {
         break;
     case 'dashboard':
         $controller = new DashboardController($database);
+        break;
+    case 'monitor':
+        $controller = new MonitorController($database);
         break;
     case 'profile':
         $controller = new ProfileController($database);
