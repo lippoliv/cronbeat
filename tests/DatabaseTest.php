@@ -474,4 +474,53 @@ class DatabaseTest extends DatabaseTestCase {
         Assert::assertInstanceOf(\Cronbeat\PingData::class, $items[0]);
         Assert::assertTrue($items[0]->getDurationMs() === null || is_int($items[0]->getDurationMs()));
     }
+
+    public function testCompletePingWithoutStartCreatesHistoryNoDuration(): void {
+        // Given
+        $db = $this->getDatabase();
+        $db->createUser('u5', 'p5');
+        $userId = $db->validateUser('u5', 'p5');
+        if ($userId === false) { throw new \RuntimeException('user validate failed'); }
+        $uuid = $db->createMonitor('m5', $userId);
+        if ($uuid === false) { throw new \RuntimeException('monitor create failed'); }
+
+        // When
+        $result = $db->completePing($uuid);
+
+        // Then
+        Assert::assertIsArray($result);
+        /** @var array{history_id:int, duration_ms:int|null} $result */
+        Assert::assertArrayHasKey('duration_ms', $result);
+        Assert::assertNull($result['duration_ms']);
+
+        $monitorId = $db->getMonitorIdByUuid($uuid);
+        if ($monitorId === false) { throw new \RuntimeException('monitor id not found'); }
+        $history = $db->getPingHistory($monitorId, 10, 0);
+        Assert::assertCount(1, $history);
+        Assert::assertNull($history[0]->getDurationMs());
+    }
+
+    public function testPingHistoryPaginationFiftyLimitWorks(): void {
+        // Given
+        $db = $this->getDatabase();
+        $db->createUser('u6', 'p6');
+        $userId = $db->validateUser('u6', 'p6');
+        if ($userId === false) { throw new \RuntimeException('user validate failed'); }
+        $uuid = $db->createMonitor('m6', $userId);
+        if ($uuid === false) { throw new \RuntimeException('monitor create failed'); }
+        // produce 120 pings
+        for ($i = 0; $i < 120; $i++) {
+            $db->completePing($uuid);
+        }
+        $monitorId = $db->getMonitorIdByUuid($uuid);
+        if ($monitorId === false) { throw new \RuntimeException('monitor id not found'); }
+
+        // When
+        $page1 = $db->getPingHistory($monitorId, 50, 0);
+        $page3 = $db->getPingHistory($monitorId, 50, 100);
+
+        // Then
+        Assert::assertCount(50, $page1);
+        Assert::assertCount(20, $page3);
+    }
 }

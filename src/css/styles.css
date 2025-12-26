@@ -61,6 +61,23 @@ button {
 button:hover {
     background-color: #2980b9;
 }
+/* Anchor variant of primary blue button (used for pagination in history view) */
+.page-button {
+    display: inline-block;
+    background-color: #3498db;
+    color: #fff;
+    text-decoration: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+.page-button:hover {
+    background-color: #2980b9;
+}
+.page-button.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
 .error {
     color: #e74c3c;
     margin-top: 1rem;

@@ -45,21 +45,17 @@
         $nextPage = min($totalPages, $page + 1);
     ?>
     <div class="pagination" style="display: flex; align-items: center; gap: 0.75rem;">
-        <button type="button"
-                style="width: auto;"
-                class="page-btn"
-                onclick="window.location.href='/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $prevPage ?>'"
-                <?= $page <= 1 ? 'disabled' : '' ?>>
-            &lt;
-        </button>
+        <a
+            class="page-button<?= $page <= 1 ? ' disabled' : '' ?>"
+            href="/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $prevPage ?>"
+            aria-label="Previous page"
+        >&lt;</a>
         <span>Page <?= $page ?> / <?= $totalPages ?></span>
-        <button type="button"
-                style="width: auto;"
-                class="page-btn"
-                onclick="window.location.href='/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $nextPage ?>'"
-                <?= $page >= $totalPages ? 'disabled' : '' ?>>
-            &gt;
-        </button>
+        <a
+            class="page-button<?= $page >= $totalPages ? ' disabled' : '' ?>"
+            href="/monitor/<?= htmlspecialchars($monitorUuid) ?>?page=<?= $nextPage ?>"
+            aria-label="Next page"
+        >&gt;</a>
     </div>
 
     <script>

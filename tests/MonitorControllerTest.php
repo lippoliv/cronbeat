@@ -25,6 +25,7 @@ class MonitorControllerTest extends DatabaseTestCase {
         $this->userId = $validated;
 
         $_SESSION = [];
+        $_GET = [];
         $_SESSION['user_id'] = $this->userId;
 
         $this->controller = new MonitorController($db);
@@ -32,6 +33,7 @@ class MonitorControllerTest extends DatabaseTestCase {
 
     protected function tearDown(): void {
         $_SESSION = [];
+        $_GET = [];
         parent::tearDown();
     }
 
@@ -81,9 +83,9 @@ class MonitorControllerTest extends DatabaseTestCase {
         Assert::assertStringContainsString('History for', $html);
         Assert::assertStringContainsString('Total pings: 75', $html);
         Assert::assertStringContainsString('Page 1 / 2', $html);
-        // First page has disabled prev button and enabled next button
-        Assert::assertMatchesRegularExpression('/<button[^>]*disabled[^>]*>\s*&lt;\s*<\/button>/', $html);
-        Assert::assertDoesNotMatchRegularExpression('/<button[^>]*disabled[^>]*>\s*&gt;\s*<\/button>/', $html);
+        // First page has disabled prev link and enabled next link (blue styling)
+        Assert::assertMatchesRegularExpression('/<a[^>]*class="[^"]*page-button[^"]*disabled[^"]*"[^>]*>\s*&lt;\s*<\/a>/', $html);
+        Assert::assertDoesNotMatchRegularExpression('/<a[^>]*class="[^"]*page-button[^"]*disabled[^"]*"[^>]*>\s*&gt;\s*<\/a>/', $html);
         // Page size is 50 items on first page
         $liCount = substr_count($html, 'class="history-item"');
         Assert::assertSame(50, $liCount);
@@ -106,9 +108,9 @@ class MonitorControllerTest extends DatabaseTestCase {
 
         // Then
         Assert::assertStringContainsString('Page 2 / 2', $html);
-        // Next button disabled on last page, Prev enabled (not disabled)
-        Assert::assertMatchesRegularExpression('/<button[^>]*disabled[^>]*>\s*&gt;\s*<\/button>/', $html);
-        Assert::assertDoesNotMatchRegularExpression('/<button[^>]*disabled[^>]*>\s*&lt;\s*<\/button>/', $html);
+        // Next link disabled on last page, Prev enabled (not disabled)
+        Assert::assertMatchesRegularExpression('/<a[^>]*class="[^"]*page-button[^"]*disabled[^"]*"[^>]*>\s*&gt;\s*<\/a>/', $html);
+        Assert::assertDoesNotMatchRegularExpression('/<a[^>]*class="[^"]*page-button[^"]*disabled[^"]*"[^>]*>\s*&lt;\s*<\/a>/', $html);
         // Remaining 25 items on second page
         $liCount = substr_count($html, 'class="history-item"');
         Assert::assertSame(25, $liCount);
