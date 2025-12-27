@@ -158,6 +158,12 @@ CronBeat includes a comprehensive logging system that helps developers and admin
 
 The PHP source code is located in the `src` directory. Any changes made to files in this directory will be immediately reflected in the running application due to the volume mapping in Docker Compose.
 
+**Important:** Before committing any changes, ensure that the code style checks pass by running:
+```bash
+composer codestyle
+```
+This script must pass without errors on each commit to maintain code quality and consistency.
+
 ### Testing
 
 The project includes unit tests for all logic. To run the tests:
