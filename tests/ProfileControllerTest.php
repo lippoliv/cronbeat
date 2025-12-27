@@ -47,15 +47,18 @@ class ProfileControllerTest extends DatabaseTestCase {
         $controller = new ProfileController($this->getDatabase());
 
         // When
+        $thrown = null;
         try {
             $controller->doRouting();
-            Assert::fail('Expected RedirectException was not thrown');
         } catch (RedirectException $e) {
-            // Then
-            $headers = $e->getHeaders();
-            Assert::assertArrayHasKey('Location', $headers);
-            Assert::assertSame('/login', $headers['Location']);
+            $thrown = $e;
         }
+
+        // Then
+        Assert::assertInstanceOf(RedirectException::class, $thrown);
+        $headers = $thrown?->getHeaders() ?? [];
+        Assert::assertArrayHasKey('Location', $headers);
+        Assert::assertSame('/login', $headers['Location']);
     }
 
     public function testShowProfileDisplaysCurrentValues(): void {

@@ -56,6 +56,7 @@ class Database {
         try {
             $this->pdo = new \PDO("sqlite:{$this->dbPath}");
             $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $this->pdo->exec('PRAGMA foreign_keys = ON');
 
             Logger::info("Successfully connected to database");
 
@@ -351,7 +352,9 @@ class Database {
         }
     }
 
-    /** @return array<array{uuid: string, name: string}> */
+    /**
+     * @return array<MonitorData>
+     */
     public function getMonitors(int $userId): array {
         Logger::info("Getting monitors for user", ['user_id' => $userId]);
 
@@ -365,20 +368,50 @@ class Database {
 
         try {
             $stmt = $this->pdo->prepare("
-                SELECT uuid, name 
-                FROM monitors
-                WHERE user_id = ?
-                ORDER BY name ASC
+                SELECT 
+                    m.uuid,
+                    m.name,
+                    (
+                        SELECT ph.pinged_at 
+                        FROM ping_history ph 
+                        WHERE ph.monitor_id = m.id 
+                        ORDER BY ph.pinged_at DESC 
+                        LIMIT 1
+                    ) AS last_ping_at,
+                    (
+                        SELECT ph2.duration_ms 
+                        FROM ping_history ph2 
+                        WHERE ph2.monitor_id = m.id 
+                        ORDER BY ph2.pinged_at DESC 
+                        LIMIT 1
+                    ) AS last_duration_ms,
+                    EXISTS(SELECT 1 FROM ping_tracking pt WHERE pt.monitor_id = m.id) AS pending_start
+                FROM monitors m
+                WHERE m.user_id = ?
+                ORDER BY m.name ASC
             ");
             $stmt->execute([$userId]);
-            $monitors = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            /** @var array<int, array{uuid:mixed, name:mixed, last_ping_at:mixed, last_duration_ms:mixed, pending_start:mixed}> $rows */
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $items = [];
+            foreach ($rows as $row) {
+                $items[] = new MonitorData(
+                    (string)$row['uuid'],
+                    (string)$row['name'],
+                    $row['last_ping_at'] !== null ? (string)$row['last_ping_at'] : null,
+                    $row['last_duration_ms'] !== null ? (int)$row['last_duration_ms'] : null,
+                    (bool)$row['pending_start'],
+                );
+            }
 
             Logger::info("Found monitors for user", [
                 'user_id' => $userId,
-                'count' => count($monitors)
+                'count' => count($items)
             ]);
 
-            return $monitors;
+            /** @var array<MonitorData> $items */
+            return $items;
         } catch (\PDOException $e) {
             Logger::error("Error getting monitors", [
                 'user_id' => $userId,
@@ -400,22 +433,176 @@ class Database {
         }
 
         try {
+            $this->pdo->beginTransaction();
+
+            $stmtId = $this->pdo->prepare("SELECT id FROM monitors WHERE uuid = ? AND user_id = ?");
+            $stmtId->execute([$uuid, $userId]);
+            $monitorId = $stmtId->fetchColumn();
+
+            if ($monitorId !== false && $monitorId !== null) {
+                $mid = (int)$monitorId;
+                $this->pdo->prepare("DELETE FROM ping_history WHERE monitor_id = ?")->execute([$mid]);
+                $this->pdo->prepare("DELETE FROM ping_tracking WHERE monitor_id = ?")->execute([$mid]);
+            }
+
             $stmt = $this->pdo->prepare("DELETE FROM monitors WHERE uuid = ? AND user_id = ?");
             $result = $stmt->execute([$uuid, $userId]);
 
             if ($result && $stmt->rowCount() > 0) {
+                $this->pdo->commit();
                 Logger::info("Monitor deleted successfully", ['uuid' => $uuid]);
                 return true;
             } else {
+                $this->pdo->rollBack();
                 Logger::warning("Failed to delete monitor", ['uuid' => $uuid]);
                 return false;
             }
         } catch (\PDOException $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
             Logger::error("Error deleting monitor", [
                 'uuid' => $uuid,
                 'user_id' => $userId,
                 'error' => $e->getMessage()
             ]);
+            throw $e;
+        }
+    }
+
+    public function getMonitorIdByUuid(string $uuid): int|false {
+        $pdo = $this->getPdo();
+        try {
+            $stmt = $pdo->prepare("SELECT id FROM monitors WHERE uuid = ?");
+            $stmt->execute([$uuid]);
+            $id = $stmt->fetchColumn();
+            if ($id === false || $id === null) {
+                return false;
+            }
+            return (int)$id;
+        } catch (\PDOException $e) {
+            Logger::error("Error getting monitor id by uuid", ['uuid' => $uuid, 'error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    public function startPingTracking(string $uuid): bool {
+        $pdo = $this->getPdo();
+        $monitorId = $this->getMonitorIdByUuid($uuid);
+        if ($monitorId === false) {
+            return false;
+        }
+        try {
+            $pdo->prepare("DELETE FROM ping_tracking WHERE monitor_id = ?")->execute([$monitorId]);
+            // store high-precision UTC timestamp to preserve milliseconds
+            $tz = new \DateTimeZone('UTC');
+            $startedAt = (new \DateTimeImmutable('now', $tz))->format('Y-m-d H:i:s.u');
+            $stmt = $pdo->prepare("INSERT INTO ping_tracking (monitor_id, started_at) VALUES (?, ?)");
+            return $stmt->execute([$monitorId, $startedAt]);
+        } catch (\PDOException $e) {
+            Logger::error("Error starting ping tracking", ['uuid' => $uuid, 'error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    public function completePing(string $uuid): array|false {
+        $pdo = $this->getPdo();
+        $monitorId = $this->getMonitorIdByUuid($uuid);
+        if ($monitorId === false) {
+            return false;
+        }
+
+        try {
+            $pdo->beginTransaction();
+
+            $stmtStart = $pdo->prepare("SELECT started_at FROM ping_tracking WHERE monitor_id = ?");
+            $stmtStart->execute([$monitorId]);
+            $startedAt = $stmtStart->fetchColumn();
+
+            $durationMs = null;
+            if ($startedAt !== false && $startedAt !== null) {
+                $tz = new \DateTimeZone('UTC');
+                $now = new \DateTimeImmutable('now', $tz);
+                // try microseconds first, then seconds, then generic
+                $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s.u', (string) $startedAt, $tz);
+                if ($start === false) {
+                    $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', (string) $startedAt, $tz);
+                }
+                if ($start === false) {
+                    $start = new \DateTimeImmutable((string) $startedAt, $tz);
+                }
+                $nowFloat = (float) $now->format('U.u');
+                $startFloat = (float) $start->format('U.u');
+                $ms = (int) round(($nowFloat - $startFloat) * 1000);
+                $durationMs = max(0, $ms);
+            }
+
+            $stmtInsert = $pdo->prepare("INSERT INTO ping_history (monitor_id, pinged_at, duration_ms) VALUES (?, CURRENT_TIMESTAMP, ?)");
+            $stmtInsert->execute([$monitorId, $durationMs]);
+            $historyId = (int)$pdo->lastInsertId();
+
+            $pdo->prepare("DELETE FROM ping_tracking WHERE monitor_id = ?")->execute([$monitorId]);
+
+            $pdo->commit();
+            return ['history_id' => $historyId, 'duration_ms' => $durationMs];
+        } catch (\PDOException $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            Logger::error("Error completing ping", ['uuid' => $uuid, 'error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    /**
+     * @return array<PingData>
+     */
+    public function getPingHistory(int $monitorId, int $limit, int $offset = 0): array {
+        $pdo = $this->getPdo();
+        try {
+            $stmt = $pdo->prepare("SELECT pinged_at, duration_ms FROM ping_history WHERE monitor_id = ? ORDER BY pinged_at DESC LIMIT ? OFFSET ?");
+            $stmt->bindValue(1, $monitorId, \PDO::PARAM_INT);
+            $stmt->bindValue(2, $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(3, $offset, \PDO::PARAM_INT);
+            $stmt->execute();
+            /** @var array<int, array{pinged_at:mixed, duration_ms:mixed}> $rows */
+            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $items = [];
+            foreach ($rows as $row) {
+                $items[] = new PingData(
+                    (string)$row['pinged_at'],
+                    $row['duration_ms'] !== null ? (int)$row['duration_ms'] : null,
+                );
+            }
+            /** @var array<PingData> $items */
+            return $items;
+        } catch (\PDOException $e) {
+            Logger::error("Error getting ping history", ['monitor_id' => $monitorId, 'error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    public function countPingHistory(int $monitorId): int {
+        $pdo = $this->getPdo();
+        try {
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM ping_history WHERE monitor_id = ?");
+            $stmt->execute([$monitorId]);
+            return (int)$stmt->fetchColumn();
+        } catch (\PDOException $e) {
+            Logger::error("Error counting ping history", ['monitor_id' => $monitorId, 'error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    public function hasPendingStart(int $monitorId): bool {
+        $pdo = $this->getPdo();
+        try {
+            $stmt = $pdo->prepare("SELECT 1 FROM ping_tracking WHERE monitor_id = ? LIMIT 1");
+            $stmt->execute([$monitorId]);
+            $row = $stmt->fetchColumn();
+            return $row !== false && $row !== null;
+        } catch (\PDOException $e) {
+            Logger::error("Error checking pending start", ['monitor_id' => $monitorId, 'error' => $e->getMessage()]);
             throw $e;
         }
     }

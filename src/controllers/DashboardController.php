@@ -113,4 +113,5 @@ class DashboardController extends BaseController {
 
         return $view->render();
     }
+
 }

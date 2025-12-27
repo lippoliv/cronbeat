@@ -3,7 +3,7 @@
  * @var string|null $error Error message to display
  * @var string|null $success Success message to display
  * @var string $username Username of the logged-in user
- * @var array $monitors Array of monitors, each with uuid and name
+ * @var array $monitors Array of MonitorData
  */
 ?>
 <div class="dashboard-header">
@@ -35,12 +35,28 @@
     <div class="monitors-grid">
         <?php foreach ($monitors as $monitor) : ?>
         <div class="monitor-tile">
-            <div class="monitor-info">
-                <h3><?= htmlspecialchars($monitor['name']) ?></h3>
-                <p class="monitor-uuid">UUID: <?= htmlspecialchars($monitor['uuid']) ?></p>
-            </div>
+            <a class="monitor-link" href="/monitor/<?= htmlspecialchars($monitor->getUuid()) ?>">
+                <div class="monitor-info">
+                    <h3><?= htmlspecialchars($monitor->getName()) ?></h3>
+                    <p class="monitor-uuid">UUID: <?= htmlspecialchars($monitor->getUuid()) ?></p>
+                    <p class="monitor-last-ping">
+                        Last ping:
+                        <?php if ($monitor->getLastPingAt() !== null && $monitor->getLastPingAt() !== ''): ?>
+                            <span class="last-ping-time"><?= htmlspecialchars((string) $monitor->getLastPingAt()) ?></span>
+                            <?php if ($monitor->getLastDurationMs() !== null): ?>
+                                <span class="last-ping-duration">(<?= (int) $monitor->getLastDurationMs() ?> ms)</span>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <span class="last-ping-time">—</span>
+                        <?php endif; ?>
+                        <?php if ($monitor->hasPendingStart()): ?>
+                            <span class="spinner" title="waiting for ping"></span>
+                        <?php endif; ?>
+                    </p>
+                </div>
+            </a>
             <div class="monitor-actions">
-                <a href="/dashboard/delete/<?= htmlspecialchars($monitor['uuid']) ?>"
+                <a href="/dashboard/delete/<?= htmlspecialchars($monitor->getUuid()) ?>"
                    class="delete-button"
                    onclick="return confirm('Are you sure you want to delete this monitor?')">
                     Delete

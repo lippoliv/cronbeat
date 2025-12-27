@@ -61,6 +61,23 @@ button {
 button:hover {
     background-color: #2980b9;
 }
+/* Anchor variant of primary blue button (used for pagination in history view) */
+.page-button {
+    display: inline-block;
+    background-color: #3498db;
+    color: #fff;
+    text-decoration: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+.page-button:hover {
+    background-color: #2980b9;
+}
+.page-button.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
 .error {
     color: #e74c3c;
     margin-top: 1rem;
@@ -194,6 +211,13 @@ button:hover {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
+/* Make the inner link look like plain text within the tile */
+.monitor-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
 .monitor-info {
     margin-bottom: 1.5rem;
 }
@@ -229,6 +253,28 @@ button:hover {
 
 .delete-button:hover {
     background-color: #c0392b;
+}
+
+.monitor-last-ping {
+    margin: 0.5rem 0 0 0;
+    color: #555;
+}
+
+.spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #ccc;
+    border-top-color: #3498db;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 /* Responsive adjustments */

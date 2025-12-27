@@ -169,8 +169,9 @@ class DatabaseTest extends DatabaseTestCase {
         // Then
         Assert::assertIsArray($monitors);
         Assert::assertCount(1, $monitors);
-        Assert::assertEquals($uuid, $monitors[0]['uuid']);
-        Assert::assertEquals($monitorName, $monitors[0]['name']);
+        Assert::assertInstanceOf(\Cronbeat\MonitorData::class, $monitors[0]);
+        Assert::assertEquals($uuid, $monitors[0]->getUuid());
+        Assert::assertEquals($monitorName, $monitors[0]->getName());
     }
 
     public function testGetMonitorsReturnsMultipleMonitorsOrderedByName(): void {
@@ -197,10 +198,10 @@ class DatabaseTest extends DatabaseTestCase {
         // Then
         Assert::assertIsArray($monitors);
         Assert::assertCount(3, $monitors);
-
-        Assert::assertEquals($monitorName1, $monitors[0]['name']);
-        Assert::assertEquals($monitorName2, $monitors[1]['name']);
-        Assert::assertEquals($monitorName3, $monitors[2]['name']);
+        Assert::assertInstanceOf(\Cronbeat\MonitorData::class, $monitors[0]);
+        Assert::assertEquals($monitorName1, $monitors[0]->getName());
+        Assert::assertEquals($monitorName2, $monitors[1]->getName());
+        Assert::assertEquals($monitorName3, $monitors[2]->getName());
     }
 
     public function testDeleteMonitorReturnsTrueWhenMonitorExists(): void {
@@ -382,5 +383,144 @@ class DatabaseTest extends DatabaseTestCase {
         $validated = $this->getDatabase()->validateUser($username, $newHash);
         Assert::assertIsInt($validated);
         Assert::assertSame($userId, $validated);
+    }
+
+    public function testGetMonitorIdByUuid(): void {
+        // Given
+        $db = $this->getDatabase();
+        $db->createUser('u', 'p');
+        $userId = $db->validateUser('u', 'p');
+        if ($userId === false) { throw new \RuntimeException('validate'); }
+        $uuid = $db->createMonitor('m', $userId);
+        if ($uuid === false) { throw new \RuntimeException('createMonitor'); }
+
+        // When
+        $id = $db->getMonitorIdByUuid($uuid);
+
+        // Then
+        Assert::assertIsInt($id);
+        Assert::assertGreaterThan(0, $id);
+        Assert::assertFalse($db->getMonitorIdByUuid('00000000-0000-0000-0000-000000000000'));
+    }
+
+    public function testStartPingTrackingAndHasPendingStart(): void {
+        // Given
+        $db = $this->getDatabase();
+        $db->createUser('u2', 'p2');
+        $userId = $db->validateUser('u2', 'p2');
+        if ($userId === false) { throw new \RuntimeException('validate'); }
+        $uuid = $db->createMonitor('m2', $userId);
+        if ($uuid === false) { throw new \RuntimeException('createMonitor'); }
+        $monitorId = $db->getMonitorIdByUuid($uuid);
+        if ($monitorId === false) { throw new \RuntimeException('id'); }
+
+        // When
+        $ok = $db->startPingTracking($uuid);
+
+        // Then
+        Assert::assertTrue($ok);
+        Assert::assertTrue($db->hasPendingStart($monitorId));
+    }
+
+    public function testCompletePingRecordsHistoryAndClearsPending(): void {
+        // Given
+        $db = $this->getDatabase();
+        $db->createUser('u3', 'p3');
+        $userId = $db->validateUser('u3', 'p3');
+        if ($userId === false) { throw new \RuntimeException('validate'); }
+        $uuid = $db->createMonitor('m3', $userId);
+        if ($uuid === false) { throw new \RuntimeException('createMonitor'); }
+        $monitorId = $db->getMonitorIdByUuid($uuid);
+        if ($monitorId === false) { throw new \RuntimeException('id'); }
+        $db->startPingTracking($uuid);
+
+        // When
+        $res = $db->completePing($uuid);
+
+        // Then
+        Assert::assertIsArray($res);
+        /** @var array{history_id:int, duration_ms:int|null} $res */
+        Assert::assertArrayHasKey('history_id', $res);
+        Assert::assertGreaterThan(0, $res['history_id']);
+        Assert::assertFalse($db->hasPendingStart($monitorId));
+        $count = $db->countPingHistory($monitorId);
+        Assert::assertSame(1, $count);
+    }
+
+    public function testGetPingHistoryAndCount(): void {
+        // Given
+        $db = $this->getDatabase();
+        $db->createUser('u4', 'p4');
+        $userId = $db->validateUser('u4', 'p4');
+        if ($userId === false) { throw new \RuntimeException('validate'); }
+        $uuid = $db->createMonitor('m4', $userId);
+        if ($uuid === false) { throw new \RuntimeException('createMonitor'); }
+        $monitorId = $db->getMonitorIdByUuid($uuid);
+        if ($monitorId === false) { throw new \RuntimeException('id'); }
+
+        $db->completePing($uuid);
+        $db->completePing($uuid);
+        $db->completePing($uuid);
+
+        // When
+        $total = $db->countPingHistory($monitorId);
+        $items = $db->getPingHistory($monitorId, 2, 0);
+        $items2 = $db->getPingHistory($monitorId, 2, 2);
+
+        // Then
+        Assert::assertSame(3, $total);
+        Assert::assertCount(2, $items);
+        Assert::assertCount(1, $items2);
+        Assert::assertInstanceOf(\Cronbeat\PingData::class, $items[0]);
+        Assert::assertTrue($items[0]->getDurationMs() === null || is_int($items[0]->getDurationMs()));
+    }
+
+    public function testCompletePingWithoutStartCreatesHistoryNoDuration(): void {
+        // Given
+        $db = $this->getDatabase();
+        $db->createUser('u5', 'p5');
+        $userId = $db->validateUser('u5', 'p5');
+        if ($userId === false) { throw new \RuntimeException('user validate failed'); }
+        $uuid = $db->createMonitor('m5', $userId);
+        if ($uuid === false) { throw new \RuntimeException('monitor create failed'); }
+
+        // When
+        $result = $db->completePing($uuid);
+
+        // Then
+        Assert::assertIsArray($result);
+        /** @var array{history_id:int, duration_ms:int|null} $result */
+        Assert::assertArrayHasKey('duration_ms', $result);
+        Assert::assertNull($result['duration_ms']);
+
+        $monitorId = $db->getMonitorIdByUuid($uuid);
+        if ($monitorId === false) { throw new \RuntimeException('monitor id not found'); }
+        $history = $db->getPingHistory($monitorId, 10, 0);
+        Assert::assertCount(1, $history);
+        Assert::assertNull($history[0]->getDurationMs());
+    }
+
+    public function testPingHistoryPaginationFiftyLimitWorks(): void {
+        // Given
+        $db = $this->getDatabase();
+        $db->createUser('u6', 'p6');
+        $userId = $db->validateUser('u6', 'p6');
+        if ($userId === false) { throw new \RuntimeException('user validate failed'); }
+        $uuid = $db->createMonitor('m6', $userId);
+        if ($uuid === false) { throw new \RuntimeException('monitor create failed'); }
+        // produce 120 pings
+        for ($i = 0; $i < 120; $i++) {
+            $db->completePing($uuid);
+        }
+        $monitorId = $db->getMonitorIdByUuid($uuid);
+        if ($monitorId === false) { throw new \RuntimeException('monitor id not found'); }
+
+        // When
+        $page1 = $db->getPingHistory($monitorId, 50, 0);
+        $page3 = $db->getPingHistory($monitorId, 50, 100);
+
+        // Then
+        Assert::assertCount(50, $page1);
+        Assert::assertCount(20, $page3);
     }
 }
