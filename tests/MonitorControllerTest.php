@@ -59,7 +59,7 @@ class MonitorControllerTest extends DatabaseTestCase {
 
         // Then
         Assert::assertInstanceOf(RedirectException::class, $thrown);
-        $headers = $thrown?->getHeaders() ?? [];
+        $headers = $thrown->getHeaders();
         Assert::assertArrayHasKey('Location', $headers);
         Assert::assertSame('/login', $headers['Location']);
     }

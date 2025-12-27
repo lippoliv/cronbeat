@@ -391,17 +391,33 @@ class Database {
                 ORDER BY m.name ASC
             ");
             $stmt->execute([$userId]);
-            /** @var array<int, array{uuid:mixed, name:mixed, last_ping_at:mixed, last_duration_ms:mixed, pending_start:mixed}> $rows */
+            /**
+             * PDO returns all fields as strings by default; EXISTS() commonly yields "0"/"1".
+             * Precisely describe the expected row shape to avoid mixed casts.
+             *
+             * @var array<int, array{
+             *     uuid: string,
+             *     name: string,
+             *     last_ping_at: string|null,
+             *     last_duration_ms: int|string|null,
+             *     pending_start: bool|int|string
+             * }> $rows
+             */
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $items = [];
             foreach ($rows as $row) {
+                $lastDuration = $row['last_duration_ms'];
+                $lastDurationInt = $lastDuration !== null ? (int) $lastDuration : null;
+                // Normalize EXISTS result to boolean via int cast first (handles '0'/'1', 0/1, true/false)
+                $pending = (bool) (int) $row['pending_start'];
+
                 $items[] = new MonitorData(
-                    (string)$row['uuid'],
-                    (string)$row['name'],
-                    $row['last_ping_at'] !== null ? (string)$row['last_ping_at'] : null,
-                    $row['last_duration_ms'] !== null ? (int)$row['last_duration_ms'] : null,
-                    (bool)$row['pending_start'],
+                    $row['uuid'],
+                    $row['name'],
+                    $row['last_ping_at'],
+                    $lastDurationInt,
+                    $pending,
                 );
             }
 
@@ -505,6 +521,9 @@ class Database {
         }
     }
 
+    /**
+     * @return array{history_id:int, duration_ms:int|null}|false
+     */
     public function completePing(string $uuid): array|false {
         $pdo = $this->getPdo();
         $monitorId = $this->getMonitorIdByUuid($uuid);
@@ -565,12 +584,17 @@ class Database {
             $stmt->bindValue(2, $limit, \PDO::PARAM_INT);
             $stmt->bindValue(3, $offset, \PDO::PARAM_INT);
             $stmt->execute();
-            /** @var array<int, array{pinged_at:mixed, duration_ms:mixed}> $rows */
+            /**
+             * @var array<int, array{
+             *     pinged_at: string,
+             *     duration_ms: int|string|null
+             * }> $rows
+             */
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             $items = [];
             foreach ($rows as $row) {
                 $items[] = new PingData(
-                    (string)$row['pinged_at'],
+                    $row['pinged_at'],
                     $row['duration_ms'] !== null ? (int)$row['duration_ms'] : null,
                 );
             }
