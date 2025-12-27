@@ -48,7 +48,7 @@ class LogoutControllerTest extends DatabaseTestCase {
 
         // Then - Verify the exception contains the correct headers
         Assert::assertInstanceOf(RedirectException::class, $thrown);
-        $headers = $thrown?->getHeaders() ?? [];
+        $headers = $thrown->getHeaders();
         Assert::assertArrayHasKey('Location', $headers);
         Assert::assertEquals('/login', $headers['Location']);
     }

@@ -472,7 +472,10 @@ class DatabaseTest extends DatabaseTestCase {
         Assert::assertCount(2, $items);
         Assert::assertCount(1, $items2);
         Assert::assertInstanceOf(\Cronbeat\PingData::class, $items[0]);
-        Assert::assertTrue($items[0]->getDurationMs() === null || is_int($items[0]->getDurationMs()));
+        $duration = $items[0]->getDurationMs();
+        if ($duration !== null) {
+            Assert::assertIsInt($duration);
+        }
     }
 
     public function testCompletePingWithoutStartCreatesHistoryNoDuration(): void {

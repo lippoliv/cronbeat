@@ -6,6 +6,7 @@
  * @var int $page
  * @var int $pageSize
  * @var int $total
+ * @var string $username
  */
 ?>
 <div class="dashboard-header">
