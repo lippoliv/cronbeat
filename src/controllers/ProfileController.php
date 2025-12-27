@@ -64,7 +64,11 @@ class ProfileController extends BaseController {
                 $error = 'Please provide a valid email address';
             } else {
                 $userId = (int)$_SESSION['user_id'];
-                $saved = $this->database->updateUserProfile($userId, $name !== '' ? $name : null, $email !== '' ? $email : null);
+                $saved = $this->database->updateUserProfile(
+                    $userId,
+                    $name !== '' ? $name : null,
+                    $email !== '' ? $email : null,
+                );
                 if ($saved) {
                     $success = 'Profile updated successfully';
                 } else {

@@ -86,8 +86,14 @@ class MonitorControllerTest extends DatabaseTestCase {
         Assert::assertStringContainsString('Total pings: 75', $html);
         Assert::assertStringContainsString('Page 1 / 2', $html);
         // First page has disabled prev link and enabled next link (blue styling)
-        Assert::assertMatchesRegularExpression('/<a[^>]*class="[^"]*page-button[^"]*disabled[^"]*"[^>]*>\s*&lt;\s*<\/a>/', $html);
-        Assert::assertDoesNotMatchRegularExpression('/<a[^>]*class="[^"]*page-button[^"]*disabled[^"]*"[^>]*>\s*&gt;\s*<\/a>/', $html);
+        Assert::assertMatchesRegularExpression(
+            '/<a[^>]*class="[^"]*page-button[^"]*disabled[^"]*"[^>]*>\s*&lt;\s*<\/a>/',
+            $html
+        );
+        Assert::assertDoesNotMatchRegularExpression(
+            '/<a[^>]*class="[^"]*page-button[^"]*disabled[^"]*"[^>]*>\s*&gt;\s*<\/a>/',
+            $html
+        );
         // Page size is 50 items on first page
         $liCount = substr_count($html, 'class="history-item"');
         Assert::assertSame(50, $liCount);
@@ -113,8 +119,14 @@ class MonitorControllerTest extends DatabaseTestCase {
         // Then
         Assert::assertStringContainsString('Page 2 / 2', $html);
         // Next link disabled on last page, Prev enabled (not disabled)
-        Assert::assertMatchesRegularExpression('/<a[^>]*class="[^"]*page-button[^"]*disabled[^"]*"[^>]*>\s*&gt;\s*<\/a>/', $html);
-        Assert::assertDoesNotMatchRegularExpression('/<a[^>]*class="[^"]*page-button[^"]*disabled[^"]*"[^>]*>\s*&lt;\s*<\/a>/', $html);
+        Assert::assertMatchesRegularExpression(
+            '/<a[^>]*class="[^"]*page-button[^"]*disabled[^"]*"[^>]*>\s*&gt;\s*<\/a>/',
+            $html
+        );
+        Assert::assertDoesNotMatchRegularExpression(
+            '/<a[^>]*class="[^"]*page-button[^"]*disabled[^"]*"[^>]*>\s*&lt;\s*<\/a>/',
+            $html
+        );
         // Remaining 25 items on second page
         $liCount = substr_count($html, 'class="history-item"');
         Assert::assertSame(25, $liCount);

@@ -22,7 +22,17 @@
     <div class="history-title">
         <h2>History for <?= htmlspecialchars($monitorName !== '' ? $monitorName : $monitorUuid) ?></h2>
     </div>
-    <p class="monitor-uuid">UUID: <span id="monitor-uuid-copy" title="Copy URL" style="cursor: pointer;" data-uuid="<?= htmlspecialchars($monitorUuid) ?>"><?= htmlspecialchars($monitorUuid) ?></span></p>
+    <p class="monitor-uuid">
+        UUID:
+        <span
+            id="monitor-uuid-copy"
+            title="Copy URL"
+            style="cursor: pointer;"
+            data-uuid="<?= htmlspecialchars($monitorUuid) ?>"
+        >
+            <?= htmlspecialchars($monitorUuid) ?>
+        </span>
+    </p>
     <p>Total pings: <?= $total ?></p>
     <hr/>
     <?php if (count($history) === 0) : ?>

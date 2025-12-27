@@ -42,7 +42,9 @@
                     <p class="monitor-last-ping">
                         Last ping:
                         <?php if ($monitor->getLastPingAt() !== null && $monitor->getLastPingAt() !== '') : ?>
-                            <span class="last-ping-time"><?= htmlspecialchars((string) $monitor->getLastPingAt()) ?></span>
+                            <span class="last-ping-time">
+                                <?= htmlspecialchars((string) $monitor->getLastPingAt()) ?>
+                            </span>
                             <?php if ($monitor->getLastDurationMs() !== null) : ?>
                                 <span class="last-ping-duration">(<?= (int) $monitor->getLastDurationMs() ?> ms)</span>
                             <?php endif; ?>
