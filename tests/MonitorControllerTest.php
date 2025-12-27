@@ -68,7 +68,9 @@ class MonitorControllerTest extends DatabaseTestCase {
         // Given
         $db = $this->getDatabase();
         $uuid = $db->createMonitor('My Monitor', $this->userId);
-        if ($uuid === false) { throw new \RuntimeException('monitor create failed'); }
+        if ($uuid === false) {
+            throw new \RuntimeException('monitor create failed');
+        }
 
         // Create 75 pings so that there are 2 pages (50 + 25)
         for ($i = 0; $i < 75; $i++) {
@@ -95,7 +97,9 @@ class MonitorControllerTest extends DatabaseTestCase {
         // Given
         $db = $this->getDatabase();
         $uuid = $db->createMonitor('Another Monitor', $this->userId);
-        if ($uuid === false) { throw new \RuntimeException('monitor create failed'); }
+        if ($uuid === false) {
+            throw new \RuntimeException('monitor create failed');
+        }
 
         for ($i = 0; $i < 75; $i++) {
             $db->completePing($uuid);
