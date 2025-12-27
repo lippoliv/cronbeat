@@ -40,7 +40,10 @@ class Migration0004 extends BaseMigration {
 
         $result = $pdo->exec("CREATE INDEX IF NOT EXISTS idx_ping_history_pinged_at ON ping_history (pinged_at DESC)");
         if ($result === false) {
-            throw new \Exception("Failed to create index on ping_history table (pinged_at): " . implode(", ", $pdo->errorInfo()));
+            throw new \Exception(
+                "Failed to create index on ping_history table (pinged_at): "
+                . implode(", ", $pdo->errorInfo())
+            );
         }
 
         Logger::debug("Creating ping_tracking table");

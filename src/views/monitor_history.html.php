@@ -22,17 +22,27 @@
     <div class="history-title">
         <h2>History for <?= htmlspecialchars($monitorName !== '' ? $monitorName : $monitorUuid) ?></h2>
     </div>
-    <p class="monitor-uuid">UUID: <span id="monitor-uuid-copy" title="Copy URL" style="cursor: pointer;" data-uuid="<?= htmlspecialchars($monitorUuid) ?>"><?= htmlspecialchars($monitorUuid) ?></span></p>
+    <p class="monitor-uuid">
+        UUID:
+        <span
+            id="monitor-uuid-copy"
+            title="Copy URL"
+            style="cursor: pointer;"
+            data-uuid="<?= htmlspecialchars($monitorUuid) ?>"
+        >
+            <?= htmlspecialchars($monitorUuid) ?>
+        </span>
+    </p>
     <p>Total pings: <?= $total ?></p>
     <hr/>
-    <?php if (count($history) === 0): ?>
+    <?php if (count($history) === 0) : ?>
         <p>No ping activity yet.</p>
-    <?php else: ?>
+    <?php else : ?>
         <ul class="history-list">
-            <?php foreach ($history as $entry): ?>
+            <?php foreach ($history as $entry) : ?>
                 <li class="history-item">
                     <span class="history-time"><?= htmlspecialchars($entry->getPingedAt()) ?></span>
-                    <?php if ($entry->getDurationMs() !== null): ?>
+                    <?php if ($entry->getDurationMs() !== null) : ?>
                         <span class="history-duration">(<?= $entry->getDurationMs() ?> ms)</span>
                     <?php endif; ?>
                 </li>

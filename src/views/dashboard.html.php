@@ -41,15 +41,17 @@
                     <p class="monitor-uuid">UUID: <?= htmlspecialchars($monitor->getUuid()) ?></p>
                     <p class="monitor-last-ping">
                         Last ping:
-                        <?php if ($monitor->getLastPingAt() !== null && $monitor->getLastPingAt() !== ''): ?>
-                            <span class="last-ping-time"><?= htmlspecialchars((string) $monitor->getLastPingAt()) ?></span>
-                            <?php if ($monitor->getLastDurationMs() !== null): ?>
+                        <?php if ($monitor->getLastPingAt() !== null && $monitor->getLastPingAt() !== '') : ?>
+                            <span class="last-ping-time">
+                                <?= htmlspecialchars((string) $monitor->getLastPingAt()) ?>
+                            </span>
+                            <?php if ($monitor->getLastDurationMs() !== null) : ?>
                                 <span class="last-ping-duration">(<?= (int) $monitor->getLastDurationMs() ?> ms)</span>
                             <?php endif; ?>
-                        <?php else: ?>
+                        <?php else : ?>
                             <span class="last-ping-time">—</span>
                         <?php endif; ?>
-                        <?php if ($monitor->hasPendingStart()): ?>
+                        <?php if ($monitor->hasPendingStart()) : ?>
                             <span class="spinner" title="waiting for ping"></span>
                         <?php endif; ?>
                     </p>

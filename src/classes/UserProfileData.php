@@ -7,7 +7,8 @@ final class UserProfileData {
         private string $username,
         private ?string $name,
         private ?string $email,
-    ) {}
+    ) {
+    }
 
     public function getUsername(): string {
         return $this->username;

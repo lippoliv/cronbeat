@@ -556,7 +556,10 @@ class Database {
                 $durationMs = max(0, $ms);
             }
 
-            $stmtInsert = $pdo->prepare("INSERT INTO ping_history (monitor_id, pinged_at, duration_ms) VALUES (?, CURRENT_TIMESTAMP, ?)");
+            $stmtInsert = $pdo->prepare(
+                "INSERT INTO ping_history (monitor_id, pinged_at, duration_ms) " .
+                "VALUES (?, CURRENT_TIMESTAMP, ?)"
+            );
             $stmtInsert->execute([$monitorId, $durationMs]);
             $historyId = (int)$pdo->lastInsertId();
 
@@ -579,7 +582,10 @@ class Database {
     public function getPingHistory(int $monitorId, int $limit, int $offset = 0): array {
         $pdo = $this->getPdo();
         try {
-            $stmt = $pdo->prepare("SELECT pinged_at, duration_ms FROM ping_history WHERE monitor_id = ? ORDER BY pinged_at DESC LIMIT ? OFFSET ?");
+            $stmt = $pdo->prepare(
+                "SELECT pinged_at, duration_ms FROM ping_history WHERE monitor_id = ? " .
+                "ORDER BY pinged_at DESC LIMIT ? OFFSET ?"
+            );
             $stmt->bindValue(1, $monitorId, \PDO::PARAM_INT);
             $stmt->bindValue(2, $limit, \PDO::PARAM_INT);
             $stmt->bindValue(3, $offset, \PDO::PARAM_INT);

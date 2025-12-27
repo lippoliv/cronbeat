@@ -390,9 +390,13 @@ class DatabaseTest extends DatabaseTestCase {
         $db = $this->getDatabase();
         $db->createUser('u', 'p');
         $userId = $db->validateUser('u', 'p');
-        if ($userId === false) { throw new \RuntimeException('validate'); }
+        if ($userId === false) {
+            throw new \RuntimeException('validate');
+        }
         $uuid = $db->createMonitor('m', $userId);
-        if ($uuid === false) { throw new \RuntimeException('createMonitor'); }
+        if ($uuid === false) {
+            throw new \RuntimeException('createMonitor');
+        }
 
         // When
         $id = $db->getMonitorIdByUuid($uuid);
@@ -408,11 +412,17 @@ class DatabaseTest extends DatabaseTestCase {
         $db = $this->getDatabase();
         $db->createUser('u2', 'p2');
         $userId = $db->validateUser('u2', 'p2');
-        if ($userId === false) { throw new \RuntimeException('validate'); }
+        if ($userId === false) {
+            throw new \RuntimeException('validate');
+        }
         $uuid = $db->createMonitor('m2', $userId);
-        if ($uuid === false) { throw new \RuntimeException('createMonitor'); }
+        if ($uuid === false) {
+            throw new \RuntimeException('createMonitor');
+        }
         $monitorId = $db->getMonitorIdByUuid($uuid);
-        if ($monitorId === false) { throw new \RuntimeException('id'); }
+        if ($monitorId === false) {
+            throw new \RuntimeException('id');
+        }
 
         // When
         $ok = $db->startPingTracking($uuid);
@@ -427,11 +437,17 @@ class DatabaseTest extends DatabaseTestCase {
         $db = $this->getDatabase();
         $db->createUser('u3', 'p3');
         $userId = $db->validateUser('u3', 'p3');
-        if ($userId === false) { throw new \RuntimeException('validate'); }
+        if ($userId === false) {
+            throw new \RuntimeException('validate');
+        }
         $uuid = $db->createMonitor('m3', $userId);
-        if ($uuid === false) { throw new \RuntimeException('createMonitor'); }
+        if ($uuid === false) {
+            throw new \RuntimeException('createMonitor');
+        }
         $monitorId = $db->getMonitorIdByUuid($uuid);
-        if ($monitorId === false) { throw new \RuntimeException('id'); }
+        if ($monitorId === false) {
+            throw new \RuntimeException('id');
+        }
         $db->startPingTracking($uuid);
 
         // When
@@ -452,11 +468,17 @@ class DatabaseTest extends DatabaseTestCase {
         $db = $this->getDatabase();
         $db->createUser('u4', 'p4');
         $userId = $db->validateUser('u4', 'p4');
-        if ($userId === false) { throw new \RuntimeException('validate'); }
+        if ($userId === false) {
+            throw new \RuntimeException('validate');
+        }
         $uuid = $db->createMonitor('m4', $userId);
-        if ($uuid === false) { throw new \RuntimeException('createMonitor'); }
+        if ($uuid === false) {
+            throw new \RuntimeException('createMonitor');
+        }
         $monitorId = $db->getMonitorIdByUuid($uuid);
-        if ($monitorId === false) { throw new \RuntimeException('id'); }
+        if ($monitorId === false) {
+            throw new \RuntimeException('id');
+        }
 
         $db->completePing($uuid);
         $db->completePing($uuid);
@@ -483,9 +505,13 @@ class DatabaseTest extends DatabaseTestCase {
         $db = $this->getDatabase();
         $db->createUser('u5', 'p5');
         $userId = $db->validateUser('u5', 'p5');
-        if ($userId === false) { throw new \RuntimeException('user validate failed'); }
+        if ($userId === false) {
+            throw new \RuntimeException('user validate failed');
+        }
         $uuid = $db->createMonitor('m5', $userId);
-        if ($uuid === false) { throw new \RuntimeException('monitor create failed'); }
+        if ($uuid === false) {
+            throw new \RuntimeException('monitor create failed');
+        }
 
         // When
         $result = $db->completePing($uuid);
@@ -497,7 +523,9 @@ class DatabaseTest extends DatabaseTestCase {
         Assert::assertNull($result['duration_ms']);
 
         $monitorId = $db->getMonitorIdByUuid($uuid);
-        if ($monitorId === false) { throw new \RuntimeException('monitor id not found'); }
+        if ($monitorId === false) {
+            throw new \RuntimeException('monitor id not found');
+        }
         $history = $db->getPingHistory($monitorId, 10, 0);
         Assert::assertCount(1, $history);
         Assert::assertNull($history[0]->getDurationMs());
@@ -508,15 +536,21 @@ class DatabaseTest extends DatabaseTestCase {
         $db = $this->getDatabase();
         $db->createUser('u6', 'p6');
         $userId = $db->validateUser('u6', 'p6');
-        if ($userId === false) { throw new \RuntimeException('user validate failed'); }
+        if ($userId === false) {
+            throw new \RuntimeException('user validate failed');
+        }
         $uuid = $db->createMonitor('m6', $userId);
-        if ($uuid === false) { throw new \RuntimeException('monitor create failed'); }
+        if ($uuid === false) {
+            throw new \RuntimeException('monitor create failed');
+        }
         // produce 120 pings
         for ($i = 0; $i < 120; $i++) {
             $db->completePing($uuid);
         }
         $monitorId = $db->getMonitorIdByUuid($uuid);
-        if ($monitorId === false) { throw new \RuntimeException('monitor id not found'); }
+        if ($monitorId === false) {
+            throw new \RuntimeException('monitor id not found');
+        }
 
         // When
         $page1 = $db->getPingHistory($monitorId, 50, 0);
