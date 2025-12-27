@@ -50,7 +50,10 @@ session_start();
 
 $controllerName = UrlHelper::parseControllerFromUrl();
 
-$database = new Database(__DIR__ . '/db/db.sqlite');
+// Determine database path (can be overridden via environment variable)
+$envDbPath = getenv('DB_PATH');
+$dbPath = ($envDbPath !== false && $envDbPath !== '') ? $envDbPath : (__DIR__ . '/db/db.sqlite');
+$database = new Database($dbPath);
 
 // Check if database exists
 if (!$database->databaseExists() && $controllerName !== 'setup') {
