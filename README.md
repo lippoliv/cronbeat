@@ -86,6 +86,26 @@ The migration system ensures that:
 
 ## Getting Started
 
+### Option A — Use Docker image (no checkout required)
+
+Run the official image from Docker Hub with a persistent database volume:
+
+```bash
+docker run -d --name cronbeat -p 8080:80 -v "$(pwd)/db:/var/www/html/db" lippertsweb/cronbeat:latest
+```
+
+- Image: https://hub.docker.com/r/lippertsweb/cronbeat
+- The local ./db folder will store your SQLite database so data persists across container restarts
+- Open http://localhost:8080 and complete the initial admin setup
+
+To stop and remove the container:
+
+```bash
+docker stop cronbeat && docker rm cronbeat
+```
+
+### Option B — Use repository code (local development)
+
 1. Clone this repository:
    ```bash
    git clone https://github.com/lippoliv/cronbeat.git
