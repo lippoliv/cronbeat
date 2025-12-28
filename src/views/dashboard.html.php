@@ -2,18 +2,9 @@
 /**
  * @var string|null $error Error message to display
  * @var string|null $success Success message to display
- * @var string $username Username of the logged-in user
  * @var array $monitors Array of MonitorData
  */
 ?>
-<div class="dashboard-header">
-    <h1>CronBeat Dashboard</h1>
-    <div class="user-info">
-        <p>Welcome, <?= htmlspecialchars($username) ?>!</p>
-        <a href="/profile">profile</a>
-        <a href="/login/logout">logout</a>
-    </div>
-</div>
 
 <?php if ($error !== null) : ?>
 <div class='error'><?= htmlspecialchars($error) ?></div>

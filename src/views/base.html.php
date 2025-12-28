@@ -3,6 +3,10 @@
  * @var string $title Page title
  * @var string $content Page content
  * @var string|null $containerClass Container CSS class
+ * @var string|null $appVersion Application version
+ * @var bool $showHeader Whether to show the header
+ * @var string|null $username Username of the logged-in user
+ * @var bool $isDashboard Whether the current page is the dashboard
  */
 ?>
 <!DOCTYPE html>
@@ -15,6 +19,27 @@
 </head>
 <body>
     <div class="<?= $containerClass ?? 'container' ?>">
+        <?php if ($showHeader) : ?>
+            <div class="header">
+                <div>
+                    <h1>
+                        <?php if ($isDashboard) : ?>
+                            CronBeat Dashboard
+                        <?php else : ?>
+                            <a href="/dashboard">CronBeat Dashboard</a>
+                        <?php endif; ?>
+                    </h1>
+                    <?php if ($appVersion !== null) : ?>
+                        <div class="app-version"><?= htmlspecialchars($appVersion) ?></div>
+                    <?php endif; ?>
+                </div>
+                <div class="user-info">
+                    <p>Welcome, <?= htmlspecialchars($username ?? '') ?>!</p>
+                    <a href="/profile">profile</a>
+                    <a href="/login/logout">logout</a>
+                </div>
+            </div>
+        <?php endif; ?>
         <?= $content ?>
     </div>
 

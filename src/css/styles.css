@@ -90,8 +90,8 @@ button:hover {
     text-align: center;
 }
 
-/* Dashboard styles */
-.dashboard-header {
+/* Header styles */
+.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -101,10 +101,21 @@ button:hover {
     border-bottom: 1px solid #eee;
 }
 
-.dashboard-header h1 {
+.header h1 {
     color: #3498db;
     margin: 0;
     text-align: left;
+}
+
+.header h1 a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.app-version {
+    font-size: 0.7em;
+    color: #aaa;
+    margin-top: 2px;
 }
 
 .user-info {
@@ -283,18 +294,18 @@ button:hover {
         max-width: 100%;
         padding: 1rem;
     }
-    
-    .dashboard-header, 
+
+    .header,
     .monitors-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
     }
-    
+
     .add-monitor-form {
         width: 100%;
     }
-    
+
     .add-monitor-form input {
         flex-grow: 1;
     }
