@@ -37,11 +37,10 @@ COPY src/ .
 # Copy vendor from builder
 COPY --from=builder /app/vendor ./vendor
 
-# Prepare writable data directory and set permissions
+# Prepare writable application directory and set permissions
 # - php-fpm runs as www-data by default; ensure it owns the writable paths
-ENV DB_PATH=/var/www/data/db.sqlite
-RUN mkdir -p /var/www/data /var/www/html/db && \
-    chown -R www-data:www-data /var/www/data /var/www/html && \
+RUN mkdir -p /var/www/html/db && \
+    chown -R www-data:www-data /var/www/html && \
     chmod -R 755 /var/www/html
 
 # Expose port 80
@@ -50,9 +49,6 @@ EXPOSE 80
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD curl -f http://localhost/ || exit 1
-
-# Declare data volume for persistence
-VOLUME ["/var/www/data"]
 
 # Start supervisor
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

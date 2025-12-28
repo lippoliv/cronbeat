@@ -50,16 +50,7 @@ cronbeat/
 
 ### Database
 
-CronBeat uses SQLite for data storage. The database is automatically created on first run when you set up your admin account.
-
-You can configure the database file location via the `DB_PATH` environment variable. By default it is stored under the web root in `src/db/db.sqlite`, but when running via Docker we default it to `/var/www/data/db.sqlite` (outside the web root) for better security and to avoid permission issues.
-
-Example:
-
-```bash
-# Custom location
-DB_PATH=/data/cronbeat/db.sqlite
-```
+CronBeat uses SQLite for data storage. The database is automatically created on first run when you set up your admin account. By default, the database file is located at `src/db/db.sqlite` inside the application directory.
 
 #### Database Migrations
 
@@ -153,7 +144,7 @@ CronBeat includes a comprehensive logging system that helps developers and admin
 - **Log Format**: Logs include timestamp, level, message, and optional context data:
   ```
   [2025-08-03 09:15:30] [INFO] Application starting {"controller":"login"}
-  [2025-08-03 09:15:31] [DEBUG] Connecting to database at /var/www/data/db.sqlite
+  [2025-08-03 09:15:31] [DEBUG] Connecting to database at /var/www/html/db/db.sqlite
   [2025-08-03 09:15:31] [INFO] Successfully connected to database
   ```
 

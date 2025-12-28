@@ -24,10 +24,8 @@ if ($logStream === false) {
 }
 Logger::setLogStream($logStream);
 
-// Initialize database (allow overriding path via environment variable)
-$envDbPath = getenv('DB_PATH');
-$dbPath = ($envDbPath !== false && $envDbPath !== '') ? $envDbPath : (APP_DIR . '/db/db.sqlite');
-$database = new Database($dbPath);
+// Initialize database with default path inside the application directory
+$database = new Database(APP_DIR . '/db/db.sqlite');
 
 // Initialize CLI and run
 $cli = new CLI($database, array_slice($argv, 1));
