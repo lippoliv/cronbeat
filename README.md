@@ -175,3 +175,20 @@ composer test     # Run all tests
 
 Tests follow the Given-When-Then pattern and are located in the `tests` directory.
 
+
+## Contributing
+
+CronBeat is a personal sandbox project used to explore and demonstrate what JetBrains Junie can do.
+
+- Feedback is very welcome.
+- Code contributions (pull requests) are not expected at this time.
+
+If you have ideas, requests, or find a bug, please open a GitHub Issue. In your issue, consider including:
+- What you want to achieve or the problem you are facing
+- Expected vs. current behavior
+- Reproduction steps (for bugs)
+- Environment details (PHP version, OS, Docker vs. direct run)
+- Any screenshots or logs that help illustrate the issue
+
+The maintainer will use your feedback to guide Junie toward an implementation.
+
