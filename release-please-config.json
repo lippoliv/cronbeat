@@ -10,10 +10,7 @@
             "include-component-in-tag":       false,
             "include-v-in-tag":               true,
             "extra-files": [
-                {
-                    "type": "generic",
-                    "path": "version.txt"
-                }
+                "version.txt"
             ]
         }
     },
