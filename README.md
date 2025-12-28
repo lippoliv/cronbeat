@@ -50,7 +50,7 @@ cronbeat/
 
 ### Database
 
-CronBeat uses SQLite for data storage. The database is automatically created on first run when you set up your admin account.
+CronBeat uses SQLite for data storage. The database is automatically created on first run when you set up your admin account. The database file is located at `src/db/db.sqlite` inside the application directory.
 
 #### Database Migrations
 
