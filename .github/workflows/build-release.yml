@@ -1,0 +1,25 @@
+name: build-release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  upload-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create release zip
+        run: |
+            cp LICENSE src/LICENSE
+            cd src && zip -r ../cronbeat-${{ github.event.release.tag_name }}.zip .
+
+      - name: Upload Release Artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} cronbeat-${{ github.event.release.tag_name }}.zip --clobber

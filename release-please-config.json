@@ -1,0 +1,15 @@
+{
+    "prerelease": true,
+    "packages":   {
+        ".": {
+            "release-type":                   "php",
+            "package-name":                   "cronbeat",
+            "bump-minor-pre-major":           true,
+            "bump-patch-for-minor-pre-major": true,
+            "include-component-in-tag":       false,
+            "include-v-in-tag":               true
+        }
+    },
+    "plugins":    [
+    ]
+}
