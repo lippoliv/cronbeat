@@ -10,6 +10,7 @@ If you have ideas, requests, or find a bug, please open a GitHub Issue. To make 
 - Expected vs. current behavior
 - Clear reproduction steps (for bugs)
 - Environment details (PHP version, OS, Docker vs. direct run)
+- CronBeat version/release used (e.g., tag like vX.Y.Z or the commit SHA if built from source)
 - Any screenshots or logs that help illustrate the issue
 
 If you’re considering a code change anyway, please open an issue first to discuss the approach before investing time. Small documentation fixes are fine to propose via PR.
