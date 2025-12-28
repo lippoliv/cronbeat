@@ -1,5 +1,6 @@
 {
     "prerelease": true,
+    "initial-version": "0.1.0",
     "packages":   {
         ".": {
             "release-type":                   "simple",
