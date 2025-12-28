@@ -175,3 +175,8 @@ composer test     # Run all tests
 
 Tests follow the Given-When-Then pattern and are located in the `tests` directory.
 
+
+## Contributing
+
+Looking to share feedback or ideas? Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
