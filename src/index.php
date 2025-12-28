@@ -4,6 +4,7 @@ const APP_DIR = __DIR__;
 const DB_VERSION = 4; // Current expected database version
 
 require_once APP_DIR . '/classes/UrlHelper.php';
+require_once APP_DIR . '/classes/AppHelper.php';
 require_once APP_DIR . '/classes/Database.php';
 require_once APP_DIR . '/classes/MonitorData.php';
 require_once APP_DIR . '/classes/PingData.php';

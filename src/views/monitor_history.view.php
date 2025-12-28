@@ -10,11 +10,11 @@ class MonitorHistoryView extends BaseView {
     private int $page = 1;
     private int $pageSize = 50;
     private int $total = 0;
-    private string $username = '';
 
     public function __construct() {
         $this->setTitle('Monitor History');
         $this->setContainerClass('view-container');
+        $this->setShowHeader(true);
     }
 
     public function setMonitorUuid(string $uuid): self {
@@ -44,10 +44,6 @@ class MonitorHistoryView extends BaseView {
         $this->total = $total;
         return $this;
     }
-    public function setUsername(string $username): self {
-        $this->username = $username;
-        return $this;
-    }
 
     public function render(): string {
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
@@ -62,8 +58,6 @@ class MonitorHistoryView extends BaseView {
         $pageSize = $this->pageSize;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $total = $this->total;
-        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
-        $username = $this->username;
 
         ob_start();
         include(defined('APP_DIR') ? APP_DIR . '/views' : __DIR__) . '/monitor_history.html.php';

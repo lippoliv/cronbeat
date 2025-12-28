@@ -6,17 +6,8 @@
  * @var int $page
  * @var int $pageSize
  * @var int $total
- * @var string $username
  */
 ?>
-<div class="dashboard-header">
-    <h1><a href="/dashboard">CronBeat Dashboard</a></h1>
-    <div class="user-info">
-        <p>Welcome, <?= htmlspecialchars($username) ?>!</p>
-        <a href="/profile">profile</a>
-        <a href="/login/logout">logout</a>
-    </div>
-</div>
 
 <div class="dashboard-content">
     <div class="history-title">

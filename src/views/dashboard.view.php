@@ -5,13 +5,14 @@ namespace Cronbeat\Views;
 class DashboardView extends BaseView {
     protected ?string $error = null;
     protected ?string $success = null;
-    protected string $username = '';
     /** @var array<\Cronbeat\MonitorData> */
     protected array $monitors = [];
 
     public function __construct() {
         $this->setTitle('CronBeat Dashboard');
         $this->setContainerClass('view-container');
+        $this->setShowHeader(true);
+        $this->setIsDashboard(true);
     }
 
     public function setError(?string $error): self {
@@ -21,11 +22,6 @@ class DashboardView extends BaseView {
 
     public function setSuccess(?string $success): self {
         $this->success = $success;
-        return $this;
-    }
-
-    public function setUsername(string $username): self {
-        $this->username = $username;
         return $this;
     }
 
@@ -42,8 +38,6 @@ class DashboardView extends BaseView {
         $error = $this->error;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $success = $this->success;
-        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
-        $username = $this->username;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $monitors = $this->monitors;
 
