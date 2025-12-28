@@ -24,7 +24,7 @@ if ($logStream === false) {
 }
 Logger::setLogStream($logStream);
 
-// Initialize database with default path inside the application directory
+// Initialize database
 $database = new Database(APP_DIR . '/db/db.sqlite');
 
 // Initialize CLI and run

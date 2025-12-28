@@ -50,7 +50,6 @@ session_start();
 
 $controllerName = UrlHelper::parseControllerFromUrl();
 
-// Use default database path inside the application directory
 $database = new Database(__DIR__ . '/db/db.sqlite');
 
 // Check if database exists
