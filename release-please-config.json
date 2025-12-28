@@ -2,7 +2,7 @@
     "prerelease": true,
     "packages":   {
         ".": {
-            "release-type":                   "php",
+            "release-type":                   "simple",
             "package-name":                   "cronbeat",
             "bump-minor-pre-major":           true,
             "bump-patch-for-minor-pre-major": true,
