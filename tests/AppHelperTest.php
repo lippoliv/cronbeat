@@ -7,10 +7,13 @@ use Cronbeat\AppHelper;
 use PHPUnit\Framework\Assert;
 
 class AppHelperTest extends TestCase {
-    private string $tempVersionFile = '';
+    private string $srcVersionFile = '';
 
     protected function setUp(): void {
-        $this->tempVersionFile = __DIR__ . '/../version.txt';
+        if (!defined('APP_DIR')) {
+            define('APP_DIR', __DIR__ . '/../src');
+        }
+        $this->srcVersionFile = APP_DIR . '/version.txt';
         AppHelper::resetAppVersion();
     }
 
@@ -21,9 +24,9 @@ class AppHelperTest extends TestCase {
     public function testGetAppVersionReturnsNullIfFileDoesNotExist(): void {
         // Given
         $originalVersion = null;
-        if (file_exists($this->tempVersionFile)) {
-            $originalVersion = file_get_contents($this->tempVersionFile);
-            rename($this->tempVersionFile, $this->tempVersionFile . '.bak');
+        if (file_exists($this->srcVersionFile)) {
+            $originalVersion = file_get_contents($this->srcVersionFile);
+            rename($this->srcVersionFile, $this->srcVersionFile . '.bak');
         }
 
         // When
@@ -33,18 +36,18 @@ class AppHelperTest extends TestCase {
         Assert::assertNull($version);
 
         // Cleanup
-        if ($originalVersion !== null && file_exists($this->tempVersionFile . '.bak')) {
-            rename($this->tempVersionFile . '.bak', $this->tempVersionFile);
+        if ($originalVersion !== null && file_exists($this->srcVersionFile . '.bak')) {
+            rename($this->srcVersionFile . '.bak', $this->srcVersionFile);
         }
     }
 
     public function testGetAppVersionReturnsVersionFromFile(): void {
         // Given
         $originalVersion = null;
-        if (file_exists($this->tempVersionFile)) {
-            $originalVersion = file_get_contents($this->tempVersionFile);
+        if (file_exists($this->srcVersionFile)) {
+            $originalVersion = file_get_contents($this->srcVersionFile);
         }
-        file_put_contents($this->tempVersionFile, "1.2.3\n");
+        file_put_contents($this->srcVersionFile, "1.2.3\n");
 
         // When
         $version = AppHelper::getAppVersion();
@@ -54,9 +57,9 @@ class AppHelperTest extends TestCase {
 
         // Cleanup
         if ($originalVersion !== null) {
-            file_put_contents($this->tempVersionFile, $originalVersion);
-        } else {
-            unlink($this->tempVersionFile);
+            file_put_contents($this->srcVersionFile, $originalVersion);
+        } else if (file_exists($this->srcVersionFile)) {
+            unlink($this->srcVersionFile);
         }
     }
 

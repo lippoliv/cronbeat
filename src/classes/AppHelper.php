@@ -7,18 +7,10 @@ class AppHelper {
 
     public static function getAppVersion(): ?string {
         if (self::$appVersion === null) {
-            $versionFile = (defined('APP_DIR') ? APP_DIR : __DIR__ . '/..') . '/version.txt';
-            if (file_exists($versionFile)) {
-                self::$appVersion = trim((string) file_get_contents($versionFile));
-            } else {
-                // Also check root if APP_DIR is defined but file not found there
-                $rootVersionFile = (defined('APP_DIR') ? APP_DIR . '/..' : __DIR__ . '/../..') . '/version.txt';
-                if (file_exists($rootVersionFile)) {
-                    self::$appVersion = trim((string) file_get_contents($rootVersionFile));
-                } else {
-                    self::$appVersion = '';
-                }
-            }
+            $versionFile = APP_DIR . '/version.txt';
+            self::$appVersion = file_exists($versionFile)
+                ? trim((string) file_get_contents($versionFile))
+                : '';
         }
 
         return self::$appVersion !== '' ? self::$appVersion : null;
