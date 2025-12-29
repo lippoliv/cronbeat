@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php
         // Normalize the view title so it doesn't repeat the app name
-        $rawTitle = (string)($title ?? '');
+        $rawTitle = $title;
         $sanitizedTitle = trim(
             preg_replace(
                 [
@@ -32,7 +32,7 @@
             $sanitizedTitle = $isDashboard ? 'Dashboard' : 'Page';
         }
         $documentTitle = htmlspecialchars($sanitizedTitle, ENT_QUOTES) . ' - CronBeat';
-    ?>
+        ?>
     <title><?= $documentTitle ?></title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
