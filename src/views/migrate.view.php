@@ -10,6 +10,7 @@ class MigrateView extends BaseView {
     protected int $expectedVersion = 0;
 
     public function __construct() {
+        // This view does not use the header, include app name in title
         $this->setTitle('CronBeat Database Migration');
     }
 
@@ -44,6 +45,8 @@ class MigrateView extends BaseView {
         $expectedVersion = $this->expectedVersion;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $needsMigration = $currentVersion < $expectedVersion;
+        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
+        $title = $this->title;
 
         ob_start();
 

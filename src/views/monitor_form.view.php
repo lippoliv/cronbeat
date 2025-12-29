@@ -6,7 +6,7 @@ class MonitorFormView extends BaseView {
     private ?string $error = null;
 
     public function __construct() {
-        $this->setTitle('Add Monitor - CronBeat');
+        $this->setTitle('Add Monitor');
     }
 
     public function setError(?string $error): void {

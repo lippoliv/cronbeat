@@ -6,6 +6,7 @@ class SetupView extends BaseView {
     protected ?string $error = null;
 
     public function __construct() {
+        // This view does not use the header, include app name in title
         $this->setTitle('CronBeat Setup');
     }
 
@@ -17,6 +18,8 @@ class SetupView extends BaseView {
     public function render(): string {
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $error = $this->error;
+        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
+        $title = $this->title;
 
         ob_start();
 

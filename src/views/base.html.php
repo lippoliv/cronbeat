@@ -14,7 +14,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?></title>
+    <?php $documentTitle = htmlspecialchars($title, ENT_QUOTES) . ' - CronBeat'; ?>
+    <title><?= $documentTitle ?></title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -24,9 +25,9 @@
                 <div>
                     <h1>
                         <?php if ($isDashboard) : ?>
-                            CronBeat Dashboard
+                            CronBeat - <?= htmlspecialchars($title, ENT_QUOTES) ?>
                         <?php else : ?>
-                            <a href="/dashboard">CronBeat Dashboard</a>
+                            <a href="/dashboard">CronBeat</a> - <?= htmlspecialchars($title, ENT_QUOTES) ?>
                         <?php endif; ?>
                     </h1>
                     <?php if ($appVersion !== null) : ?>

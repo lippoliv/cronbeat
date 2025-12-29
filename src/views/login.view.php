@@ -6,7 +6,7 @@ class LoginView extends BaseView {
     protected ?string $error = null;
 
     public function __construct() {
-        $this->setTitle('CronBeat Login');
+        $this->setTitle('Login');
     }
 
     public function setError(?string $error): self {
@@ -17,6 +17,8 @@ class LoginView extends BaseView {
     public function render(): string {
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $error = $this->error;
+        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
+        $title = $this->title;
 
         ob_start();
 

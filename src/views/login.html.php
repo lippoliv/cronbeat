@@ -3,7 +3,7 @@
  * @var string|null $error Error message to display
  */
 ?>
-<h1>CronBeat Login</h1>
+<h1><?= htmlspecialchars($title, ENT_QUOTES) ?></h1>
 <?php if (isset($error) && $error !== '') : ?>
 <div class='error'><?= $error ?></div>
 <?php endif; ?>

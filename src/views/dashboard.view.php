@@ -9,7 +9,7 @@ class DashboardView extends BaseView {
     protected array $monitors = [];
 
     public function __construct() {
-        $this->setTitle('CronBeat Dashboard');
+        $this->setTitle('Dashboard');
         $this->setContainerClass('view-container');
         $this->setShowHeader(true);
         $this->setIsDashboard(true);
