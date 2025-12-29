@@ -17,6 +17,8 @@ class LoginView extends BaseView {
     public function render(): string {
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $error = $this->error;
+        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
+        $title = $this->title;
 
         ob_start();
 

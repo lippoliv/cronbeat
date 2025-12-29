@@ -3,7 +3,7 @@
  * @var string|null $error Error message to display
  */
 ?>
-<h1>Login</h1>
+<h1><?= htmlspecialchars($title ?? 'Login', ENT_QUOTES) ?></h1>
 <?php if (isset($error) && $error !== '') : ?>
 <div class='error'><?= $error ?></div>
 <?php endif; ?>
