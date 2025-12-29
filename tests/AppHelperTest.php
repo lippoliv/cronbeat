@@ -58,7 +58,7 @@ class AppHelperTest extends TestCase {
         // Cleanup
         if ($originalVersion !== null) {
             file_put_contents($this->srcVersionFile, $originalVersion);
-        } else if (file_exists($this->srcVersionFile)) {
+        } elseif (file_exists($this->srcVersionFile)) {
             unlink($this->srcVersionFile);
         }
     }
