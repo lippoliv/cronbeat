@@ -97,6 +97,11 @@ class MonitorControllerTest extends DatabaseTestCase {
         // Page size is 50 items on first page
         $liCount = substr_count($html, 'class="history-item"');
         Assert::assertSame(50, $liCount);
+        // 49 intervals shown (ignore last entry on page)
+        $intervalCount = substr_count($html, 'class="history-interval"');
+        Assert::assertSame(49, $intervalCount);
+        // Interval format hh:mm:ss
+        Assert::assertMatchesRegularExpression('/\+\s*\d{2}:\d{2}:\d{2}/', $html);
     }
 
     public function testDoRoutingServesHistorySecondPageViaQueryParam(): void {
@@ -130,5 +135,8 @@ class MonitorControllerTest extends DatabaseTestCase {
         // Remaining 25 items on second page
         $liCount = substr_count($html, 'class="history-item"');
         Assert::assertSame(25, $liCount);
+        // 24 intervals on second page
+        $intervalCount = substr_count($html, 'class="history-interval"');
+        Assert::assertSame(24, $intervalCount);
     }
 }
