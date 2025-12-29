@@ -45,6 +45,41 @@ class MonitorHistoryView extends BaseView {
         return $this;
     }
 
+    /**
+     * Build a list of history items with an optional interval string to the next (older) entry.
+     * The last item on the current page has no interval.
+     *
+     * @return array<int, array{entry:\Cronbeat\PingData, interval: ?string}>
+     */
+    public function getHistoryWithIntervals(): array {
+        $result = [];
+        $count = count($this->history);
+        for ($i = 0; $i < $count; $i++) {
+            $entry = $this->history[$i];
+            $next = $i + 1 < $count ? $this->history[$i + 1] : null;
+            $interval = $next !== null ? $this->computeIntervalString($entry, $next) : null;
+            $result[] = [
+                'entry' => $entry,
+                'interval' => $interval,
+            ];
+        }
+        return $result;
+    }
+
+    private function computeIntervalString(\Cronbeat\PingData $current, \Cronbeat\PingData $next): ?string {
+        try {
+            $t1 = new \DateTimeImmutable($current->getPingedAt());
+            $t2 = new \DateTimeImmutable($next->getPingedAt());
+            $diffSec = max(0, $t1->getTimestamp() - $t2->getTimestamp());
+            $h = intdiv($diffSec, 3600);
+            $m = intdiv($diffSec % 3600, 60);
+            $s = $diffSec % 60;
+            return sprintf('%02d:%02d:%02d', $h, $m, $s);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     public function render(): string {
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $monitorUuid = $this->monitorUuid;

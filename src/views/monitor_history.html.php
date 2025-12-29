@@ -30,27 +30,8 @@
         <p>No ping activity yet.</p>
     <?php else : ?>
         <ul class="history-list">
-            <?php
-            $count = count($history);
-            for ($i = 0; $i < $count; $i++) :
-                $entry = $history[$i];
-                $next = $i + 1 < $count ? $history[$i + 1] : null;
-                // Calculate interval to previous ping within this page (ignore last entry)
-                $interval = null;
-                if ($next !== null) {
-                    try {
-                        $t1 = new \DateTimeImmutable($entry->getPingedAt());
-                        $t2 = new \DateTimeImmutable($next->getPingedAt());
-                        $diffSec = max(0, $t1->getTimestamp() - $t2->getTimestamp());
-                        $h = intdiv($diffSec, 3600);
-                        $m = intdiv($diffSec % 3600, 60);
-                        $s = $diffSec % 60;
-                        $interval = sprintf('%02d:%02d:%02d', $h, $m, $s);
-                    } catch (\Throwable $e) {
-                        $interval = null;
-                    }
-                }
-            ?>
+            <?php foreach ($this->getHistoryWithIntervals() as $item) : ?>
+                <?php $entry = $item['entry']; $interval = $item['interval']; ?>
                 <li class="history-item">
                     <span class="history-time"><?= htmlspecialchars($entry->getPingedAt()) ?></span>
                     <?php if ($entry->getDurationMs() !== null) : ?>
@@ -60,7 +41,7 @@
                         <span class="history-interval">+ <?= htmlspecialchars($interval) ?></span>
                     <?php endif; ?>
                 </li>
-            <?php endfor; ?>
+            <?php endforeach; ?>
         </ul>
     <?php endif; ?>
 
