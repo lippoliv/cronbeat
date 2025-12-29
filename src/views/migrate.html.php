@@ -1,5 +1,6 @@
 <?php
 /**
+ * @var string $title
  * @var string|null $error Error message to display
  * @var string|null $success Success message to display
  * @var int $currentVersion Current database version
