@@ -2,19 +2,10 @@
 /**
  * @var string|null $error
  * @var string|null $success
- * @var string $username
  * @var string $name
  * @var string $email
  */
 ?>
-<div class="dashboard-header">
-    <h1><a href="/dashboard">CronBeat Dashboard</a></h1>
-    <div class="user-info">
-        <p>Welcome, <?= htmlspecialchars($username) ?>!</p>
-        <a href="/profile">profile</a>
-        <a href="/login/logout">logout</a>
-    </div>
-</div>
 
 <?php if ($error !== null) : ?>
 <div class='error'><?= htmlspecialchars($error) ?></div>
