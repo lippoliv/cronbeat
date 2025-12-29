@@ -7,7 +7,7 @@
  * @var bool $needsMigration Whether migration is needed
  */
 ?>
-<h1><?= htmlspecialchars($title ?? 'Database Migration', ENT_QUOTES) ?></h1>
+<h1><?= htmlspecialchars($title, ENT_QUOTES) ?></h1>
 
 <?php if (isset($error) && $error !== '') : ?>
 <div class='error'><?= $error ?></div>
