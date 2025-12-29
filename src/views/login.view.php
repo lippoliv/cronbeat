@@ -6,7 +6,7 @@ class LoginView extends BaseView {
     protected ?string $error = null;
 
     public function __construct() {
-        $this->setTitle('CronBeat Login');
+        $this->setTitle('Login');
     }
 
     public function setError(?string $error): self {

@@ -6,7 +6,7 @@ class SetupView extends BaseView {
     protected ?string $error = null;
 
     public function __construct() {
-        $this->setTitle('CronBeat Setup');
+        $this->setTitle('Setup');
     }
 
     public function setError(?string $error): self {

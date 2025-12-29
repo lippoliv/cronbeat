@@ -14,7 +14,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?></title>
+    <?php
+        // Normalize the view title so it doesn't repeat the app name
+        $rawTitle = (string)($title ?? '');
+        $sanitizedTitle = trim(
+            preg_replace(
+                [
+                    '/^\s*CronBeat\s*-\s*/i',   // strip leading "CronBeat - "
+                    '/\s*-\s*CronBeat\s*$/i',   // strip trailing " - CronBeat"
+                ],
+                '',
+                $rawTitle
+            ) ?? ''
+        );
+        // Fallback if title becomes empty
+        if ($sanitizedTitle === '') {
+            $sanitizedTitle = $isDashboard ? 'Dashboard' : 'Page';
+        }
+        $documentTitle = htmlspecialchars($sanitizedTitle, ENT_QUOTES) . ' - CronBeat';
+    ?>
+    <title><?= $documentTitle ?></title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -24,9 +43,9 @@
                 <div>
                     <h1>
                         <?php if ($isDashboard) : ?>
-                            CronBeat Dashboard
+                            CronBeat - <?= htmlspecialchars($sanitizedTitle, ENT_QUOTES) ?>
                         <?php else : ?>
-                            <a href="/dashboard">CronBeat Dashboard</a>
+                            <a href="/dashboard">CronBeat</a> - <?= htmlspecialchars($sanitizedTitle, ENT_QUOTES) ?>
                         <?php endif; ?>
                     </h1>
                     <?php if ($appVersion !== null) : ?>

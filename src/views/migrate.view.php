@@ -10,7 +10,7 @@ class MigrateView extends BaseView {
     protected int $expectedVersion = 0;
 
     public function __construct() {
-        $this->setTitle('CronBeat Database Migration');
+        $this->setTitle('Database Migration');
     }
 
     public function setError(?string $error): self {

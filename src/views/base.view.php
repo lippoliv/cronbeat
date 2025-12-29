@@ -7,7 +7,7 @@ use Cronbeat\AppHelper;
 class BaseView {
 
 
-    protected string $title   = 'CronBeat';
+    protected string $title   = 'Dashboard';
 
     protected string $content = '';
 
