@@ -70,11 +70,14 @@ class MonitorHistoryView extends BaseView {
         try {
             $t1 = new \DateTimeImmutable($current->getPingedAt());
             $t2 = new \DateTimeImmutable($next->getPingedAt());
-            $diffSec = max(0, $t1->getTimestamp() - $t2->getTimestamp());
-            $h = intdiv($diffSec, 3600);
-            $m = intdiv($diffSec % 3600, 60);
-            $s = $diffSec % 60;
-            return sprintf('%02d:%02d:%02d', $h, $m, $s);
+            // Use DateTime::diff and DateInterval::format as requested in review
+            $diff = $t2->diff($t1);
+            $days = (int)$diff->format('%a');
+            $hours = (int)$diff->format('%H');
+            $minutes = (int)$diff->format('%I');
+            $seconds = (int)$diff->format('%S');
+            $totalHours = $days * 24 + $hours;
+            return sprintf('%02d:%02d:%02d', $totalHours, $minutes, $seconds);
         } catch (\Throwable $e) {
             return null;
         }
@@ -85,7 +88,6 @@ class MonitorHistoryView extends BaseView {
         $monitorUuid = $this->monitorUuid;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $monitorName = $this->monitorName;
-        // Provide precomputed history items including per-page intervals
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $historyWithIntervals = $this->getHistoryWithIntervals();
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
