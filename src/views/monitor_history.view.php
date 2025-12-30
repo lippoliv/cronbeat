@@ -85,8 +85,9 @@ class MonitorHistoryView extends BaseView {
         $monitorUuid = $this->monitorUuid;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $monitorName = $this->monitorName;
+        // Provide precomputed history items including per-page intervals
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
-        $history = $this->history;
+        $historyWithIntervals = $this->getHistoryWithIntervals();
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $page = $this->page;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable

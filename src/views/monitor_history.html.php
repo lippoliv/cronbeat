@@ -2,7 +2,7 @@
 /**
  * @var string $monitorUuid
  * @var string $monitorName
- * @var array<\Cronbeat\PingData> $history
+ * @var array<int, array{entry: \Cronbeat\PingData, interval: ?string}> $historyWithIntervals
  * @var int $page
  * @var int $pageSize
  * @var int $total
@@ -26,11 +26,11 @@
     </p>
     <p>Total pings: <?= $total ?></p>
     <hr/>
-    <?php if (count($history) === 0) : ?>
+    <?php if (count($historyWithIntervals) === 0) : ?>
         <p>No ping activity yet.</p>
     <?php else : ?>
         <ul class="history-list">
-            <?php foreach ($this->getHistoryWithIntervals() as $item) : ?>
+            <?php foreach ($historyWithIntervals as $item) : ?>
                 <?php $entry = $item['entry']; $interval = $item['interval']; ?>
                 <li class="history-item">
                     <span class="history-time"><?= htmlspecialchars($entry->getPingedAt()) ?></span>
