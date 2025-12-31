@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/lippoliv/cronbeat/compare/v0.2.0...v0.3.0) (2025-12-31)
+
+
+### Features
+
+* Display Time Differences Between Ping Entries ([#51](https://github.com/lippoliv/cronbeat/issues/51)) ([5f5fef3](https://github.com/lippoliv/cronbeat/commit/5f5fef3a80668110c92804224c5327d8de4b0e7c))
+
 ## [0.2.0](https://github.com/lippoliv/cronbeat/compare/v0.1.0...v0.2.0) (2025-12-29)
 
 
