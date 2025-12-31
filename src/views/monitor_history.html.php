@@ -38,7 +38,7 @@
                 <li class="history-item">
                     <span class="history-time"><?= htmlspecialchars($entry->getPingedAt()) ?></span>
                     <?php if ($entry->getDurationMs() !== null) : ?>
-                        <span class="history-duration">(<?= $entry->getDurationMs() ?> ms)</span>
+                        <span class="history-duration">(<?= htmlspecialchars(\Cronbeat\AppHelper::formatDuration((int) $entry->getDurationMs())) ?>)</span>
                     <?php endif; ?>
                     <?php if ($gap !== null) : ?>
                         <span class="history-gap">+ <?= htmlspecialchars($gap) ?></span>
