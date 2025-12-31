@@ -2,7 +2,7 @@
 /**
  * @var string $monitorUuid
  * @var string $monitorName
- * @var array<int, array{entry: \Cronbeat\PingData, interval: ?string}> $historyWithIntervals
+ * @var array<int, array{entry: \Cronbeat\PingData, gap: ?string}> $historyWithGaps
  * @var int $page
  * @var int $pageSize
  * @var int $total
@@ -26,19 +26,19 @@
     </p>
     <p>Total pings: <?= $total ?></p>
     <hr/>
-    <?php if (count($historyWithIntervals) === 0) : ?>
+    <?php if (count($historyWithGaps) === 0) : ?>
         <p>No ping activity yet.</p>
     <?php else : ?>
         <ul class="history-list">
-            <?php foreach ($historyWithIntervals as $item) : ?>
-                <?php $entry = $item['entry']; $interval = $item['interval']; ?>
+            <?php foreach ($historyWithGaps as $item) : ?>
+                <?php $entry = $item['entry']; $gap = $item['gap']; ?>
                 <li class="history-item">
                     <span class="history-time"><?= htmlspecialchars($entry->getPingedAt()) ?></span>
                     <?php if ($entry->getDurationMs() !== null) : ?>
                         <span class="history-duration">(<?= $entry->getDurationMs() ?> ms)</span>
                     <?php endif; ?>
-                    <?php if ($interval !== null) : ?>
-                        <span class="history-interval">+ <?= htmlspecialchars($interval) ?></span>
+                    <?php if ($gap !== null) : ?>
+                        <span class="history-gap">+ <?= htmlspecialchars($gap) ?></span>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>

@@ -46,38 +46,31 @@ class MonitorHistoryView extends BaseView {
     }
 
     /**
-     * Build a list of history items with an optional interval string to the next (older) entry.
-     * The last item on the current page has no interval.
+     * Build a list of history items with an optional gap string to the next (older) entry.
+     * The last item on the current page has no gap.
      *
-     * @return array<int, array{entry:\Cronbeat\PingData, interval: ?string}>
+     * @return array<int, array{entry:\Cronbeat\PingData, gap: ?string}>
      */
-    public function getHistoryWithIntervals(): array {
+    public function getHistoryWithGaps(): array {
         $result = [];
         $count = count($this->history);
         for ($i = 0; $i < $count; $i++) {
             $entry = $this->history[$i];
             $next = $i + 1 < $count ? $this->history[$i + 1] : null;
-            $interval = $next !== null ? $this->computeIntervalString($entry, $next) : null;
+            $gap = $next !== null ? $this->computeGapString($entry, $next) : null;
             $result[] = [
                 'entry' => $entry,
-                'interval' => $interval,
+                'gap' => $gap,
             ];
         }
         return $result;
     }
 
-    private function computeIntervalString(\Cronbeat\PingData $current, \Cronbeat\PingData $next): ?string {
+    private function computeGapString(\Cronbeat\PingData $current, \Cronbeat\PingData $next): ?string {
         try {
             $t1 = new \DateTimeImmutable($current->getPingedAt());
             $t2 = new \DateTimeImmutable($next->getPingedAt());
-            // Use DateTime::diff and DateInterval::format as requested in review
-            $diff = $t2->diff($t1);
-            $days = (int)$diff->format('%a');
-            $hours = (int)$diff->format('%H');
-            $minutes = (int)$diff->format('%I');
-            $seconds = (int)$diff->format('%S');
-            $totalHours = $days * 24 + $hours;
-            return sprintf('%02d:%02d:%02d', $totalHours, $minutes, $seconds);
+            return $t2->diff($t1)->format('%a:%H:%I:%S');
         } catch (\Throwable $e) {
             return null;
         }
@@ -89,7 +82,7 @@ class MonitorHistoryView extends BaseView {
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $monitorName = $this->monitorName;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
-        $historyWithIntervals = $this->getHistoryWithIntervals();
+        $historyWithGaps = $this->getHistoryWithGaps();
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $page = $this->page;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable

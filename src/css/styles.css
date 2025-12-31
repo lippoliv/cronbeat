@@ -246,8 +246,8 @@ button:hover {
     word-break: break-all;
 }
 
-/* Style the interval between history entries similar to the UUID label: small, grey */
-.history-interval {
+/* Style the gap between history entries similar to the UUID label: small, grey */
+.history-gap {
     font-size: 0.8rem;
     color: #7f8c8d;
 }
