@@ -97,6 +97,9 @@ class MonitorControllerTest extends DatabaseTestCase {
         // Page size is 50 items on first page
         $liCount = substr_count($html, 'class="history-item"');
         Assert::assertSame(50, $liCount);
+        $gapCount = substr_count($html, 'class="history-gap"');
+        Assert::assertSame(49, $gapCount);
+        Assert::assertMatchesRegularExpression('/\+\s*\d+:\d{2}:\d{2}:\d{2}/', $html);
     }
 
     public function testDoRoutingServesHistorySecondPageViaQueryParam(): void {
@@ -130,5 +133,7 @@ class MonitorControllerTest extends DatabaseTestCase {
         // Remaining 25 items on second page
         $liCount = substr_count($html, 'class="history-item"');
         Assert::assertSame(25, $liCount);
+        $gapCount = substr_count($html, 'class="history-gap"');
+        Assert::assertSame(24, $gapCount);
     }
 }

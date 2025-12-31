@@ -45,13 +45,44 @@ class MonitorHistoryView extends BaseView {
         return $this;
     }
 
+    /**
+     * Build a list of history items with an optional gap string to the next (older) entry.
+     * The last item on the current page has no gap.
+     *
+     * @return array<int, array{entry:\Cronbeat\PingData, gap: ?string}>
+     */
+    public function getHistoryWithGaps(): array {
+        $result = [];
+        $count = count($this->history);
+        for ($i = 0; $i < $count; $i++) {
+            $entry = $this->history[$i];
+            $next = $i + 1 < $count ? $this->history[$i + 1] : null;
+            $gap = $next !== null ? $this->computeGapString($entry, $next) : null;
+            $result[] = [
+                'entry' => $entry,
+                'gap' => $gap,
+            ];
+        }
+        return $result;
+    }
+
+    private function computeGapString(\Cronbeat\PingData $current, \Cronbeat\PingData $next): ?string {
+        try {
+            $t1 = new \DateTimeImmutable($current->getPingedAt());
+            $t2 = new \DateTimeImmutable($next->getPingedAt());
+            return $t2->diff($t1)->format('%a:%H:%I:%S');
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     public function render(): string {
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $monitorUuid = $this->monitorUuid;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $monitorName = $this->monitorName;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
-        $history = $this->history;
+        $historyWithGaps = $this->getHistoryWithGaps();
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $page = $this->page;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
