@@ -29,9 +29,9 @@ class DurationFormatTest extends TestCase {
 
     public function testSsMsFormatUpTo90SecondsInclusive(): void {
         // Given
-        $justOverTwoSec = 2001;      // 2s 1ms => "2s 1ms"
-        $sixtyOneSec = 61000;        // 61s     => "61s 0ms"
-        $ninetySec = 90000;          // 90s     => "90s 0ms"
+        $justOverTwoSec = 2001;
+        $sixtyOneSec = 61000;
+        $ninetySec = 90000;
 
         // When
         $f1 = AppHelper::formatDuration($justOverTwoSec);
@@ -46,8 +46,8 @@ class DurationFormatTest extends TestCase {
 
     public function testMmSsFormatAfter90Seconds(): void {
         // Given
-        $justOverNinetySec = 90001;  // 1m 30s 1ms => "1m 30s"
-        $twoMinutesFiveSec = 125000; // 2m 5s       => "2m 5s"
+        $justOverNinetySec = 90001;
+        $twoMinutesFiveSec = 125000;
 
         // When
         $f1 = AppHelper::formatDuration($justOverNinetySec);
