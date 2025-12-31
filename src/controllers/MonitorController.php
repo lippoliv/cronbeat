@@ -70,7 +70,6 @@ class MonitorController extends BaseController {
     private function handleEdit(string $uuid): string {
         $userId = $_SESSION['user_id'];
 
-        // find current name for view prefilling
         $currentName = '';
         foreach ($this->database->getMonitors($userId) as $m) {
             if ($m->getUuid() === $uuid) {

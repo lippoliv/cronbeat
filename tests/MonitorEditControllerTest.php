@@ -47,7 +47,7 @@ class MonitorEditControllerTest extends DatabaseTestCase {
         return $this->controller;
     }
 
-    public function testEditPageShowsFormAndDeleteLink(): void {
+    public function testEditPageShowsForm(): void {
         // Given
         $db = $this->getDatabase();
         $uuid = $db->createMonitor('Original Name', $this->userId);
@@ -63,8 +63,24 @@ class MonitorEditControllerTest extends DatabaseTestCase {
         Assert::assertStringContainsString('<form', $html);
         Assert::assertStringContainsString('name="name"', $html);
         Assert::assertStringContainsString('Original Name', $html);
-        // Delete button moved from dashboard to edit page
-        Assert::assertStringContainsString("/dashboard/delete/" . $uuid, $html);
+    }
+
+    public function testEditPageCanDeleteMonitor(): void {
+        // Given
+        $db = $this->getDatabase();
+        $uuid = $db->createMonitor('To Be Deleted', $this->userId);
+        if ($uuid === false) {
+            throw new \RuntimeException('Failed to create monitor for test');
+        }
+
+        // When: simulate following the delete link from the edit page
+        $dashboard = new \Cronbeat\Controllers\DashboardController($db);
+        $output = $dashboard->deleteMonitor($uuid);
+
+        // Then
+        Assert::assertStringContainsString('Monitor deleted successfully', $output);
+        $monitors = $db->getMonitors($this->userId);
+        Assert::assertCount(0, $monitors);
     }
 
     public function testPostEditUpdatesNameAndRedirectsToHistory(): void {

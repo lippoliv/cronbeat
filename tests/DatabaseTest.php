@@ -280,6 +280,50 @@ class DatabaseTest extends DatabaseTestCase {
         Assert::assertCount(1, $monitors);
     }
 
+    public function testUpdateMonitorNameReturnsTrueAndChangesName(): void {
+        // Given
+        $username = 'rename_user';
+        $passwordHash = hash('sha256', 'pw');
+        $db = $this->getDatabase();
+        $db->createUser($username, $passwordHash);
+        $userId = $db->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+        $uuid = $db->createMonitor('Old Name', $userId);
+        if ($uuid === false) {
+            throw new \RuntimeException('Failed to create monitor for test');
+        }
+
+        // When
+        $ok = $db->updateMonitorName($uuid, $userId, 'New Name');
+
+        // Then
+        Assert::assertTrue($ok);
+        $monitors = $db->getMonitors($userId);
+        Assert::assertCount(1, $monitors);
+        Assert::assertSame('New Name', $monitors[0]->getName());
+    }
+
+    public function testUpdateMonitorNameReturnsFalseWhenMonitorDoesNotExist(): void {
+        // Given
+        $username = 'rename_user2';
+        $passwordHash = hash('sha256', 'pw2');
+        $db = $this->getDatabase();
+        $db->createUser($username, $passwordHash);
+        $userId = $db->validateUser($username, $passwordHash);
+        if ($userId === false) {
+            throw new \RuntimeException('Failed to validate test user');
+        }
+        $nonExistentUuid = '00000000-0000-0000-0000-000000000000';
+
+        // When
+        $ok = $db->updateMonitorName($nonExistentUuid, $userId, 'Does Not Matter');
+
+        // Then
+        Assert::assertFalse($ok);
+    }
+
     public function testGetUsernameReturnsUsernameWhenUserExists(): void {
         // Given
         $username = 'testuser';
