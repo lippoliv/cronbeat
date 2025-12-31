@@ -19,8 +19,8 @@ class AppHelper {
     /**
      * Formats a duration in milliseconds according to UI rules:
      *  - up to and including 2000 ms: "<ms> ms"
-     *  - up to and including 90 s: "ss:ms" with zero-padded seconds (2) and milliseconds (3)
-     *  - above 90 s: "mm:ss" with zero-padded minutes (2) and seconds (2)
+     *  - up to and including 90 s: "<s>s <ms>ms" (no zero-padding)
+     *  - above 90 s: "<m>m <s>s" (no zero-padding)
      */
     public static function formatDuration(int $milliseconds): string {
         if ($milliseconds <= 2000) {
@@ -31,18 +31,14 @@ class AppHelper {
         $remainingMs = $milliseconds % 1000;
 
         if ($milliseconds <= 90_000) {
-            // ss:ms (pad seconds to 2 digits, ms to 3 digits)
-            $sec = str_pad((string) $totalSeconds, 2, '0', STR_PAD_LEFT);
-            $ms  = str_pad((string) $remainingMs, 3, '0', STR_PAD_LEFT);
-            return $sec . ':' . $ms;
+            // Format as "Xs Yms" without zero-padding
+            return $totalSeconds . 's ' . $remainingMs . 'ms';
         }
 
-        // mm:ss (pad minutes and seconds to 2 digits)
+        // Format as "Xm Ys" without zero-padding
         $minutes = intdiv($totalSeconds, 60);
         $seconds = $totalSeconds % 60;
-        $mm = str_pad((string) $minutes, 2, '0', STR_PAD_LEFT);
-        $ss = str_pad((string) $seconds, 2, '0', STR_PAD_LEFT);
-        return $mm . ':' . $ss;
+        return $minutes . 'm ' . $seconds . 's';
     }
 
     /**

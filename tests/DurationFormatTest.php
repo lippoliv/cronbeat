@@ -29,9 +29,9 @@ class DurationFormatTest extends TestCase {
 
     public function testSsMsFormatUpTo90SecondsInclusive(): void {
         // Given
-        $justOverTwoSec = 2001;      // 2s 1ms => 02:001
-        $sixtyOneSec = 61000;        // 61s     => 61:000
-        $ninetySec = 90000;          // 90s     => 90:000
+        $justOverTwoSec = 2001;      // 2s 1ms => "2s 1ms"
+        $sixtyOneSec = 61000;        // 61s     => "61s 0ms"
+        $ninetySec = 90000;          // 90s     => "90s 0ms"
 
         // When
         $f1 = AppHelper::formatDuration($justOverTwoSec);
@@ -39,22 +39,22 @@ class DurationFormatTest extends TestCase {
         $f3 = AppHelper::formatDuration($ninetySec);
 
         // Then
-        Assert::assertSame('02:001', $f1);
-        Assert::assertSame('61:000', $f2);
-        Assert::assertSame('90:000', $f3);
+        Assert::assertSame('2s 1ms', $f1);
+        Assert::assertSame('61s 0ms', $f2);
+        Assert::assertSame('90s 0ms', $f3);
     }
 
     public function testMmSsFormatAfter90Seconds(): void {
         // Given
-        $justOverNinetySec = 90001;  // 1m 30s 1ms => 01:30
-        $twoMinutesFiveSec = 125000; // 2m 5s       => 02:05
+        $justOverNinetySec = 90001;  // 1m 30s 1ms => "1m 30s"
+        $twoMinutesFiveSec = 125000; // 2m 5s       => "2m 5s"
 
         // When
         $f1 = AppHelper::formatDuration($justOverNinetySec);
         $f2 = AppHelper::formatDuration($twoMinutesFiveSec);
 
         // Then
-        Assert::assertSame('01:30', $f1);
-        Assert::assertSame('02:05', $f2);
+        Assert::assertSame('1m 30s', $f1);
+        Assert::assertSame('2m 5s', $f2);
     }
 }
