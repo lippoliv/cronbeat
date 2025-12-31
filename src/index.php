@@ -28,6 +28,7 @@ require_once APP_DIR . '/controllers/ApiController.php';
 require_once APP_DIR . '/views/dashboard.view.php';
 require_once APP_DIR . '/views/monitor_form.view.php';
 require_once APP_DIR . '/views/monitor_history.view.php';
+require_once APP_DIR . '/views/monitor_edit.view.php';
 require_once APP_DIR . '/controllers/ProfileController.php';
 require_once APP_DIR . '/views/profile.view.php';
 

@@ -19,6 +19,11 @@ class MonitorController extends BaseController {
             $uuid = substr($uuid, 0, $qPos);
         }
         $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+        $action = $parts[1] ?? '';
+
+        if ($action === 'edit') {
+            return $this->handleEdit($uuid);
+        }
 
         return $this->showMonitorHistory($uuid, $page);
     }
@@ -59,6 +64,41 @@ class MonitorController extends BaseController {
             ->setTotal($total)
             ->setUsername($username !== false ? $username : 'Unknown');
 
+        return $view->render();
+    }
+
+    private function handleEdit(string $uuid): string {
+        $userId = $_SESSION['user_id'];
+
+        // find current name for view prefilling
+        $currentName = '';
+        foreach ($this->database->getMonitors($userId) as $m) {
+            if ($m->getUuid() === $uuid) {
+                $currentName = $m->getName();
+                break;
+            }
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = isset($_POST['name']) ? trim((string)$_POST['name']) : '';
+            if ($name === '') {
+                $view = new \Cronbeat\Views\MonitorEditView();
+                $view->setMonitorUuid($uuid)->setName($currentName)->setError('Monitor name is required');
+                return $view->render();
+            }
+
+            $ok = $this->database->updateMonitorName($uuid, $userId, $name);
+            if ($ok) {
+                throw new RedirectException(['Location' => '/monitor/' . $uuid]);
+            }
+
+            $view = new \Cronbeat\Views\MonitorEditView();
+            $view->setMonitorUuid($uuid)->setName($currentName)->setError('Failed to update monitor');
+            return $view->render();
+        }
+
+        $view = new \Cronbeat\Views\MonitorEditView();
+        $view->setMonitorUuid($uuid)->setName($currentName);
         return $view->render();
     }
 }

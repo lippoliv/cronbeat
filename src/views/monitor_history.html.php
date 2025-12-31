@@ -12,6 +12,9 @@
 <div class="dashboard-content">
     <div class="history-title">
         <h2>History for <?= htmlspecialchars($monitorName !== '' ? $monitorName : $monitorUuid) ?></h2>
+        <div>
+            <a class="add-monitor-button" href="/monitor/<?= htmlspecialchars($monitorUuid) ?>/edit">Edit</a>
+        </div>
     </div>
     <p class="monitor-uuid">
         UUID:

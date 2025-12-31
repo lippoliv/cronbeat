@@ -48,13 +48,7 @@
                     </p>
                 </div>
             </a>
-            <div class="monitor-actions">
-                <a href="/dashboard/delete/<?= htmlspecialchars($monitor->getUuid()) ?>"
-                   class="delete-button"
-                   onclick="return confirm('Are you sure you want to delete this monitor?')">
-                    Delete
-                </a>
-            </div>
+            <div class="monitor-actions"></div>
         </div>
         <?php endforeach; ?>
     </div>
