@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/lippoliv/cronbeat/compare/v0.4.0...v0.4.1) (2025-12-31)
+
+
+### Bug Fixes
+
+* version information not shown in docker tag builds ([#64](https://github.com/lippoliv/cronbeat/issues/64)) ([ee625e2](https://github.com/lippoliv/cronbeat/commit/ee625e21bb9835644c6ae25ff1f89cea51aa0a54))
+
 ## [0.4.0](https://github.com/lippoliv/cronbeat/compare/v0.3.0...v0.4.0) (2025-12-31)
 
 
