@@ -52,19 +52,6 @@ cronbeat/
 
 CronBeat uses SQLite for data storage. The database is automatically created on first run when you set up your admin account. The database file is located at `src/db/db.sqlite` inside the application directory.
 
-Important: When running in Docker, the db directory must be owned by the www-data user inside the container. On every container start, the entrypoint will ensure this by running a recursive chown if needed. For Alpine-based images (this project), www-data typically has UID/GID 82.
-
-Optional (Linux/Mac): If you prefer to avoid the small startup overhead of the automatic chown, you can pre-set the ownership on the host:
-
-```bash
-mkdir -p db
-# Ensure the directory is owned by www-data inside the container
-# Using names (works on Linux if www-data exists) or numeric IDs (Alpine default: 82:82)
-sudo chown -R 82:82 db
-# or
-sudo chown -R www-data:www-data db
-```
-
 #### Database Migrations
 
 CronBeat includes a database migration system to handle schema changes between versions:
@@ -110,12 +97,6 @@ docker run -d --name cronbeat -p 8080:80 -v "$(pwd)/db:/var/www/html/db" lippert
 - Image: https://hub.docker.com/r/lippertsweb/cronbeat
 - The local ./db folder will store your SQLite database so data persists across container restarts
 - Open http://localhost:8080 and complete the initial admin setup
-
-Note: The container automatically corrects ownership of /var/www/html/db on startup. If you want to pre-set it on the host (to avoid the container doing it each time), run:
-
-```bash
-sudo chown -R 82:82 ./db  # Alpine UID/GID for www-data
-```
 
 To stop and remove the container:
 
