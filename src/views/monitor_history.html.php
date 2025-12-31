@@ -31,7 +31,10 @@
     <?php else : ?>
         <ul class="history-list">
             <?php foreach ($historyWithGaps as $item) : ?>
-                <?php $entry = $item['entry']; $gap = $item['gap']; ?>
+                <?php
+                    $entry = $item['entry'];
+                    $gap = $item['gap'];
+                ?>
                 <li class="history-item">
                     <span class="history-time"><?= htmlspecialchars($entry->getPingedAt()) ?></span>
                     <?php if ($entry->getDurationMs() !== null) : ?>
