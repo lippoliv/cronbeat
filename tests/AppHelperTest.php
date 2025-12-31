@@ -82,4 +82,32 @@ class AppHelperTest extends TestCase {
             unlink($srcVersionFile);
         }
     }
+
+    /**
+     * @return array<string, array{0:int,1:string}>
+     */
+    public static function formatDurationProvider(): array {
+        return [
+            'ms: 1500' => [1500, '1500 ms'],
+            'ms: 2000' => [2000, '2000 ms'],
+            's ms: 2001' => [2001, '2s 1ms'],
+            's ms: 61000' => [61000, '61s 0ms'],
+            's ms: 90000' => [90000, '90s 0ms'],
+            'm s: 90001' => [90001, '1m 30s'],
+            'm s: 125000' => [125000, '2m 5s'],
+        ];
+    }
+
+    /**
+     * @dataProvider formatDurationProvider
+     */
+    public function testFormatDurationParameterized(int $milliseconds, string $expected): void {
+        // Given
+
+        // When
+        $actual = AppHelper::formatDuration($milliseconds);
+
+        // Then
+        Assert::assertSame($expected, $actual);
+    }
 }
