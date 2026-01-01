@@ -43,6 +43,12 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}
 
+      - name: Copy LICENSE and version.txt to src
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          cp LICENSE src/LICENSE
+          cp version.txt src/version.txt
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:

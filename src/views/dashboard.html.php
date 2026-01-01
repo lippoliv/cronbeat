@@ -36,8 +36,14 @@
                             <span class="last-ping-time">
                                 <?= htmlspecialchars((string) $monitor->getLastPingAt()) ?>
                             </span>
-                            <?php if ($monitor->getLastDurationMs() !== null) : ?>
-                                <span class="last-ping-duration">(<?= (int) $monitor->getLastDurationMs() ?> ms)</span>
+                            <?php $lastDurationMs = $monitor->getLastDurationMs(); if ($lastDurationMs !== null) : ?>
+                                <span class="last-ping-duration">
+                                    (
+                                    <?= htmlspecialchars(
+                                        \Cronbeat\AppHelper::formatDuration($lastDurationMs)
+                                    ) ?>
+                                    )
+                                </span>
                             <?php endif; ?>
                         <?php else : ?>
                             <span class="last-ping-time">—</span>

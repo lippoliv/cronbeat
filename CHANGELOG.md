@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.1](https://github.com/lippoliv/cronbeat/compare/v0.4.0...v0.4.1) (2025-12-31)
+
+
+### Bug Fixes
+
+* version information not shown in docker tag builds ([#64](https://github.com/lippoliv/cronbeat/issues/64)) ([ee625e2](https://github.com/lippoliv/cronbeat/commit/ee625e21bb9835644c6ae25ff1f89cea51aa0a54))
+
+## [0.4.0](https://github.com/lippoliv/cronbeat/compare/v0.3.0...v0.4.0) (2025-12-31)
+
+
+### Features
+
+* Check and set DB Folder Ownership on Boot ([#54](https://github.com/lippoliv/cronbeat/issues/54)) ([04e99b1](https://github.com/lippoliv/cronbeat/commit/04e99b13c7a8b449c5ba864e1d2d3a4a7b462a8a))
+* Format Ping Duration Display Based on Length ([#60](https://github.com/lippoliv/cronbeat/issues/60)) ([b0303f4](https://github.com/lippoliv/cronbeat/commit/b0303f438264dc20570ac2f9ac4cc034bad5a2d4))
+
 ## [0.3.0](https://github.com/lippoliv/cronbeat/compare/v0.2.0...v0.3.0) (2025-12-31)
 
 
