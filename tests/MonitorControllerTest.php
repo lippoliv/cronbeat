@@ -158,6 +158,22 @@ class MonitorControllerTest extends DatabaseTestCase {
         Assert::assertStringContainsString('Original Name', $html);
     }
 
+    public function testEditPageHeaderShowsUsername(): void {
+        // Given
+        $db = $this->getDatabase();
+        $uuid = $db->createMonitor('Name', $this->userId);
+        if ($uuid === false) {
+            throw new \RuntimeException('Failed to create monitor for test');
+        }
+
+        // When
+        $_SERVER['REQUEST_URI'] = "/monitor/$uuid/edit";
+        $html = $this->getController()->doRouting();
+
+        // Then
+        Assert::assertStringContainsString('Welcome, ' . $this->username . '!', $html);
+    }
+
     public function testEditPageCanDeleteMonitor(): void {
         // Given
         $db = $this->getDatabase();

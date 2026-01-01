@@ -52,6 +52,10 @@ class DashboardController extends BaseController {
 
             if ($name === '') {
                 $view = new MonitorFormView();
+                $username = $this->database->getUsername($_SESSION['user_id']);
+                if ($username !== false) {
+                    $view->setUsername($username);
+                }
                 $view->setError('Monitor name is required');
                 return $view->render();
             } else {
@@ -62,6 +66,10 @@ class DashboardController extends BaseController {
                     throw new RedirectException(['Location' => '/dashboard']);
                 } else {
                     $view = new MonitorFormView();
+                    $username = $this->database->getUsername($_SESSION['user_id']);
+                    if ($username !== false) {
+                        $view->setUsername($username);
+                    }
                     $view->setError('Failed to create monitor');
                     return $view->render();
                 }
@@ -69,11 +77,19 @@ class DashboardController extends BaseController {
         }
 
         $view = new MonitorFormView();
+        $username = $this->database->getUsername($_SESSION['user_id']);
+        if ($username !== false) {
+            $view->setUsername($username);
+        }
         return $view->render();
     }
 
     public function showMonitorForm(): string {
         $view = new MonitorFormView();
+        $username = $this->database->getUsername($_SESSION['user_id']);
+        if ($username !== false) {
+            $view->setUsername($username);
+        }
         return $view->render();
     }
 

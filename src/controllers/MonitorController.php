@@ -82,7 +82,11 @@ class MonitorController extends BaseController {
             $name = isset($_POST['name']) ? trim((string)$_POST['name']) : '';
             if ($name === '') {
                 $view = new \Cronbeat\Views\MonitorEditView();
-                $view->setMonitorUuid($uuid)->setName($currentName)->setError('Monitor name is required');
+                $username = $this->database->getUsername($userId);
+                $view->setMonitorUuid($uuid)
+                    ->setName($currentName)
+                    ->setError('Monitor name is required')
+                    ->setUsername($username !== false ? $username : 'Unknown');
                 return $view->render();
             }
 
@@ -92,12 +96,19 @@ class MonitorController extends BaseController {
             }
 
             $view = new \Cronbeat\Views\MonitorEditView();
-            $view->setMonitorUuid($uuid)->setName($currentName)->setError('Failed to update monitor');
+            $username = $this->database->getUsername($userId);
+            $view->setMonitorUuid($uuid)
+                ->setName($currentName)
+                ->setError('Failed to update monitor')
+                ->setUsername($username !== false ? $username : 'Unknown');
             return $view->render();
         }
 
         $view = new \Cronbeat\Views\MonitorEditView();
-        $view->setMonitorUuid($uuid)->setName($currentName);
+        $username = $this->database->getUsername($userId);
+        $view->setMonitorUuid($uuid)
+            ->setName($currentName)
+            ->setUsername($username !== false ? $username : 'Unknown');
         return $view->render();
     }
 }
