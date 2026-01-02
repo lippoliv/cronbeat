@@ -26,6 +26,8 @@ class MonitorControllerTest extends DatabaseTestCase {
 
         $_SESSION = [];
         $_GET = [];
+        $_POST = [];
+        $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SESSION['user_id'] = $this->userId;
 
         $this->controller = new MonitorController($db);
@@ -34,6 +36,7 @@ class MonitorControllerTest extends DatabaseTestCase {
     protected function tearDown(): void {
         $_SESSION = [];
         $_GET = [];
+        $_POST = [];
         parent::tearDown();
     }
 
@@ -135,5 +138,104 @@ class MonitorControllerTest extends DatabaseTestCase {
         Assert::assertSame(25, $liCount);
         $gapCount = substr_count($html, 'class="history-gap"');
         Assert::assertSame(24, $gapCount);
+    }
+
+    public function testEditPageShowsForm(): void {
+        // Given
+        $db = $this->getDatabase();
+        $uuid = $db->createMonitor('Original Name', $this->userId);
+        if ($uuid === false) {
+            throw new \RuntimeException('Failed to create monitor for test');
+        }
+
+        // When
+        $_SERVER['REQUEST_URI'] = "/monitor/$uuid/edit";
+        $html = $this->getController()->doRouting();
+
+        // Then
+        Assert::assertStringContainsString('<form', $html);
+        Assert::assertStringContainsString('name="name"', $html);
+        Assert::assertStringContainsString('Original Name', $html);
+    }
+
+    public function testEditPageHeaderShowsUsername(): void {
+        // Given
+        $db = $this->getDatabase();
+        $uuid = $db->createMonitor('Name', $this->userId);
+        if ($uuid === false) {
+            throw new \RuntimeException('Failed to create monitor for test');
+        }
+
+        // When
+        $_SERVER['REQUEST_URI'] = "/monitor/$uuid/edit";
+        $html = $this->getController()->doRouting();
+
+        // Then
+        Assert::assertStringContainsString('Welcome, ' . $this->username . '!', $html);
+    }
+
+    public function testEditPageCanDeleteMonitor(): void {
+        // Given
+        $db = $this->getDatabase();
+        $uuid = $db->createMonitor('To Be Deleted', $this->userId);
+        if ($uuid === false) {
+            throw new \RuntimeException('Failed to create monitor for test');
+        }
+
+        // When: simulate following the delete link from the edit page
+        $dashboard = new \Cronbeat\Controllers\DashboardController($db);
+        $output = $dashboard->deleteMonitor($uuid);
+
+        // Then
+        Assert::assertStringContainsString('Monitor deleted successfully', $output);
+        $monitors = $db->getMonitors($this->userId);
+        Assert::assertCount(0, $monitors);
+    }
+
+    public function testPostEditUpdatesNameAndRedirectsToHistory(): void {
+        // Given
+        $db = $this->getDatabase();
+        $uuid = $db->createMonitor('Before Edit', $this->userId);
+        if ($uuid === false) {
+            throw new \RuntimeException('Failed to create monitor for test');
+        }
+
+        // When
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['name'] = 'After Edit';
+        $_SERVER['REQUEST_URI'] = "/monitor/$uuid/edit";
+
+        $thrown = null;
+        try {
+            $this->getController()->doRouting();
+        } catch (RedirectException $e) {
+            $thrown = $e;
+        }
+
+        // Then
+        Assert::assertInstanceOf(RedirectException::class, $thrown);
+        $headers = $thrown->getHeaders();
+        Assert::assertArrayHasKey('Location', $headers);
+        Assert::assertSame('/monitor/' . $uuid, $headers['Location']);
+
+        $monitors = $db->getMonitors($this->userId);
+        Assert::assertCount(1, $monitors);
+        Assert::assertSame('After Edit', $monitors[0]->getName());
+    }
+
+    public function testHistoryPageContainsEditLink(): void {
+        // Given
+        $db = $this->getDatabase();
+        $uuid = $db->createMonitor('My Monitor', $this->userId);
+        if ($uuid === false) {
+            throw new \RuntimeException('Failed to create monitor for test');
+        }
+
+        // When
+        $_SERVER['REQUEST_URI'] = "/monitor/$uuid";
+        $html = $this->getController()->doRouting();
+
+        // Then
+        Assert::assertStringContainsString('/monitor/' . $uuid . '/edit', $html);
     }
 }

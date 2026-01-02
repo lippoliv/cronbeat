@@ -486,6 +486,29 @@ class Database {
         }
     }
 
+    public function updateMonitorName(string $uuid, int $userId, string $name): bool {
+        Logger::info("Updating monitor name", ['uuid' => $uuid, 'user_id' => $userId, 'name' => $name]);
+
+        $pdo = $this->getPdo();
+        try {
+            $stmt = $pdo->prepare("UPDATE monitors SET name = ? WHERE uuid = ? AND user_id = ?");
+            $ok = $stmt->execute([$name, $uuid, $userId]);
+            if ($ok && $stmt->rowCount() > 0) {
+                Logger::info("Monitor renamed successfully", ['uuid' => $uuid]);
+                return true;
+            }
+            Logger::warning("Monitor rename affected no rows", ['uuid' => $uuid]);
+            return false;
+        } catch (\PDOException $e) {
+            Logger::error("Error updating monitor name", [
+                'uuid' => $uuid,
+                'user_id' => $userId,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
     public function getMonitorIdByUuid(string $uuid): int|false {
         $pdo = $this->getPdo();
         try {

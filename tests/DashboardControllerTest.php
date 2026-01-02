@@ -89,6 +89,19 @@ class DashboardControllerTest extends DatabaseTestCase {
         Assert::assertStringContainsString('name="name"', $output);
     }
 
+    public function testShowMonitorFormIsFullScreenAndShowsHeaderUsername(): void {
+        // Given
+
+        // When
+        $output = $this->getController()->showMonitorForm();
+
+        // Then
+        // Full-screen container
+        Assert::assertStringContainsString('class="view-container"', $output);
+        // Header with username
+        Assert::assertStringContainsString('Welcome, ' . $this->username . '!', $output);
+    }
+
     public function testAddMonitorCreatesMonitorWithCorrectData(): void {
         // Given
         $_SERVER['REQUEST_METHOD'] = 'POST';

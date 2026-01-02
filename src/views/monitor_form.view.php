@@ -7,6 +7,9 @@ class MonitorFormView extends BaseView {
 
     public function __construct() {
         $this->setTitle('Add Monitor');
+        // Render as a full-screen view similar to edit/history pages
+        $this->setContainerClass('view-container');
+        $this->setShowHeader(true);
     }
 
     public function setError(?string $error): void {

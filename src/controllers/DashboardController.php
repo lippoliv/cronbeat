@@ -47,33 +47,41 @@ class DashboardController extends BaseController {
     }
 
     public function addMonitor(): string {
+        // Prepare view and username at the top to reduce complexity and duplication
+        $view = new MonitorFormView();
+        $username = $this->database->getUsername($_SESSION['user_id']);
+        if ($username !== false) {
+            $view->setUsername($username);
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'])) {
             $name = trim($_POST['name']);
 
             if ($name === '') {
-                $view = new MonitorFormView();
                 $view->setError('Monitor name is required');
                 return $view->render();
-            } else {
-                $userId = $_SESSION['user_id'];
-                $result = $this->database->createMonitor($name, $userId);
-
-                if ($result !== false) {
-                    throw new RedirectException(['Location' => '/dashboard']);
-                } else {
-                    $view = new MonitorFormView();
-                    $view->setError('Failed to create monitor');
-                    return $view->render();
-                }
             }
+
+            $userId = $_SESSION['user_id'];
+            $result = $this->database->createMonitor($name, $userId);
+
+            if ($result !== false) {
+                throw new RedirectException(['Location' => '/dashboard']);
+            }
+
+            $view->setError('Failed to create monitor');
+            return $view->render();
         }
 
-        $view = new MonitorFormView();
         return $view->render();
     }
 
     public function showMonitorForm(): string {
         $view = new MonitorFormView();
+        $username = $this->database->getUsername($_SESSION['user_id']);
+        if ($username !== false) {
+            $view->setUsername($username);
+        }
         return $view->render();
     }
 
