@@ -22,7 +22,7 @@ class MonitorController extends BaseController {
         $action = $parts[1] ?? '';
 
         if ($action === 'edit') {
-            return $this->handleEdit($uuid);
+            return $this->updateMonitor($uuid);
         }
 
         return $this->showMonitorHistory($uuid, $page);
@@ -67,7 +67,7 @@ class MonitorController extends BaseController {
         return $view->render();
     }
 
-    private function handleEdit(string $uuid): string {
+    private function updateMonitor(string $uuid): string {
         $userId = $_SESSION['user_id'];
 
         $currentName = '';
