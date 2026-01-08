@@ -182,7 +182,7 @@ class MonitorControllerTest extends DatabaseTestCase {
             throw new \RuntimeException('Failed to create monitor for test');
         }
 
-        // When: simulate following the delete link from the edit page
+        // When
         $dashboard = new \Cronbeat\Controllers\DashboardController($db);
         $output = $dashboard->deleteMonitor($uuid);
 

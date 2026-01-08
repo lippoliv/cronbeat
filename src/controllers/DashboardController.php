@@ -47,7 +47,6 @@ class DashboardController extends BaseController {
     }
 
     public function addMonitor(): string {
-        // Prepare view and username at the top to reduce complexity and duplication
         $view = new MonitorFormView();
         $username = $this->database->getUsername($_SESSION['user_id']);
         if ($username !== false) {
