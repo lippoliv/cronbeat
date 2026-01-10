@@ -28,5 +28,7 @@ Logger::setLogStream($logStream);
 $database = new Database(APP_DIR . '/db/db.sqlite');
 
 // Initialize CLI and run
-$cli = new CLI($database, array_slice($argv, 1));
+// Use $_SERVER['argv'] to avoid undefined $argv in non-CLI/static analysis contexts
+$args = isset($_SERVER['argv']) && is_array($_SERVER['argv']) ? array_slice($_SERVER['argv'], 1) : [];
+$cli = new CLI($database, $args);
 $cli->run();
