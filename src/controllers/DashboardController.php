@@ -65,7 +65,7 @@ class DashboardController extends BaseController {
             $result = $this->database->createMonitor($name, $userId);
 
             if ($result !== false) {
-                throw new RedirectException(['Location' => '/dashboard']);
+                throw new RedirectException(['Location' => '/monitor/' . $result]);
             }
 
             $view->setError('Failed to create monitor');

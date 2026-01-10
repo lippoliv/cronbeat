@@ -129,7 +129,8 @@ class DashboardControllerTest extends DatabaseTestCase {
         // Verify the exception contains the correct headers
         $headers = $exception->getHeaders();
         Assert::assertArrayHasKey('Location', $headers);
-        Assert::assertEquals('/dashboard', $headers['Location']);
+        $uuid = $monitors[0]->getUuid();
+        Assert::assertEquals('/monitor/' . $uuid, $headers['Location']);
     }
 
     public function testAddMonitorShowsErrorWhenNameIsEmpty(): void {
