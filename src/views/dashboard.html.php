@@ -25,7 +25,39 @@
     <?php else : ?>
     <div class="monitors-grid">
         <?php foreach ($monitors as $monitor) : ?>
-        <div class="monitor-tile">
+        <?php
+            $tileClass = 'monitor-tile';
+            $expected = $monitor->getExpectedIntervalMinutes();
+            $grace = $monitor->getGracePeriodMinutes();
+            $lastPing = $monitor->getLastPingAt();
+            if ($expected !== null && $expected > 0 && $lastPing !== null && $lastPing !== '') {
+                // try to parse as UTC timestamp
+                $lastTs = null;
+                try {
+                    $dt = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $lastPing, new \DateTimeZone('UTC'));
+                    if ($dt !== false) {
+                        $lastTs = $dt->getTimestamp();
+                    }
+                } catch (\Throwable $e) {
+                    $lastTs = null;
+                }
+                if ($lastTs === null) {
+                    $tmp = strtotime($lastPing);
+                    if ($tmp !== false) { $lastTs = $tmp; }
+                }
+                if ($lastTs !== null) {
+                    $elapsed = time() - $lastTs;
+                    $expectedSec = $expected * 60;
+                    $graceSec = ($grace ?? 0) * 60;
+                    if ($elapsed > ($expectedSec + $graceSec)) {
+                        $tileClass .= ' monitor-tile-alert';
+                    } elseif ($elapsed > $expectedSec) {
+                        $tileClass .= ' monitor-tile-warning';
+                    }
+                }
+            }
+        ?>
+        <div class="<?= $tileClass ?>">
             <a class="monitor-link" href="/monitor/<?= htmlspecialchars($monitor->getUuid()) ?>">
                 <div class="monitor-info">
                     <h3><?= htmlspecialchars($monitor->getName()) ?></h3>

@@ -6,6 +6,8 @@ class MonitorEditView extends BaseView {
     private string $monitorUuid = '';
     private string $name = '';
     private ?string $error = null;
+    private ?int $expectedIntervalMinutes = null;
+    private ?int $gracePeriodMinutes = null;
 
     public function __construct() {
         $this->setTitle('Edit Monitor');
@@ -28,6 +30,16 @@ class MonitorEditView extends BaseView {
         return $this;
     }
 
+    public function setExpectedIntervalMinutes(?int $minutes): self {
+        $this->expectedIntervalMinutes = $minutes;
+        return $this;
+    }
+
+    public function setGracePeriodMinutes(?int $minutes): self {
+        $this->gracePeriodMinutes = $minutes;
+        return $this;
+    }
+
     public function render(): string {
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $monitorUuid = $this->monitorUuid;
@@ -35,6 +47,10 @@ class MonitorEditView extends BaseView {
         $name = $this->name;
         // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
         $error = $this->error;
+        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
+        $expectedIntervalMinutes = $this->expectedIntervalMinutes;
+        // phpcs:ignore SlevomatCodingStandard.Variables.UnusedVariable
+        $gracePeriodMinutes = $this->gracePeriodMinutes;
 
         ob_start();
         include(defined('APP_DIR') ? APP_DIR . '/views' : __DIR__) . '/monitor_edit.html.php';

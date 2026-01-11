@@ -9,6 +9,8 @@ final class MonitorData {
         private ?string $lastPingAt,
         private ?int $lastDurationMs,
         private bool $pendingStart,
+        private ?int $expectedIntervalMinutes = null,
+        private ?int $gracePeriodMinutes = null,
     ) {
     }
 
@@ -30,5 +32,13 @@ final class MonitorData {
 
     public function hasPendingStart(): bool {
         return $this->pendingStart;
+    }
+
+    public function getExpectedIntervalMinutes(): ?int {
+        return $this->expectedIntervalMinutes;
+    }
+
+    public function getGracePeriodMinutes(): ?int {
+        return $this->gracePeriodMinutes;
     }
 }

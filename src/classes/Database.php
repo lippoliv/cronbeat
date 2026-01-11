@@ -315,7 +315,7 @@ class Database {
         }
     }
 
-    public function createMonitor(string $name, int $userId): string|false {
+    public function createMonitor(string $name, int $userId, ?int $expectedIntervalMinutes = null, ?int $gracePeriodMinutes = null): string|false {
         Logger::info("Creating new monitor", ['name' => $name, 'user_id' => $userId]);
 
         if ($this->pdo === null) {
@@ -329,8 +329,10 @@ class Database {
         try {
             $uuid = $this->generateUUID();
 
-            $stmt = $this->pdo->prepare("INSERT INTO monitors (uuid, name, user_id) VALUES (?, ?, ?)");
-            $result = $stmt->execute([$uuid, $name, $userId]);
+            $stmt = $this->pdo->prepare(
+                "INSERT INTO monitors (uuid, name, user_id, expected_interval_minutes, grace_period_minutes) VALUES (?, ?, ?, ?, ?)"
+            );
+            $result = $stmt->execute([$uuid, $name, $userId, $expectedIntervalMinutes, $gracePeriodMinutes]);
 
             if ($result) {
                 Logger::info("Monitor created successfully", ['name' => $name, 'uuid' => $uuid]);
@@ -368,6 +370,8 @@ class Database {
                 SELECT 
                     m.uuid,
                     m.name,
+                    m.expected_interval_minutes,
+                    m.grace_period_minutes,
                     (
                         SELECT ph.pinged_at 
                         FROM ping_history ph 
@@ -395,6 +399,8 @@ class Database {
              * @var array<int, array{
              *     uuid: string,
              *     name: string,
+             *     expected_interval_minutes: int|string|null,
+             *     grace_period_minutes: int|string|null,
              *     last_ping_at: string|null,
              *     last_duration_ms: int|string|null,
              *     pending_start: bool|int|string
@@ -409,12 +415,19 @@ class Database {
                 // Normalize EXISTS result to boolean via int cast first (handles '0'/'1', 0/1, true/false)
                 $pending = (bool) (int) $row['pending_start'];
 
+                $expected = $row['expected_interval_minutes'];
+                $expectedInt = $expected !== null ? (int)$expected : null;
+                $grace = $row['grace_period_minutes'];
+                $graceInt = $grace !== null ? (int)$grace : null;
+
                 $items[] = new MonitorData(
                     $row['uuid'],
                     $row['name'],
                     $row['last_ping_at'],
                     $lastDurationInt,
                     $pending,
+                    $expectedInt,
+                    $graceInt,
                 );
             }
 
@@ -498,6 +511,43 @@ class Database {
             return false;
         } catch (\PDOException $e) {
             Logger::error("Error updating monitor name", [
+                'uuid' => $uuid,
+                'user_id' => $userId,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    public function updateMonitorSettings(
+        string $uuid,
+        int $userId,
+        string $name,
+        ?int $expectedIntervalMinutes,
+        ?int $gracePeriodMinutes
+    ): bool {
+        Logger::info("Updating monitor settings", [
+            'uuid' => $uuid,
+            'user_id' => $userId,
+            'name' => $name,
+            'expected' => $expectedIntervalMinutes,
+            'grace' => $gracePeriodMinutes,
+        ]);
+
+        $pdo = $this->getPdo();
+        try {
+            $stmt = $pdo->prepare(
+                "UPDATE monitors SET name = ?, expected_interval_minutes = ?, grace_period_minutes = ? WHERE uuid = ? AND user_id = ?"
+            );
+            $ok = $stmt->execute([$name, $expectedIntervalMinutes, $gracePeriodMinutes, $uuid, $userId]);
+            if ($ok && $stmt->rowCount() > 0) {
+                Logger::info("Monitor updated successfully", ['uuid' => $uuid]);
+                return true;
+            }
+            Logger::warning("Monitor update affected no rows", ['uuid' => $uuid]);
+            return false;
+        } catch (\PDOException $e) {
+            Logger::error("Error updating monitor settings", [
                 'uuid' => $uuid,
                 'user_id' => $userId,
                 'error' => $e->getMessage(),
@@ -628,6 +678,27 @@ class Database {
             return $items;
         } catch (\PDOException $e) {
             Logger::error("Error getting ping history", ['monitor_id' => $monitorId, 'error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Inserts a ping entry at a specified UTC timestamp. Intended for scenarios where the ping time
+     * needs to be controlled (e.g., testing, migrations). Returns true on success.
+     */
+    public function insertPingAt(string $uuid, \DateTimeInterface $whenUtc, ?int $durationMs = null): bool {
+        $pdo = $this->getPdo();
+        $monitorId = $this->getMonitorIdByUuid($uuid);
+        if ($monitorId === false) {
+            return false;
+        }
+        try {
+            $ts = (new \DateTimeImmutable('@' . $whenUtc->getTimestamp()))->setTimezone(new \DateTimeZone('UTC'))
+                ->format('Y-m-d H:i:s');
+            $stmt = $pdo->prepare("INSERT INTO ping_history (monitor_id, pinged_at, duration_ms) VALUES (?, ?, ?)");
+            return $stmt->execute([$monitorId, $ts, $durationMs]);
+        } catch (\PDOException $e) {
+            Logger::error("Error inserting ping at", ['uuid' => $uuid, 'error' => $e->getMessage()]);
             throw $e;
         }
     }

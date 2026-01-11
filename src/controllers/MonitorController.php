@@ -71,9 +71,13 @@ class MonitorController extends BaseController {
         $userId = $_SESSION['user_id'];
 
         $currentName = '';
+        $currentExpected = null;
+        $currentGrace = null;
         foreach ($this->database->getMonitors($userId) as $m) {
             if ($m->getUuid() === $uuid) {
                 $currentName = $m->getName();
+                $currentExpected = $m->getExpectedIntervalMinutes();
+                $currentGrace = $m->getGracePeriodMinutes();
                 break;
             }
         }
@@ -87,23 +91,45 @@ class MonitorController extends BaseController {
             if ($name === '') {
                 $view->setMonitorUuid($uuid)
                     ->setName($currentName)
+                    ->setExpectedIntervalMinutes($currentExpected)
+                    ->setGracePeriodMinutes($currentGrace)
                     ->setError('Monitor name is required');
                 return $view->render();
             }
 
-            $ok = $this->database->updateMonitorName($uuid, $userId, $name);
+            $expHours = isset($_POST['expected_interval_hours']) ? (int)$_POST['expected_interval_hours'] : 0;
+            $expMinutes = isset($_POST['expected_interval_minutes']) ? (int)$_POST['expected_interval_minutes'] : 0;
+            $graceHours = isset($_POST['grace_period_hours']) ? (int)$_POST['grace_period_hours'] : 0;
+            $graceMinutes = isset($_POST['grace_period_minutes']) ? (int)$_POST['grace_period_minutes'] : 0;
+
+            $expHours = max(0, $expHours);
+            $expMinutes = max(0, min(59, $expMinutes));
+            $graceHours = max(0, $graceHours);
+            $graceMinutes = max(0, min(59, $graceMinutes));
+
+            $expectedTotal = ($expHours * 60) + $expMinutes;
+            $graceTotal = ($graceHours * 60) + $graceMinutes;
+
+            $expectedValue = $expectedTotal > 0 ? $expectedTotal : null;
+            $graceValue = $graceTotal > 0 ? $graceTotal : null;
+
+            $ok = $this->database->updateMonitorSettings($uuid, $userId, $name, $expectedValue, $graceValue);
             if ($ok) {
                 throw new RedirectException(['Location' => '/monitor/' . $uuid]);
             }
 
             $view->setMonitorUuid($uuid)
                 ->setName($currentName)
+                ->setExpectedIntervalMinutes($currentExpected)
+                ->setGracePeriodMinutes($currentGrace)
                 ->setError('Failed to update monitor');
             return $view->render();
         }
 
         $view->setMonitorUuid($uuid)
-            ->setName($currentName);
+            ->setName($currentName)
+            ->setExpectedIntervalMinutes($currentExpected)
+            ->setGracePeriodMinutes($currentGrace);
         return $view->render();
     }
 }
