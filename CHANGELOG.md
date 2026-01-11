@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0](https://github.com/lippoliv/cronbeat/compare/v0.4.1...v0.5.0) (2026-01-11)
+
+
+### Features
+
+* Enable Monitor Editing and Relocate Delete Button ([#57](https://github.com/lippoliv/cronbeat/issues/57)) ([675f4c5](https://github.com/lippoliv/cronbeat/commit/675f4c51f3a65f281da96c9e7fbc0546c4593d2d))
+* Navigate to History View After Adding Monitor ([#68](https://github.com/lippoliv/cronbeat/issues/68)) ([17ba9d1](https://github.com/lippoliv/cronbeat/commit/17ba9d1676db7ebaec22b18e4d64dd1f72216394))
+
+
+### Bug Fixes
+
+* Fix codestyle ([#70](https://github.com/lippoliv/cronbeat/issues/70)) ([636219c](https://github.com/lippoliv/cronbeat/commit/636219c5c8f4efe53ab59b9b3dacfbfc66636bfd))
+
 ## [0.4.1](https://github.com/lippoliv/cronbeat/compare/v0.4.0...v0.4.1) (2025-12-31)
 
 
