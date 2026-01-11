@@ -7,7 +7,6 @@ use Cronbeat\Logger;
 use Cronbeat\MigrationHelper;
 
 class CLI {
-
     private Database $database;
     /** @var array<string> */
     private array $args;
