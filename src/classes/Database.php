@@ -67,7 +67,6 @@ class Database {
         }
     }
 
-
     private function getPdo(): \PDO {
         if ($this->pdo === null) {
             $this->connect();
@@ -79,8 +78,6 @@ class Database {
 
         return $this->pdo;
     }
-
-
 
     public function createUser(string $username, string $passwordHash): bool {
         Logger::info("Creating new user", ['username' => $username]);

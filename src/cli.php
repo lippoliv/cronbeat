@@ -28,5 +28,6 @@ Logger::setLogStream($logStream);
 $database = new Database(APP_DIR . '/db/db.sqlite');
 
 // Initialize CLI and run
-$cli = new CLI($database, array_slice($argv, 1));
+$args = isset($_SERVER['argv']) && is_array($_SERVER['argv']) ? array_slice($_SERVER['argv'], 1) : [];
+$cli = new CLI($database, $args);
 $cli->run();

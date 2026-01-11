@@ -72,5 +72,4 @@ abstract class MigrationHelper {
 
         return $migrations;
     }
-
 }
