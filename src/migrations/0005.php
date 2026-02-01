@@ -26,10 +26,8 @@ class Migration0005 extends BaseMigration {
         );
         if ($result1 === false) {
             $err = implode(", ", $pdo->errorInfo());
-            // SQLite returns error if column already exists; ignore that gracefully
-            if (stripos($err, 'duplicate column') === false && stripos($err, 'already exists') === false) {
-                throw new \Exception("Failed to add expected_interval_minutes column: " . $err);
-            }
+            // Do not ignore duplicate/exists errors – surface them to fail the migration
+            throw new \Exception("Failed to add expected_interval_minutes column: " . $err);
         }
 
         $result2 = $pdo->exec(
@@ -37,9 +35,8 @@ class Migration0005 extends BaseMigration {
         );
         if ($result2 === false) {
             $err = implode(", ", $pdo->errorInfo());
-            if (stripos($err, 'duplicate column') === false && stripos($err, 'already exists') === false) {
-                throw new \Exception("Failed to add grace_period_minutes column: " . $err);
-            }
+            // Do not ignore duplicate/exists errors – surface them to fail the migration
+            throw new \Exception("Failed to add grace_period_minutes column: " . $err);
         }
     }
 }
