@@ -61,8 +61,25 @@ class DashboardController extends BaseController {
                 return $view->render();
             }
 
+            // Parse optional expected interval and grace period (hours/minutes)
+            $expHours = isset($_POST['expected_interval_hours']) ? (int)$_POST['expected_interval_hours'] : 0;
+            $expMinutes = isset($_POST['expected_interval_minutes']) ? (int)$_POST['expected_interval_minutes'] : 0;
+            $graceHours = isset($_POST['grace_period_hours']) ? (int)$_POST['grace_period_hours'] : 0;
+            $graceMinutes = isset($_POST['grace_period_minutes']) ? (int)$_POST['grace_period_minutes'] : 0;
+
+            $expHours = max(0, $expHours);
+            $expMinutes = max(0, $expMinutes);
+            $graceHours = max(0, $graceHours);
+            $graceMinutes = max(0, $graceMinutes);
+
+            $expectedTotal = ($expHours * 60) + $expMinutes;
+            $graceTotal = ($graceHours * 60) + $graceMinutes;
+
+            $expectedValue = $expectedTotal > 0 ? $expectedTotal : null; // optional
+            $graceValue = $graceTotal > 0 ? $graceTotal : null; // optional; 0 treated as null
+
             $userId = $_SESSION['user_id'];
-            $result = $this->database->createMonitor($name, $userId);
+            $result = $this->database->createMonitor($name, $userId, $expectedValue, $graceValue);
 
             if ($result !== false) {
                 throw new RedirectException(['Location' => '/monitor/' . $result]);

@@ -19,6 +19,46 @@
             <input type="text" id="name" name="name" value="<?= htmlspecialchars($name) ?>" required>
         </div>
 
+        <?php
+        $expTotal = $expectedIntervalMinutes ?? 0;
+        $expHours = intdiv($expTotal, 60);
+        $expMinutes = $expTotal % 60;
+
+        $graceTotal = $gracePeriodMinutes ?? 0;
+        $graceHours = intdiv($graceTotal, 60);
+        $graceMinutes = $graceTotal % 60;
+        ?>
+
+        <div class="form-group" style="display:flex; gap: 0.75rem; align-items: end; flex-wrap: wrap;">
+            <div style="flex:1 1 200px;">
+                <label>Expected Interval (optional)</label>
+                <div style="display:flex; gap:0.5rem;">
+                    <div>
+                        <input type="number" min="0" id="expected_interval_hours" name="expected_interval_hours" value="<?= htmlspecialchars((string)$expHours) ?>" style="width:6rem;">
+                        <div class="history-gap">hours</div>
+                    </div>
+                    <div>
+                        <input type="number" min="0" max="59" id="expected_interval_minutes" name="expected_interval_minutes" value="<?= htmlspecialchars((string)$expMinutes) ?>" style="width:6rem;">
+                        <div class="history-gap">minutes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="flex:1 1 200px;">
+                <label>Grace Period (optional)</label>
+                <div style="display:flex; gap:0.5rem;">
+                    <div>
+                        <input type="number" min="0" id="grace_period_hours" name="grace_period_hours" value="<?= htmlspecialchars((string)$graceHours) ?>" style="width:6rem;">
+                        <div class="history-gap">hours</div>
+                    </div>
+                    <div>
+                        <input type="number" min="0" max="59" id="grace_period_minutes" name="grace_period_minutes" value="<?= htmlspecialchars((string)$graceMinutes) ?>" style="width:6rem;">
+                        <div class="history-gap">minutes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="form-actions" style="display:flex; gap: 0.5rem; align-items:center;">
             <button type="submit" class="add-button">Save</button>
             <a href="/monitor/<?= htmlspecialchars($monitorUuid) ?>" class="cancel-button">Cancel</a>

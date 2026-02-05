@@ -222,6 +222,15 @@ button:hover {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
+/* Status colors for monitors */
+.monitor-tile-warning {
+    background-color: #fff8d6; /* soft yellow */
+}
+
+.monitor-tile-alert {
+    background-color: #ffe5e5; /* light red */
+}
+
 /* Make the inner link look like plain text within the tile */
 .monitor-link {
     display: block;
